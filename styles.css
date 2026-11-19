@@ -157,48 +157,6 @@ input {
 }
 
 /* Floating search */
-#search-form.map-search,
-.map-search {
-    position: absolute;
-    top: 0.85rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    width: min(90vw, 640px);
-    padding: 0.45rem 0.6rem;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(3, 2, 19, 0.12);
-    border-radius: 0.8rem;
-    box-shadow: 0 14px 30px -24px rgba(3, 2, 19, 0.45);
-    pointer-events: auto;
-    z-index: 650;
-}
-
-@supports (backdrop-filter: blur(12px)) {
-    .map-search {
-        backdrop-filter: blur(12px);
-    }
-}
-
-.map-search.has-active-search {
-    border-color: rgba(3, 2, 19, 0.24);
-    box-shadow: 0 20px 36px -24px rgba(3, 2, 19, 0.55);
-}
-
-.search-field {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.32rem 0.45rem;
-    border-radius: 0.7rem;
-    border: 1px solid rgba(3, 2, 19, 0.08);
-    background: rgba(3, 2, 19, 0.05);
-    min-height: 42px;
-    min-width: 0;
-}
-
 .map-search {
     position: absolute;
     top: 0.85rem;
@@ -300,7 +258,7 @@ input {
 }
 
 .search-input::placeholder {
-    color: rgba(3, 2, 19, 0.45);
+    color: var(--muted-foreground);
 }
 
 .search-input:focus {
@@ -351,12 +309,6 @@ input {
         top: 1rem;
         width: calc(100% - 1.5rem);
         padding: 0.6rem 0.8rem;
-    }
-
-    .search-field {
-        width: 100%;
-        gap: 0.45rem;
-        min-height: 48px;
     }
 }
 
@@ -444,6 +396,33 @@ input {
     padding-top: 0;
     padding-bottom: 0;
     margin: 0;
+}
+
+@media (max-width: 768px) {
+    #controls {
+        bottom: 0.5rem;
+        left: 0.5rem;
+        right: 0.5rem;
+    }
+
+    .control-panel {
+        padding: 0.75rem;
+        border-radius: 0.6rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .header h1 {
+        font-size: 1rem;
+    }
+
+    #expanded-controls {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    .filters {
+        grid-template-columns: 1fr;
+    }
 }
 
 .filters {

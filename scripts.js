@@ -2,6 +2,7 @@
 const state = {
     sites: [],
     filteredSites: [],
+    uniqueSiteCount: 0,
     minYear: 1978,
     maxYear: Math.max(new Date().getFullYear(), 2025),
     selectedYear: new Date().getFullYear(),
@@ -27,7 +28,6 @@ const elements = {
     sliderBubble: document.getElementById('slider-bubble'),
     sliderStart: document.getElementById('slider-start'),
     sliderEnd: document.getElementById('slider-end'),
-    searchBar: document.getElementById('search-form'),
     searchForm: document.getElementById('search-form'),
     searchInput: document.getElementById('search-input'),
     searchTags: document.getElementById('search-tags'),
@@ -37,10 +37,9 @@ const elements = {
 
 const mapState = {
     map: null,
-    markers: [],
+    markersById: new Map(),
     clusterGroup: null,
     forceFitBounds: true,
-    userHasAdjusted: false,
     isAutoFitting: false,
     activeSpiderCluster: null,
     lastSpiderCluster: null,
@@ -110,14 +109,6 @@ function formatDescriptionText(value) {
     return trimmed;
 }
 
-const DEFAULT_POPUP_IMAGES = [
-    'assets/placeholder_image01.jpg',
-    'assets/placeholder_image02.jpg',
-    'assets/placeholder_image03.jpg',
-    'assets/placeholder_image04.jpg',
-    'assets/placeholder_image05.jpg'
-];
-const FALLBACK_POPUP_IMAGE = 'assets/default-popup-fallback.svg';
 const COMMONS_API = 'https://commons.wikimedia.org/w/api.php';
 const MAX_POPUP_IMAGES = 5;
 
@@ -479,13 +470,22 @@ async function init() {
 
 // Set up event listeners
 function setupEventListeners() {
-    // Year slider
+    // Year slider: update the bubble immediately, debounce the expensive map rebuild.
+    let sliderFrame = null;
+    let sliderTimer = null;
     elements.yearSlider.addEventListener('input', (e) => {
         state.selectedYear = parseInt(e.target.value);
-        updateProgress();
-        filterSites();
-        updateMap();
-        updateSliderBubble();
+        if (sliderFrame) cancelAnimationFrame(sliderFrame);
+        sliderFrame = requestAnimationFrame(() => {
+            sliderFrame = null;
+            updateSliderBubble();
+        });
+        clearTimeout(sliderTimer);
+        sliderTimer = setTimeout(() => {
+            updateProgress();
+            filterSites();
+            updateMap();
+        }, 120);
     });
 
     window.addEventListener('resize', () => {
@@ -699,52 +699,160 @@ function updateControlsVisibility() {
     } else {
         controlPanel.classList.remove('collapsed');
     }
+    if (elements.toggleControls) {
+        elements.toggleControls.setAttribute('aria-expanded', String(!state.controlsCollapsed));
+    }
 }
 
-// Load UNESCO sites from DigitalOcean Function
-async function loadSites() {
+// Load UNESCO sites directly from Wikidata's SPARQL endpoint.
+// The original DigitalOcean proxy was retired; querying WDQS directly keeps the app static and self-contained.
+const WIKIDATA_SPARQL_ENDPOINT = 'https://query.wikidata.org/sparql';
+const UNESCO_SITES_QUERY = `
+SELECT ?item ?itemLabel ?description ?country ?coordinate ?inscriptionYear ?unescoId ?officialUrl ?type ?image WHERE {
+  {
+    SELECT ?item
+      (SAMPLE(?lEn) AS ?lbl_en)
+      (SAMPLE(?lAny) AS ?lbl_any)
+      (SAMPLE(?cName) AS ?countryName)
+      (SAMPLE(?dEn) AS ?description)
+      (SAMPLE(?coordVal) AS ?coordinate)
+      (SAMPLE(?id) AS ?whsId)
+      (SAMPLE(?url973) AS ?unescoURL_p973)
+      (SAMPLE(?year) AS ?inscriptionYear)
+      (SAMPLE(?img) AS ?image)
+    WHERE {
+      ?item wdt:P1435 wd:Q9259 .
+      FILTER NOT EXISTS {
+        ?item p:P1435 ?st .
+        ?st ps:P1435 wd:Q9259 ; pq:P582 ?end .
+      }
+      OPTIONAL { ?item rdfs:label ?lEn FILTER(LANG(?lEn) = "en") }
+      OPTIONAL { ?item rdfs:label ?lAny }
+      OPTIONAL { ?item wdt:P17 ?c . OPTIONAL { ?c rdfs:label ?cName FILTER(LANG(?cName) = "en") } }
+      OPTIONAL { ?item schema:description ?dEn FILTER(LANG(?dEn) = "en") }
+      OPTIONAL { ?item wdt:P625 ?coordVal }
+      ?item wdt:P757 ?id .
+      OPTIONAL { ?item wdt:P973 ?url973 . FILTER(CONTAINS(STR(?url973), "whc.unesco.org/en/list/")) }
+      OPTIONAL { ?item p:P1435 ?st . ?st ps:P1435 wd:Q9259 ; pq:P585 ?date . BIND(YEAR(?date) AS ?year) }
+      OPTIONAL { ?item wdt:P18 ?img }
+    }
+    GROUP BY ?item
+  }
+  BIND(COALESCE(?lbl_en, ?lbl_any) AS ?itemLabel)
+  BIND(?countryName AS ?country)
+  BIND(IF(BOUND(?whsId), CONCAT("https://whc.unesco.org/en/list/", STR(?whsId)), IF(BOUND(?unescoURL_p973), STR(?unescoURL_p973), "")) AS ?officialUrl)
+  BIND(IF(BOUND(?whsId), STR(?whsId), "") AS ?unescoId)
+  BIND(
+    IF(
+      EXISTS { ?item wdt:P2614 ?critC . ?critC rdfs:label ?labelC . FILTER(LANG(?labelC)="en") . FILTER(STR(?labelC) IN ("(i)", "(ii)", "(iii)", "(iv)", "(v)", "(vi)")) } &&
+      EXISTS { ?item wdt:P2614 ?critN . ?critN rdfs:label ?labelN . FILTER(LANG(?labelN)="en") . FILTER(STR(?labelN) IN ("(vii)", "(viii)", "(ix)", "(x)")) },
+      "mixed",
+      IF(
+        EXISTS { ?item wdt:P2614 ?critN2 . ?critN2 rdfs:label ?labelN2 . FILTER(LANG(?labelN2)="en") . FILTER(STR(?labelN2) IN ("(vii)", "(viii)", "(ix)", "(x)")) },
+        "natural",
+        "cultural"
+      )
+    ) AS ?type
+  )
+}
+ORDER BY ?itemLabel
+`;
+
+const SITE_CACHE_KEY = 'wh-sites-v2';
+const SITE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+function readSiteCache() {
     try {
-        console.log('Loading sites from DigitalOcean Function...');
-        
-        // Use your actual DigitalOcean function URL
-        const functionUrl = 'https://faas-nyc1-2ef2e6cc.doserverless.co/api/v1/web/fn-64bcf502-3460-4418-ae12-fed42467b800/default/wikidata-proxy?refresh=1';
-        const response = await fetch(functionUrl, {
-            headers: {
-                'Accept': 'application/json'
-            }
+        const raw = localStorage.getItem(SITE_CACHE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.sites)) return null;
+        if (Date.now() - parsed.fetchedAt > SITE_CACHE_TTL_MS) return null;
+        return parsed.sites;
+    } catch (error) {
+        console.warn('Unable to read site cache', error);
+        return null;
+    }
+}
+
+function writeSiteCache(sites) {
+    try {
+        localStorage.setItem(SITE_CACHE_KEY, JSON.stringify({ fetchedAt: Date.now(), sites }));
+    } catch (error) {
+        console.warn('Unable to write site cache', error);
+    }
+}
+
+async function loadSites() {
+    const cached = readSiteCache();
+    if (cached) {
+        console.log('Using cached UNESCO sites:', cached.length);
+        processSitesData(cached);
+        return;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    try {
+        console.log('Loading UNESCO sites from Wikidata SPARQL...');
+
+        const params = new URLSearchParams({
+            query: UNESCO_SITES_QUERY,
+            format: 'json'
         });
-        
+
+        const response = await fetch(`${WIKIDATA_SPARQL_ENDPOINT}?${params.toString()}`, {
+            headers: {
+                'Accept': 'application/sparql-results+json'
+            },
+            signal: controller.signal
+        });
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        console.log('Function returned:', data);
-
-        if (Array.isArray(data.sites)) {
-            processSitesData(data.sites);
-            return;
+        const bindings = data.results?.bindings;
+        if (!Array.isArray(bindings)) {
+            throw new Error('Invalid data structure returned from Wikidata');
         }
 
-        if (data.results?.bindings) {
-            console.warn('Received legacy SPARQL bindings – normalizing on the client.');
-            const normalizedSites = normalizeBindings(data.results.bindings);
-            processSitesData(normalizedSites);
-            return;
-        }
-
-        throw new Error('Invalid data structure returned from function');
+        console.log('Wikidata returned:', bindings.length, 'bindings');
+        const normalizedSites = normalizeBindings(bindings);
+        writeSiteCache(normalizedSites);
+        processSitesData(normalizedSites);
 
     } catch (error) {
-        console.error('Error loading sites from function:', error);
-        showError('Unable to load data from Wikidata at the moment. Please try again later.');
+        if (error.name === 'AbortError') {
+            console.error('Wikidata request timed out');
+            showError('Wikidata took too long to respond. Please try again.');
+        } else {
+            console.error('Error loading sites from Wikidata:', error);
+            showError('Unable to load data from Wikidata at the moment. Please try again later.');
+        }
         state.loading = false;
+    } finally {
+        clearTimeout(timeoutId);
     }
+}
+
+// Normalize a UNESCO World Heritage ID so extensions ("123bis") collapse
+// onto their parent site. Returns '' for missing IDs.
+function normalizeUnescoId(id) {
+    if (id == null) return '';
+    let trimmed = String(id).trim();
+    if (!trimmed) return '';
+    // Strip revision/extension suffixes and numeric sub-site suffixes
+    trimmed = trimmed.replace(/(bis|ter|quater|rev)(-\d+)?$/i, '');
+    trimmed = trimmed.replace(/-\d+$/, '');
+    return trimmed;
 }
 
 // Process the sites data
 function processSitesData(sites) {
-    console.log('Processing sites ', sites);
+    console.log('Processing sites:', sites.length);
 
     if (!Array.isArray(sites)) {
         throw new Error('Invalid data structure');
@@ -802,7 +910,16 @@ function processSitesData(sites) {
         site.longitude <= 180
     );
 
-    console.log('Processed valid sites:', state.sites.length);
+    const uniqueIds = new Set();
+    let withoutUnescoId = 0;
+    for (const site of state.sites) {
+        const id = normalizeUnescoId(site.unescoId);
+        if (id) uniqueIds.add(id);
+        else withoutUnescoId += 1;
+    }
+    state.uniqueSiteCount = uniqueIds.size + withoutUnescoId;
+
+    console.log('Processed valid sites:', state.sites.length, '| unique UNESCO sites:', state.uniqueSiteCount);
 
     const inscriptionYears = state.sites
         .map(site => site.inscriptionYear)
@@ -834,7 +951,6 @@ function processSitesData(sites) {
     state.loading = false;
     hideLoading();
     requestFitBounds();
-    mapState.userHasAdjusted = false;
     updateSliderBubble();
 }
 
@@ -886,7 +1002,7 @@ function parseInscriptionYear(value) {
 
 function parseLegacyWKT(value) {
     if (!value) return null;
-    const match = value.match(/Point\\(([-\\d\\.]+) ([-\\d\\.]+)\\)/);
+    const match = value.match(/Point\(([-\d.]+) ([-.\d]+)\)/);
     return match ? { lat: parseFloat(match[2]), lon: parseFloat(match[1]) } : null;
 }
 
@@ -909,59 +1025,11 @@ function normalizeBindings(bindings) {
             inscriptionYear: item.inscriptionYear?.value ?? null,
             unescoId: item.unescoId?.value ?? null,
             unescoUrl: item.officialUrl?.value ?? null,
+            images: item.image?.value ? [extractCommonsFileName(item.image.value)].filter(Boolean) : [],
             criteria: [],
             type: item.type?.value ?? null
         };
     });
-}
-
-// Test data fallback
-function loadTestSites() {
-    console.log('Loading test data...');
-    
-    const testSites = [
-        {
-            id: "1",
-            name: "Yellowstone National Park",
-            country: "United States",
-            latitude: 44.4280,
-            longitude: -110.5885,
-            inscriptionYear: 1978,
-            type: "natural",
-            description: "First national park in the world, known for its geothermal features.",
-            officialUrl: "https://www.nps.gov/yell/index.htm"
-        },
-        {
-            id: "2",
-            name: "Great Wall of China",
-            country: "China",
-            latitude: 40.4319,
-            longitude: 116.5704,
-            inscriptionYear: 1987,
-            type: "cultural",
-            description: "Series of fortifications made of stone, brick, wood and other materials.",
-            officialUrl: "https://whc.unesco.org/en/list/438"
-        },
-        {
-            id: "3",
-            name: "Galápagos Islands",
-            country: "Ecuador",
-            latitude: -0.7893,
-            longitude: -91.2109,
-            inscriptionYear: 1978,
-            type: "natural",
-            description: "Volcanic archipelago famous for its endemic species studied by Charles Darwin.",
-            officialUrl: "https://whc.unesco.org/en/list/1"
-        }
-    ];
-    
-    state.sites = testSites;
-    filterSites();
-    updateCounts();
-    updateProgress();
-    state.loading = false;
-    hideLoading();
-    initMap();
 }
 
 // Filter sites based on current state
@@ -973,13 +1041,34 @@ function filterSites() {
         return yearMatch && typeMatch && searchMatch;
     });
     
-    elements.siteCount.innerHTML = `Showing <strong>${state.filteredSites.length}</strong> UNESCO World Heritage Sites${state.selectedYear < new Date().getFullYear() ? ` up to ${state.selectedYear}` : ''}`;
+    const filteredCount = state.filteredSites.length;
+    const filteredUniqueIds = new Set();
+    for (const site of state.filteredSites) {
+        const id = normalizeUnescoId(site.unescoId);
+        if (id) filteredUniqueIds.add(id);
+    }
+    const filteredUniqueCount = filteredUniqueIds.size;
+    const yearSuffix = state.selectedYear < new Date().getFullYear() ? ` up to ${state.selectedYear}` : '';
+    if (filteredCount === 0) {
+        elements.siteCount.innerHTML = `No UNESCO World Heritage Sites match your filters${yearSuffix}`;
+    } else if (filteredCount === filteredUniqueCount) {
+        const siteWord = filteredCount === 1 ? 'Site' : 'Sites';
+        elements.siteCount.innerHTML = `Showing <strong>${filteredCount}</strong> UNESCO World Heritage ${siteWord}${yearSuffix}`;
+    } else {
+        elements.siteCount.innerHTML = `Showing <strong>${filteredCount}</strong> site records across <strong>${filteredUniqueCount}</strong> UNESCO World Heritage Sites${yearSuffix}`;
+    }
     updateSliderBubble();
 }
 
 // Update progress percentage
 function updateProgress() {
-    elements.totalSites.textContent = `${state.sites.length} total sites`;
+    const totalCount = state.sites.length;
+    const uniqueCount = state.uniqueSiteCount;
+    if (totalCount === uniqueCount) {
+        elements.totalSites.textContent = `${totalCount} total ${totalCount === 1 ? 'site' : 'sites'}`;
+    } else {
+        elements.totalSites.textContent = `${uniqueCount} UNESCO sites (${totalCount} records)`;
+    }
 }
 
 function updateSliderBubble() {
@@ -1037,13 +1126,14 @@ function updateSliderEnds() {
 
 // Update site counts
 function updateCounts() {
-    const counts = {
-        all: state.sites.filter(s => s.inscriptionYear <= state.selectedYear && matchesActiveSearchTerms(s)).length,
-        cultural: state.sites.filter(s => s.type === 'cultural' && s.inscriptionYear <= state.selectedYear && matchesActiveSearchTerms(s)).length,
-        natural: state.sites.filter(s => s.type === 'natural' && s.inscriptionYear <= state.selectedYear && matchesActiveSearchTerms(s)).length,
-        mixed: state.sites.filter(s => s.type === 'mixed' && s.inscriptionYear <= state.selectedYear && matchesActiveSearchTerms(s)).length
-    };
-    
+    const counts = { all: 0, cultural: 0, natural: 0, mixed: 0 };
+    state.sites.forEach(site => {
+        if (site.inscriptionYear > state.selectedYear) return;
+        if (!matchesActiveSearchTerms(site)) return;
+        counts.all += 1;
+        if (counts[site.type] !== undefined) counts[site.type] += 1;
+    });
+
     document.getElementById('count-all').textContent = counts.all;
     document.getElementById('count-cultural').textContent = counts.cultural;
     document.getElementById('count-natural').textContent = counts.natural;
@@ -1058,10 +1148,10 @@ function hideLoading() {
 // Show error
 function showError(message) {
     elements.loading.innerHTML = `
-        <div style="text-align: center; max-width: 500px; padding: 1rem;">
+        <div role="alert" style="text-align: center; max-width: 500px; padding: 1rem;">
             <p style="color: #d4183d; margin-bottom: 1rem;">${message}</p>
             <button
-                onclick="location.reload()"
+                id="retry-button"
                 style="
                     padding: 0.5rem 1rem;
                     background: #030213;
@@ -1076,6 +1166,15 @@ function showError(message) {
             </button>
         </div>
     `;
+    document.getElementById('retry-button')?.addEventListener('click', () => {
+        elements.loading.innerHTML = `
+            <div>
+                <div class="loader" aria-hidden="true"></div>
+                <p>Retrying&hellip; this can take 20&ndash;30 seconds.</p>
+            </div>
+        `;
+        loadSites();
+    });
 }
 
 function initMap() {
@@ -1094,14 +1193,12 @@ function initMap() {
 
     mapState.map.on('movestart', () => {
         if (!mapState.isAutoFitting) {
-            mapState.userHasAdjusted = true;
             mapState.forceFitBounds = false;
         }
     });
 
     mapState.map.on('zoomstart', () => {
         if (!mapState.isAutoFitting) {
-            mapState.userHasAdjusted = true;
             mapState.forceFitBounds = false;
         }
     });
@@ -1124,65 +1221,81 @@ function initMap() {
     updateMap();
 }
 
-// Update map with current filtered sites
+// Create a single marker for a site
+function createMarker(site) {
+    const icon = createIcon(site.type);
+    const config = markerConfigs[site.type] || markerConfigs.cultural;
+    const marker = L.marker([site.latitude, site.longitude], {
+        icon,
+        siteType: site.type,
+        title: site.name
+    }).bindPopup(() => buildPopupContent(site, config), {
+        autoPan: false
+    });
+
+    marker.__suppressCentering = false;
+    marker.__siteData = site;
+
+    marker.on('popupopen', (event) => {
+        const popupElement = event.popup?.getElement?.();
+        loadPopupImages(marker.__siteData, popupElement);
+        if (marker.__suppressCentering) {
+            marker.__suppressCentering = false;
+            if (popupElement) {
+                requestAnimationFrame(() => adjustPopupIntoViewport(marker, popupElement));
+            }
+            return;
+        }
+        centerPopupOnMarker(marker, popupElement);
+    });
+
+    marker.on('mouseover', function() {
+        marker.bindTooltip(`<strong>${site.name}</strong>`, {
+            permanent: false,
+            direction: 'top',
+            className: 'tooltip-popup',
+            offset: [0, -46],
+        }).openTooltip();
+    });
+
+    marker.on('mouseout', () => marker.closeTooltip());
+
+    marker.on('add', () => {
+        const el = marker.getElement();
+        if (el) el.setAttribute('aria-label', site.name);
+    });
+
+    return marker;
+}
+
+// Update map with current filtered sites (incremental)
 function updateMap() {
     if (!mapState.map) return;
-    
+
     if (!mapState.clusterGroup) {
         mapState.clusterGroup = createClusterGroup();
         mapState.map.addLayer(mapState.clusterGroup);
     }
 
-    mapState.clusterGroup.clearLayers();
-    mapState.markers = [];
-    
-    // Add new markers
+    const nextIds = new Set(state.filteredSites.map(site => site.id));
+
+    // Remove markers that are no longer visible
+    for (const [id, marker] of mapState.markersById) {
+        if (!nextIds.has(id)) {
+            mapState.clusterGroup.removeLayer(marker);
+            mapState.markersById.delete(id);
+        }
+    }
+
+    // Add markers for newly visible sites
     state.filteredSites.forEach(site => {
-        const icon = createIcon(site.type);
-
-        const config = markerConfigs[site.type] || markerConfigs.cultural;
-        const popupHtml = buildPopupContent(site, config);
-
-        const marker = L.marker([site.latitude, site.longitude], {
-            icon,
-            siteType: site.type
-        }).bindPopup(popupHtml, {
-            autoPan: false
-        });
-
-        marker.__suppressCentering = false;
-
-        marker.__siteData = site;
-
-        marker.on('popupopen', (event) => {
-            const popupElement = event.popup?.getElement?.();
-            loadPopupImages(marker.__siteData, popupElement);
-            if (marker.__suppressCentering) {
-                marker.__suppressCentering = false;
-                if (popupElement) {
-                    requestAnimationFrame(() => adjustPopupIntoViewport(marker, popupElement));
-                }
-                return;
-            }
-            centerPopupOnMarker(marker, popupElement);
-        });
-
-        marker.on('mouseover', function() {
-            marker.bindTooltip(`<strong>${site.name}</strong>`, {
-                permanent: false,
-                direction: 'top',
-                className: 'tooltip-popup',
-                offset: [0, -46],
-            }).openTooltip();
-        });
-
-        marker.on('mouseout', () => marker.closeTooltip());
-        
-        mapState.markers.push(marker);
+        if (mapState.markersById.has(site.id)) return;
+        const marker = createMarker(site);
+        mapState.markersById.set(site.id, marker);
         mapState.clusterGroup.addLayer(marker);
     });
 
-    // Fit bounds if we have sites
+    // Fit bounds on first load only
     const hasMarkers = mapState.clusterGroup.getLayers().length > 0;
     const shouldAutoFit = hasMarkers && mapState.forceFitBounds;
     if (shouldAutoFit) {
@@ -1199,21 +1312,28 @@ function updateMap() {
 }
 
 // Create custom icons
+const iconCache = new Map();
+
 function createIcon(type) {
-    const config = markerConfigs[type] || markerConfigs.cultural;
+    const key = markerConfigs[type] ? type : 'cultural';
+    if (iconCache.has(key)) return iconCache.get(key);
+
+    const config = markerConfigs[key];
     const markerHtml = `
         <div class="heritage-marker" style="background-color:${config.color};">
             <span class="heritage-marker-icon">${config.icon}</span>
         </div>
     `;
 
-    return L.divIcon({
+    const icon = L.divIcon({
         html: markerHtml,
         iconSize: [42, 42],
         iconAnchor: [21, 42],
         popupAnchor: [0, -32],
         className: 'custom-heritage-marker'
     });
+    iconCache.set(key, icon);
+    return icon;
 }
 
 function refreshLucideIcons(root = document) {
@@ -1231,6 +1351,21 @@ function ensureFileTitle(title) {
     const trimmed = String(title).trim();
     if (!trimmed) return null;
     return trimmed.startsWith('File:') ? trimmed : `File:${trimmed}`;
+}
+
+function extractCommonsFileName(value) {
+    if (!value) return null;
+    const str = String(value).trim();
+    if (!str) return null;
+    const match = str.match(/Special:FilePath\/(.+)$/i);
+    if (match) {
+        try {
+            return decodeURIComponent(match[1]);
+        } catch (error) {
+            return match[1];
+        }
+    }
+    return str;
 }
 
 async function fetchCommonsThumbnails(titles) {
@@ -1405,7 +1540,7 @@ function buildPopupContent(site, config) {
                 : '';
 
     const countryMarkup = countryLabel ? `
-        <span class="popup-country" role="text">
+        <span class="popup-country">
             ${flagMarkup}
             <span>${escapeHtml(countryLabel)}</span>
         </span>

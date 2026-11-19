@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wikidata World Heritage Explorer</title>
-    <link rel="icon" href="/wikidata-world-heritage/favicon.ico" />
+    <meta name="description" content="Explore 1,300+ UNESCO World Heritage Sites on an interactive map, sourced from Wikidata." />
+    <meta property="og:title" content="Wikidata World Heritage Explorer" />
+    <meta property="og:description" content="Explore 1,300+ UNESCO World Heritage Sites on an interactive map, sourced from Wikidata." />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
@@ -13,10 +17,10 @@
 </head>
 <body>
     <div id="app">
-        <div id="loading">
+        <div id="loading" role="status" aria-live="polite">
             <div>
                 <div class="loader" aria-hidden="true"></div>
-                <p>Loading UNESCO World Heritage Sites from Wikidata...</p>
+                <p>Loading UNESCO World Heritage Sites from Wikidata&hellip; this can take 20&ndash;30 seconds.</p>
             </div>
         </div>
 
@@ -47,13 +51,13 @@
                 <div class="header">
                     <div class="header-top">
                         <h1>Wikidata World Heritage Explorer</h1>
-                        <button id="toggle-controls" class="toggle-btn" aria-label="Toggle controls">
+                        <button id="toggle-controls" class="toggle-btn" aria-label="Toggle controls" aria-expanded="false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="6 9 12 15 18 9"></polyline>
                             </svg>
                         </button>
                     </div>
-                    <p id="site-count">Loading sites...</p>
+                    <p id="site-count" aria-live="polite">Loading sites...</p>
                 </div>
                 
                 <div id="expanded-controls">
@@ -94,13 +98,13 @@
 
                     <div class="slider-container">
                         <div class="slider-bubble" id="slider-bubble">1978 | 0 Sites</div>
-                        <input type="range" id="year-slider" class="slider" min="1978" max="2024" value="2024">
+                        <input type="range" id="year-slider" class="slider" min="1978" max="2024" value="2024" aria-label="Filter sites by inscription year">
                         <div class="slider-ends">
                             <span id="slider-start">1978</span>
                             <span id="slider-end">2024</span>
                         </div>
                         <div class="slider-label">
-                            <span id="total-sites">0 total sites</span>
+                            <span id="total-sites" aria-live="polite">0 total sites</span>
                         </div>
                     </div>
                 </div>
@@ -112,5 +116,10 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <script src="https://unpkg.com/lucide@0.343.0/dist/umd/lucide.min.js"></script>
     <script src="scripts.js"></script>
+    <noscript>
+        <p style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; font-family: sans-serif; max-width: 30rem;">
+            This map requires JavaScript. Enable it to explore UNESCO World Heritage Sites.
+        </p>
+    </noscript>
 </body>
 </html>
