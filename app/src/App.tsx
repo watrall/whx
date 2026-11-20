@@ -162,18 +162,6 @@ export default function App() {
   }, [loading, selectedSite, debouncedQuery, types, yearRange, domain]);
 
   useEffect(() => {
-    if (!playing) return;
-    if (yearRange[1] >= domain[1]) {
-      setPlaying(false);
-      return;
-    }
-    const timer = window.setTimeout(() => {
-      setYearRange((prev) => [prev[0], Math.min(prev[1] + 1, domain[1])]);
-    }, 400);
-    return () => window.clearTimeout(timer);
-  }, [playing, yearRange, domain]);
-
-  useEffect(() => {
     const onVisibility = () => {
       if (document.hidden) setPlaying(false);
     };
@@ -250,6 +238,29 @@ export default function App() {
       ),
     [sites, types, matchesQuery],
   );
+
+  // Years that have at least one matching site. Playback jumps between these
+  // so the early decades (a handful of inscriptions in 18 years) do not stall.
+  const activeYears = useMemo(() => {
+    const years = new Set<number>();
+    for (const site of timelineSites) if (site.year !== null) years.add(site.year);
+    return [...years].sort((a, b) => a - b);
+  }, [timelineSites]);
+
+  useEffect(() => {
+    if (!playing) return;
+    if (yearRange[1] >= domain[1]) {
+      setPlaying(false);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setYearRange((prev) => {
+        const next = activeYears.find((year) => year > prev[1]);
+        return [prev[0], Math.min(next ?? domain[1], domain[1])];
+      });
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [playing, yearRange, domain, activeYears]);
 
   const sortedFiltered = useMemo(() => {
     const copy = [...filtered];
