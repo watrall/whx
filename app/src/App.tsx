@@ -14,6 +14,7 @@ import { Attribution } from './components/Attribution.tsx';
 import { CountryChip } from './components/CountryChip.tsx';
 import { CriteriaFilter } from './components/CriteriaFilter.tsx';
 import { DiscoverActions } from './components/DiscoverActions.tsx';
+import { ExportMenu } from './components/ExportMenu.tsx';
 import { EmptyState } from './components/EmptyState.tsx';
 import { FilterChip } from './components/FilterChip.tsx';
 import { SharedListBanner } from './components/SharedListBanner.tsx';
@@ -33,6 +34,7 @@ import { useDebouncedValue } from './lib/useDebouncedValue.ts';
 import { useMediaQuery } from './lib/useMediaQuery.ts';
 import { useRecentSearches } from './lib/useRecentSearches.ts';
 import { useSavedSites } from './lib/useSavedSites.ts';
+import { downloadText, toCsv, toGeoJson } from './lib/export.ts';
 import { nearestSites } from './lib/geo.ts';
 import { NO_EXTRA, hasExtraFilters, matchesExtra, shareListUrl } from './lib/filters.ts';
 import type { ExtraFilters } from './lib/filters.ts';
@@ -440,6 +442,22 @@ export default function App() {
       { timeout: 8000, maximumAge: 300000 },
     );
   }, []);
+
+  const handleExport = useCallback(
+    (format: 'csv' | 'geojson') => {
+      const stamp = new Date().toISOString().slice(0, 10);
+      if (format === 'csv') {
+        downloadText(`world-heritage-sites-${stamp}.csv`, 'text/csv', toCsv(sortedFiltered));
+      } else {
+        downloadText(
+          `world-heritage-sites-${stamp}.geojson`,
+          'application/geo+json',
+          toGeoJson(sortedFiltered),
+        );
+      }
+    },
+    [sortedFiltered],
+  );
 
   const handleStep = useCallback(
     (delta: -1 | 1) => {
@@ -884,6 +902,7 @@ export default function App() {
                 {formatNumber(listCount)}
               </span>
               {sortSelect}
+              <ExportMenu count={sortedFiltered.length} onExport={handleExport} touch={!isDesktop} />
             </div>
           </div>
 
@@ -1085,6 +1104,7 @@ export default function App() {
                 {formatNumber(listCount)}
               </span>
               {sortSelect}
+              <ExportMenu count={sortedFiltered.length} onExport={handleExport} touch={!isDesktop} />
             </div>
           </div>
           <div className="min-h-0 flex-1">{listBody}</div>
