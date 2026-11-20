@@ -388,8 +388,8 @@ export default function App() {
         onKeyDown={(event) => {
           if (event.key === 'Escape') setQuery('');
         }}
-        placeholder="Search sites, countries, keywords"
-        aria-label="Search sites, countries, keywords"
+        placeholder="Search sites or countries"
+        aria-label="Search sites or countries"
         className="focus-ring h-10 w-full rounded-xl border border-line bg-canvas pl-9 pr-20 text-sm text-ink placeholder:text-muted/80"
         spellCheck={false}
       />
@@ -429,7 +429,7 @@ export default function App() {
       </p>
       <p className="mt-3 text-sm leading-relaxed text-muted">
         Data comes from Wikidata and the UNESCO World Heritage list. Basemap © OpenStreetMap
-        contributors, © CARTO. Boundaries and labels are illustrative. Not affiliated with UNESCO;
+        contributors. Boundaries and labels are illustrative. Not affiliated with UNESCO;
         verify details on the official site.
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
@@ -659,7 +659,7 @@ export default function App() {
           >
             <Search className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
             <span className="flex-1 truncate text-base text-muted">
-              {query || 'Search sites, countries, keywords'}
+              {query || 'Search sites or countries'}
             </span>
           </button>
           {query && (

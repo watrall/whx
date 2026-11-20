@@ -100,12 +100,11 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       preferCanvas: true,
     }).setView([20, 0], 2);
 
-    // CARTO Positron: a quiet, low-saturation basemap so the type colours carry the map.
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      subdomains: 'abcd',
+    // OSM tiles, muted in CSS (.leaflet-tile-pane) so the type colours carry the map.
+    // CARTO Positron now requires an API key, so it is not used.
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
 
     const cluster = L.markerClusterGroup({

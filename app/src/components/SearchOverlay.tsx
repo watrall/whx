@@ -161,7 +161,7 @@ export function SearchOverlay({
             aria-activedescendant={results[activeIndex] ? `search-result-${activeIndex}` : undefined}
             aria-autocomplete="list"
             aria-label="Search sites"
-            placeholder="Search sites, countries, keywords"
+            placeholder="Search sites or countries"
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
             onKeyDown={handleInputKeyDown}

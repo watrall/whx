@@ -89,12 +89,16 @@ input {
 
 /* Leaflet baseline */
 .leaflet-container {
-  background: oklch(0.87 0.008 215);
+  background: oklch(0.9 0.006 215);
   font-family: inherit;
   outline: none;
 }
 .leaflet-container a {
   color: oklch(var(--ink));
+}
+.leaflet-tile-pane {
+  /* Mute default OSM: drop most saturation, soften contrast, lift the whites. */
+  filter: grayscale(0.8) contrast(0.88) brightness(1.06) sepia(0.06);
 }
 .leaflet-control-attribution {
   background: oklch(var(--paper-raised) / 0.85) !important;

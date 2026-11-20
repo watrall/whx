@@ -10,15 +10,7 @@ export function Attribution({ className = '' }: { className?: string }) {
       >
         OpenStreetMap
       </a>{' '}
-      contributors ©{' '}
-      <a
-        href="https://carto.com/attributions"
-        target="_blank"
-        rel="noreferrer"
-        className="underline decoration-line underline-offset-2 hover:text-ink"
-      >
-        CARTO
-      </a>
+      contributors
     </p>
   );
 }
