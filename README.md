@@ -2,8 +2,6 @@
 
 An independent, map-first explorer for UNESCO World Heritage Sites. It puts every property on one map and lets you explore them by place, type, theme and time, instead of paging through a list. It is not affiliated with UNESCO, and every site links back to its official UNESCO page.
 
-It runs entirely in the browser from static files. There are no accounts and no server.
-
 ## Features
 
 **Explore the map**
@@ -23,14 +21,14 @@ It runs entirely in the browser from static files. There are no accounts and no 
 - Directions in the device's maps app, and a link to the official UNESCO page.
 
 **Keep and share**
-- Save sites, filter to them, and share the list as a link.
+- Save sites, filter to them, and share the list as a link. Saved sites stay on your device, and nothing about you is collected.
 - Every view has its own link, covering the open site, search, filters and year range.
 - Export what you are looking at as CSV or GeoJSON.
 - The list can follow the map ("In view") or show every match ("All sites"), sorted by name, year, country or, after Near me, distance.
 
 **On any device**
 - A phone layout with a search pill, a bottom sheet and large touch targets, separate from the desktop layout.
-- Keyboard shortcuts, screen-reader labels, visible focus, reduced-motion support, and colour contrast checked by automated tests.
+- Keyboard shortcuts, screen-reader labels, visible focus and reduced-motion support.
 
 ## Data
 
@@ -38,13 +36,13 @@ All of the data is public. The app combines five sources, and a few things it wo
 
 ### Where it comes from
 
-| Source | What the app takes from it | How it is refreshed | Licence |
-|---|---|---|---|
-| **Wikidata** | The list of World Heritage Sites, each with its UNESCO ID, coordinates, photo, selection criteria, a one-line description, and a country and year as fallbacks | Re-queried every night | CC0 |
-| **UNESCO World Heritage Centre**, XML export | The official site name, every country, the year of inscription, whether the site is in danger, and UNESCO's short description of the site | Imported by hand from UNESCO's syndication page | Descriptions: CC BY-SA 3.0 IGO |
-| **Wikipedia**, "List of World Heritage in Danger" | A short reason, and the year listed, for sites that UNESCO flags as in danger | Imported by hand | CC BY-SA 4.0 |
-| **Wikimedia Commons** | The photographs. Each one is requested at the size it is shown, and credited with a link to its Commons page, where the author and licence are given | Fetched live from Commons | Set per photo |
-| **OpenStreetMap** | The basemap tiles, softened so the markers stand out | Fetched live | ODbL |
+| Source | What the app takes from it | Licence |
+|---|---|---|
+| **Wikidata** | The list of World Heritage Sites, each with its UNESCO ID, coordinates, photo, selection criteria, a one-line description, and a country and year as fallbacks | CC0 |
+| **UNESCO World Heritage Centre**, XML export | The official site name, every country, the year of inscription, whether the site is in danger, and UNESCO's short description of the site | Descriptions: CC BY-SA 3.0 IGO |
+| **Wikipedia**, "List of World Heritage in Danger" | A short reason, and the year listed, for sites that UNESCO flags as in danger | CC BY-SA 4.0 |
+| **Wikimedia Commons** | The photographs. Each one is requested at the size it is shown, and credited with a link to its Commons page, where the author and licence are given | Set per photo |
+| **OpenStreetMap** | The basemap tiles, softened so the markers stand out | ODbL |
 
 The plain-language wording of the ten selection criteria is written in the app, shortened from UNESCO's published criteria.
 
@@ -56,8 +54,4 @@ The plain-language wording of the ten selection criteria is written in the app, 
 4. **The description is UNESCO's.** Where UNESCO has none, Wikidata's one-liner is shown only if it says something, so boilerplate like "World Heritage site in Iran and Azerbaijan" is hidden.
 5. **"In danger" follows UNESCO's flag.** Wikipedia's list adds the reason and start year only for sites UNESCO flags, matched by UNESCO number or name. Where the two sources disagree about which sites are in danger, UNESCO's flag wins and the Wikipedia entry is ignored. A few recent additions have no reason in either source yet, so they show the status and year only.
 6. **Links are built from the UNESCO number.** The "View on UNESCO" link always points to the canonical page for the property, even when Wikidata holds an extension ID.
-7. **Some figures are computed in the browser.** These are the nearest sites and their distances, the live filter counts, the "New" badge (the latest two inscription years), the cluster rings, and the CSV and GeoJSON exports, which contain facts and links but not UNESCO's description text.
-
-### What stays in your browser
-
-Saved sites are kept in your browser's local storage and never leave it. A shared list is just a link containing the site IDs. Your location is used only when you press Near me, is held in memory, and is not sent anywhere. The app does not collect any other information about you.
+7. **Some figures are worked out by the app itself.** These are the nearest sites and their distances, the live filter counts, the "New" badge (the latest two inscription years), the cluster rings, and the CSV and GeoJSON exports, which contain facts and links but not UNESCO's description text.
