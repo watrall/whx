@@ -26,6 +26,8 @@ interface MapViewProps {
   onBoundsChange?: (bounds: Bounds) => void;
   onMapClick?: () => void;
   controlsBottomClass?: string;
+  /** Centre the first view on this site instead of fitting every marker. */
+  initialFocus?: { site: Site; offset: [number, number] } | null;
   className?: string;
 }
 
@@ -49,6 +51,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     onBoundsChange,
     onMapClick,
     controlsBottomClass = 'bottom-28',
+    initialFocus = null,
     className = '',
   },
   ref,
@@ -63,6 +66,8 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
   const hasFitRef = useRef(false);
   const lastFitKeyRef = useRef('');
   const selectedIdRef = useRef<string | null>(null);
+  const initialFocusRef = useRef(initialFocus);
+  initialFocusRef.current = initialFocusRef.current ?? initialFocus;
   const highlightedIdRef = useRef<string | null>(null);
   const onSelectRef = useRef(onSelect);
   const onHoverRef = useRef(onHover);
@@ -209,7 +214,17 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     if (!hasFitRef.current && sites.length > 0) {
       const bounds = cluster.getBounds();
       if (bounds.isValid()) {
-        map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
+        const focus = initialFocusRef.current;
+        if (focus) {
+          const zoom = 9;
+          const point = map.project([focus.site.lat, focus.site.lon], zoom);
+          point.x += focus.offset[0];
+          point.y += focus.offset[1];
+          map.setView(map.unproject(point, zoom), zoom, { animate: false });
+          initialFocusRef.current = null;
+        } else {
+          map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
+        }
         hasFitRef.current = true;
         lastFitKeyRef.current = fitKey;
       }

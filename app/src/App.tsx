@@ -24,6 +24,7 @@ import type { Bounds, Site, SiteType, YearRange } from './lib/types.ts';
 import { useDebouncedValue } from './lib/useDebouncedValue.ts';
 import { useMediaQuery } from './lib/useMediaQuery.ts';
 import { useRecentSearches } from './lib/useRecentSearches.ts';
+import { buildUrlHash, parseUrlState } from './lib/urlState.ts';
 import {
   TYPE_ORDER,
   countryCount,
@@ -75,13 +76,15 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
 }
 
 export default function App() {
+  // Read the hash once so a shared link restores the view it was copied from.
+  const initialUrl = useRef(parseUrlState(window.location.hash));
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
 
-  const [query, setQuery] = useState('');
-  const [types, setTypes] = useState<Set<SiteType>>(new Set());
+  const [query, setQuery] = useState(initialUrl.current.query);
+  const [types, setTypes] = useState<Set<SiteType>>(new Set(initialUrl.current.types));
   const [yearRange, setYearRange] = useState<YearRange>(FALLBACK_DOMAIN);
   const [domain, setDomain] = useState<YearRange>(FALLBACK_DOMAIN);
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
@@ -92,6 +95,10 @@ export default function App() {
   const [aboutOpen, setAboutOpen] = useState(false);
   const [sheetSnap, setSheetSnap] = useState<SheetSnap>('peek');
   const [bounds, setBounds] = useState<Bounds | null>(null);
+  const [initialFocus, setInitialFocus] = useState<{
+    site: Site;
+    offset: [number, number];
+  } | null>(null);
 
   const mapRef = useRef<MapViewHandle>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -113,7 +120,23 @@ export default function App() {
           ? [Math.min(...years), Math.max(...years)]
           : FALLBACK_DOMAIN;
         setDomain(nextDomain);
-        setYearRange(nextDomain);
+        const wanted = initialUrl.current.years;
+        setYearRange(
+          wanted
+            ? [Math.max(wanted[0], nextDomain[0]), Math.min(wanted[1], nextDomain[1])]
+            : nextDomain,
+        );
+        const linked = initialUrl.current.site
+          ? result.sites.find((site) => site.id === initialUrl.current.site)
+          : undefined;
+        initialUrl.current.site = null;
+        if (linked) {
+          setSelectedSite(linked);
+          setInitialFocus({
+            site: linked,
+            offset: window.matchMedia('(min-width: 1024px)').matches ? [210, 0] : [0, 120],
+          });
+        }
         setLoading(false);
       })
       .catch((err: unknown) => {
@@ -123,6 +146,19 @@ export default function App() {
       });
     return () => controller.abort();
   }, [reloadKey]);
+
+  useEffect(() => {
+    if (loading) return;
+    const hash = buildUrlHash({
+      site: selectedSite?.id ?? null,
+      query: debouncedQuery,
+      types,
+      years: yearRange,
+      domain,
+    });
+    const next = `${window.location.pathname}${window.location.search}${hash}`;
+    window.history.replaceState(null, '', next);
+  }, [loading, selectedSite, debouncedQuery, types, yearRange, domain]);
 
   useEffect(() => {
     if (!playing) return;
@@ -266,7 +302,7 @@ export default function App() {
       setSearchOpen(false);
       setHighlightedId(null);
       if (!isDesktop) setSheetSnap('peek');
-      mapRef.current?.focusSite(site, { offset: isDesktop ? [140, 0] : [0, 120] });
+      mapRef.current?.focusSite(site, { offset: isDesktop ? [210, 0] : [0, 120] });
     },
     [addRecent, query, isDesktop],
   );
@@ -575,6 +611,7 @@ export default function App() {
               onBoundsChange={setBounds}
               onMapClick={() => setSelectedSite(null)}
               controlsBottomClass="bottom-28"
+              initialFocus={initialFocus}
             />
             {selectedSite && (
               <SiteDetail
@@ -632,6 +669,7 @@ export default function App() {
         onBoundsChange={setBounds}
         onMapClick={() => setSelectedSite(null)}
         controlsBottomClass="bottom-[calc(152px+env(safe-area-inset-bottom)+16px)]"
+        initialFocus={initialFocus}
       />
 
       <div className="pointer-events-none fixed inset-x-0 top-0 z-[400] bg-gradient-to-b from-canvas/90 to-transparent px-4 pb-6 pt-[calc(env(safe-area-inset-top)+12px)]">

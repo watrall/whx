@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
-import { ExternalLink, X } from 'lucide-react';
+import { Check, ExternalLink, Link2, X } from 'lucide-react';
 import type { Site } from '../lib/types.ts';
 import { parseCriteria } from '../lib/criteria.ts';
 import { TYPE_INK, TYPE_LABEL, TYPE_TINT, imageCreditUrl, siteMeta } from '../lib/utils.ts';
@@ -16,6 +16,17 @@ interface SiteDetailProps {
 export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailProps) {
   const criteria = parseCriteria(site.criteria);
   const creditUrl = imageCreditUrl(site.image);
+  const [copied, setCopied] = useState(false);
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopied(false);
+    }
+  };
   const dragStartRef = useRef<number | null>(null);
   const dragYRef = useRef(0);
   const [dragY, setDragY] = useState(0);
@@ -187,6 +198,9 @@ export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailPro
           </section>
         )}
 
+        <p className="sr-only" role="status">
+          {copied ? 'Link copied to clipboard' : ''}
+        </p>
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {site.officialUrl && (
             <a
@@ -199,6 +213,14 @@ export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailPro
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
           )}
+          <button
+            type="button"
+            onClick={copyLink}
+            className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-medium text-ink transition hover:bg-canvas"
+          >
+            {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+            {copied ? 'Link copied' : 'Copy link'}
+          </button>
           <a
             href={`https://www.wikidata.org/wiki/${site.id}`}
             target="_blank"
