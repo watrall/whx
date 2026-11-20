@@ -39,7 +39,7 @@ export const TYPE_ICON: Record<SiteType, string> = {
  */
 export function unescoUrl(site: Pick<Site, 'unescoId' | 'officialUrl'>): string | null {
   const number = site.unescoId?.match(/^\d+/)?.[0];
-  if (number) return `https://whc.unesco.org/en/list/${number}`;
+  if (number) return `https://whc.unesco.org/en/list/${number}/`;
   return site.officialUrl;
 }
 
