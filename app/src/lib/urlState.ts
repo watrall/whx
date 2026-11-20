@@ -10,6 +10,8 @@ export interface UrlState {
   list: string[];
   /** Criteria codes such as "vi" and "ix". */
   criteria: string[];
+  /** A country name, as UNESCO spells it. */
+  country: string | null;
 }
 
 const CRITERIA_CODES = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x'];
@@ -41,6 +43,7 @@ export function parseUrlState(hash: string): UrlState {
       .split(',')
       .filter((id) => /^Q\d+$/.test(id))
       .slice(0, 150),
+    country: (params.get('country') ?? '').slice(0, 80) || null,
     criteria: (params.get('crit') ?? '').split(',').filter((code) => CRITERIA_CODES.includes(code)),
   };
 }
@@ -55,6 +58,7 @@ export function buildUrlHash(state: {
   danger: boolean;
   list: ReadonlySet<string> | null;
   criteria: ReadonlySet<string>;
+  country: string | null;
 }): string {
   const params = new URLSearchParams();
   if (state.site) params.set('site', state.site);
@@ -66,6 +70,7 @@ export function buildUrlHash(state: {
     params.set('years', `${state.years[0]}-${state.years[1]}`);
   }
   if (state.danger) params.set('danger', '1');
+  if (state.country) params.set('country', state.country);
   if (state.criteria.size > 0) {
     params.set('crit', CRITERIA_CODES.filter((code) => state.criteria.has(code)).join(','));
   }

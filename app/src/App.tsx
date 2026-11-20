@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import { Attribution } from './components/Attribution.tsx';
+import { CountryChip } from './components/CountryChip.tsx';
 import { CriteriaFilter } from './components/CriteriaFilter.tsx';
 import { DiscoverActions } from './components/DiscoverActions.tsx';
 import { EmptyState } from './components/EmptyState.tsx';
@@ -103,6 +104,7 @@ export default function App() {
     danger: initialUrl.current.danger,
     listIds: initialUrl.current.list.length > 0 ? new Set(initialUrl.current.list) : null,
     criteria: new Set(initialUrl.current.criteria),
+    country: initialUrl.current.country,
   });
   const [shareCopied, setShareCopied] = useState(false);
   const [yearRange, setYearRange] = useState<YearRange>(FALLBACK_DOMAIN);
@@ -181,6 +183,7 @@ export default function App() {
       danger: extra.danger,
       list: extra.listIds,
       criteria: extra.criteria,
+      country: extra.country,
     });
     const next = `${window.location.pathname}${window.location.search}${hash}`;
     window.history.replaceState(null, '', next);
@@ -346,6 +349,7 @@ export default function App() {
     extra.savedOnly,
     extra.listIds?.size ?? '',
     [...extra.criteria].sort().join(','),
+    extra.country ?? '',
   ].join('|');
 
   // Changing a filter refits the map to the results, so a card left open would
@@ -622,6 +626,15 @@ export default function App() {
     });
   }, []);
 
+  const handleFilterCountry = useCallback((country: string | null) => {
+    setSelectedSite(null);
+    setExtra((prev) => ({ ...prev, country }));
+  }, []);
+
+  const countryChip = extra.country ? (
+    <CountryChip country={extra.country} onClear={() => handleFilterCountry(null)} />
+  ) : null;
+
   const handleClearCriteria = useCallback(() => {
     setSelectedSite(null);
     setExtra((prev) => ({ ...prev, criteria: new Set() }));
@@ -856,6 +869,7 @@ export default function App() {
                 )}
               </div>
             </div>
+            {countryChip && <div className="mt-3">{countryChip}</div>}
             {sharedBanner && <div className="mt-3">{sharedBanner}</div>}
             <div className="mt-3">{typeFilter}</div>
             <div className="mt-2">{criteriaFilter('popover')}</div>
@@ -915,6 +929,7 @@ export default function App() {
                 onSelectNearby={handleSelect}
                 saved={saved.has(selectedSite.id)}
                 onToggleSaved={() => toggleSaved(selectedSite.id)}
+                onFilterCountry={handleFilterCountry}
                 onClose={() => setSelectedSite(null)}
               />
             )}
@@ -1049,6 +1064,7 @@ export default function App() {
         }
       >
         <div className="flex min-h-0 flex-1 flex-col">
+          {countryChip && <div className="px-4 pt-2">{countryChip}</div>}
           {sharedBanner && <div className="px-4 pt-2">{sharedBanner}</div>}
           <div className="px-4 pt-2">{criteriaFilter('inline')}</div>
           <DiscoverActions
@@ -1095,6 +1111,7 @@ export default function App() {
           onSelectNearby={handleSelect}
           saved={saved.has(selectedSite.id)}
           onToggleSaved={() => toggleSaved(selectedSite.id)}
+          onFilterCountry={handleFilterCountry}
           onClose={() => setSelectedSite(null)}
         />
       )}

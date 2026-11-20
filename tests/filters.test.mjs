@@ -46,6 +46,7 @@ test('url state round-trips danger and a shared list', () => {
     danger: true,
     list: new Set(['Q5', 'Q9']),
     criteria: new Set(),
+    country: null,
   });
   assert.equal(hash, '#danger=1&list=Q5%2CQ9');
   const parsed = parseUrlState(hash);
@@ -75,7 +76,23 @@ test('url state round-trips criteria and drops unknown codes', () => {
     danger: false,
     list: null,
     criteria: new Set(['ix', 'vi']),
+    country: null,
   });
   assert.equal(hash, '#crit=vi%2Cix');
   assert.deepEqual(parseUrlState('#crit=vi,zz,ix').criteria, ['vi', 'ix']);
+});
+
+test("country filter matches any of a site's countries", () => {
+  const f = { ...NO_EXTRA, country: 'Italy' };
+  assert.equal(matchesExtra({ id: 'Q1', danger: false, criteriaCodes: [], countries: ['Italy', 'France'] }, f, new Set()), true);
+  assert.equal(matchesExtra({ id: 'Q2', danger: false, criteriaCodes: [], countries: ['France'] }, f, new Set()), false);
+  assert.equal(hasExtraFilters(f), true);
+});
+
+test('url state round-trips a country', () => {
+  const hash = buildUrlHash({
+    site: null, query: '', types: new Set(), years: [1978, 2026], domain: [1978, 2026],
+    danger: false, list: null, criteria: new Set(), country: 'Iran (Islamic Republic of)',
+  });
+  assert.equal(parseUrlState(hash).country, 'Iran (Islamic Republic of)');
 });

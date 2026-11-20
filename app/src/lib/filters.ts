@@ -10,6 +10,8 @@ export interface ExtraFilters {
   listIds: ReadonlySet<string> | null;
   /** Selection criteria codes; a site matches if it meets any of them. */
   criteria: ReadonlySet<string>;
+  /** Only sites in this country (UNESCO's name for it). */
+  country: string | null;
 }
 
 export const NO_EXTRA: ExtraFilters = {
@@ -17,11 +19,14 @@ export const NO_EXTRA: ExtraFilters = {
   savedOnly: false,
   listIds: null,
   criteria: new Set(),
+  country: null,
 };
 
 export function hasExtraFilters(filters: ExtraFilters): boolean {
   return (
-    filters.danger || filters.savedOnly || filters.listIds !== null || filters.criteria.size > 0
+    filters.danger || filters.savedOnly || filters.listIds !== null ||
+    filters.criteria.size > 0 ||
+    filters.country !== null
   );
 }
 
@@ -29,6 +34,7 @@ export function matchesExtra(site: Site, filters: ExtraFilters, saved: ReadonlyS
   if (filters.danger && !site.danger) return false;
   if (filters.savedOnly && !saved.has(site.id)) return false;
   if (filters.listIds && !filters.listIds.has(site.id)) return false;
+  if (filters.country && !site.countries.includes(filters.country)) return false;
   if (filters.criteria.size > 0 && !site.criteriaCodes.some((code) => filters.criteria.has(code))) {
     return false;
   }

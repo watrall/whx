@@ -32,6 +32,8 @@ interface SiteDetailProps {
   onSelectNearby?: (site: Site) => void;
   saved?: boolean;
   onToggleSaved?: () => void;
+  /** Filter the map to one of the site's countries. */
+  onFilterCountry?: (country: string) => void;
 }
 
 export function SiteDetail({
@@ -44,6 +46,7 @@ export function SiteDetail({
   onSelectNearby,
   saved = false,
   onToggleSaved,
+  onFilterCountry,
 }: SiteDetailProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -263,7 +266,23 @@ export function SiteDetail({
           <div className={site.countries.length > 1 ? 'col-span-2' : undefined}>
             <dt className="text-muted">{site.countries.length > 1 ? 'Countries' : 'Country'}</dt>
             <dd className="mt-0.5 font-medium text-ink">
-              {site.countries.length > 0 ? site.countries.join(', ') : site.country || '—'}
+              {site.countries.length > 0 && onFilterCountry
+                ? site.countries.map((name, index) => (
+                    <span key={name}>
+                      {index > 0 && ', '}
+                      <button
+                        type="button"
+                        onClick={() => onFilterCountry(name)}
+                        title={`Show only sites in ${name}`}
+                        className="focus-ring rounded text-left underline decoration-line-strong underline-offset-2 transition hover:decoration-ink"
+                      >
+                        {name}
+                      </button>
+                    </span>
+                  ))
+                : site.countries.length > 0
+                  ? site.countries.join(', ')
+                  : site.country || '—'}
             </dd>
           </div>
         </dl>
