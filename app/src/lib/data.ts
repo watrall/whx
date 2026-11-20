@@ -90,7 +90,7 @@ export function normalizeBindings(bindings: Binding[]): Site[] {
       description: readValue(binding, 'description')?.trim() ?? '',
       lat: coordinate.lat,
       lon: coordinate.lon,
-      year: parseYear(readValue(binding, 'inscriptionYear')),
+      year: resolveYear(qid, readValue(binding, 'inscriptionYear')),
       type: resolveType(readValue(binding, 'criteria'), readValue(binding, 'description')),
       image: normalizeImage(readValue(binding, 'image')),
       officialUrl: safeUrl(readValue(binding, 'officialUrl')),
@@ -111,6 +111,25 @@ export function parseCoordinate(value?: string): { lat: number; lon: number } | 
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
   if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
   return { lat, lon };
+}
+
+/** UNESCO's first inscriptions were made in 1978; anything earlier is bad data. */
+export const FIRST_INSCRIPTION_YEAR = 1978;
+
+/**
+ * Known-wrong years in Wikidata, keyed by QID. Fix these upstream on Wikidata
+ * and delete the entry once the correction has propagated.
+ */
+export const YEAR_OVERRIDES: Record<string, number> = {
+  // Serengeti National Park: Wikidata says 1960 (likely the park's creation); inscribed 1981.
+  Q11812902: 1981,
+};
+
+export function resolveYear(qid: string, value?: string): number | null {
+  const override = YEAR_OVERRIDES[qid];
+  if (override !== undefined) return override;
+  const year = parseYear(value);
+  return year !== null && year < FIRST_INSCRIPTION_YEAR ? null : year;
 }
 
 export function parseYear(value?: string): number | null {
