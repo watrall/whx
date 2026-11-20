@@ -8,8 +8,11 @@ export interface UrlState {
   danger: boolean;
   /** Site IDs from a shared list link. */
   list: string[];
+  /** Criteria codes such as "vi" and "ix". */
+  criteria: string[];
 }
 
+const CRITERIA_CODES = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x'];
 const TYPES: SiteType[] = ['cultural', 'natural', 'mixed'];
 
 /** Reads app state from a location hash such as `#site=Q123&types=natural&years=1990-2005`. */
@@ -38,6 +41,7 @@ export function parseUrlState(hash: string): UrlState {
       .split(',')
       .filter((id) => /^Q\d+$/.test(id))
       .slice(0, 150),
+    criteria: (params.get('crit') ?? '').split(',').filter((code) => CRITERIA_CODES.includes(code)),
   };
 }
 
@@ -50,6 +54,7 @@ export function buildUrlHash(state: {
   domain: YearRange;
   danger: boolean;
   list: ReadonlySet<string> | null;
+  criteria: ReadonlySet<string>;
 }): string {
   const params = new URLSearchParams();
   if (state.site) params.set('site', state.site);
@@ -61,6 +66,9 @@ export function buildUrlHash(state: {
     params.set('years', `${state.years[0]}-${state.years[1]}`);
   }
   if (state.danger) params.set('danger', '1');
+  if (state.criteria.size > 0) {
+    params.set('crit', CRITERIA_CODES.filter((code) => state.criteria.has(code)).join(','));
+  }
   if (state.list && state.list.size > 0) params.set('list', [...state.list].join(','));
   const text = params.toString();
   return text ? `#${text}` : '';

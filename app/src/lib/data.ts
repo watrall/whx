@@ -1,3 +1,4 @@
+import { parseCriteria } from './criteria.ts';
 import type { Site, SiteType } from './types.ts';
 import { applyUnescoFacts, loadUnescoFacts } from './unesco.ts';
 
@@ -105,6 +106,7 @@ export function normalizeBindings(bindings: Binding[]): Site[] {
       officialUrl: safeUrl(readValue(binding, 'officialUrl')),
       unescoId,
       criteria: readValue(binding, 'criteria')?.trim() || null,
+      criteriaCodes: parseCriteria(readValue(binding, 'criteria') ?? null).map((item) => item.code),
     });
   }
 

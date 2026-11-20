@@ -45,6 +45,7 @@ test('url state round-trips danger and a shared list', () => {
     domain: [1978, 2026],
     danger: true,
     list: new Set(['Q5', 'Q9']),
+    criteria: new Set(),
   });
   assert.equal(hash, '#danger=1&list=Q5%2CQ9');
   const parsed = parseUrlState(hash);
@@ -55,4 +56,26 @@ test('url state round-trips danger and a shared list', () => {
 test('url state ignores malformed list ids', () => {
   const parsed = parseUrlState('#list=Q1,evil,Q2<script>,Q3');
   assert.deepEqual(parsed.list, ['Q1', 'Q3']);
+});
+
+test('criteria filter matches a site meeting any selected criterion', () => {
+  const f = { ...NO_EXTRA, criteria: new Set(['vi', 'ix']) };
+  assert.equal(matchesExtra({ id: 'Q1', danger: false, criteriaCodes: ['ii', 'vi'] }, f, new Set()), true);
+  assert.equal(matchesExtra({ id: 'Q2', danger: false, criteriaCodes: ['ii', 'iv'] }, f, new Set()), false);
+  assert.equal(hasExtraFilters(f), true);
+});
+
+test('url state round-trips criteria and drops unknown codes', () => {
+  const hash = buildUrlHash({
+    site: null,
+    query: '',
+    types: new Set(),
+    years: [1978, 2026],
+    domain: [1978, 2026],
+    danger: false,
+    list: null,
+    criteria: new Set(['ix', 'vi']),
+  });
+  assert.equal(hash, '#crit=vi%2Cix');
+  assert.deepEqual(parseUrlState('#crit=vi,zz,ix').criteria, ['vi', 'ix']);
 });

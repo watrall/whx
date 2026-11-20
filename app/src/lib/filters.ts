@@ -8,18 +8,30 @@ export interface ExtraFilters {
   savedOnly: boolean;
   /** A shared list from a link: show only these sites. */
   listIds: ReadonlySet<string> | null;
+  /** Selection criteria codes; a site matches if it meets any of them. */
+  criteria: ReadonlySet<string>;
 }
 
-export const NO_EXTRA: ExtraFilters = { danger: false, savedOnly: false, listIds: null };
+export const NO_EXTRA: ExtraFilters = {
+  danger: false,
+  savedOnly: false,
+  listIds: null,
+  criteria: new Set(),
+};
 
 export function hasExtraFilters(filters: ExtraFilters): boolean {
-  return filters.danger || filters.savedOnly || filters.listIds !== null;
+  return (
+    filters.danger || filters.savedOnly || filters.listIds !== null || filters.criteria.size > 0
+  );
 }
 
 export function matchesExtra(site: Site, filters: ExtraFilters, saved: ReadonlySet<string>): boolean {
   if (filters.danger && !site.danger) return false;
   if (filters.savedOnly && !saved.has(site.id)) return false;
   if (filters.listIds && !filters.listIds.has(site.id)) return false;
+  if (filters.criteria.size > 0 && !site.criteriaCodes.some((code) => filters.criteria.has(code))) {
+    return false;
+  }
   return true;
 }
 

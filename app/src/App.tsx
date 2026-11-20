@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import { Attribution } from './components/Attribution.tsx';
+import { CriteriaFilter } from './components/CriteriaFilter.tsx';
 import { DiscoverActions } from './components/DiscoverActions.tsx';
 import { EmptyState } from './components/EmptyState.tsx';
 import { FilterChip } from './components/FilterChip.tsx';
@@ -101,6 +102,7 @@ export default function App() {
     ...NO_EXTRA,
     danger: initialUrl.current.danger,
     listIds: initialUrl.current.list.length > 0 ? new Set(initialUrl.current.list) : null,
+    criteria: new Set(initialUrl.current.criteria),
   });
   const [shareCopied, setShareCopied] = useState(false);
   const [yearRange, setYearRange] = useState<YearRange>(FALLBACK_DOMAIN);
@@ -178,6 +180,7 @@ export default function App() {
       domain,
       danger: extra.danger,
       list: extra.listIds,
+      criteria: extra.criteria,
     });
     const next = `${window.location.pathname}${window.location.search}${hash}`;
     window.history.replaceState(null, '', next);
@@ -342,6 +345,7 @@ export default function App() {
     extra.danger,
     extra.savedOnly,
     extra.listIds?.size ?? '',
+    [...extra.criteria].sort().join(','),
   ].join('|');
 
   // Changing a filter refits the map to the results, so a card left open would
@@ -596,6 +600,43 @@ export default function App() {
     setExtra((prev) => ({ ...prev, danger: !prev.danger }));
   }, []);
 
+  // Counts show what ticking a criterion would add, given everything else that is active.
+  const criteriaCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    const without = { ...extra, criteria: new Set<string>() };
+    for (const site of sites) {
+      if (types.size > 0 && !types.has(site.type)) continue;
+      if (!matchesYear(site) || !matchesQuery(site) || !matchesExtra(site, without, saved)) continue;
+      for (const code of site.criteriaCodes) counts[code] = (counts[code] ?? 0) + 1;
+    }
+    return counts;
+  }, [sites, types, matchesYear, matchesQuery, extra, saved]);
+
+  const handleToggleCriterion = useCallback((code: string) => {
+    setSelectedSite(null);
+    setExtra((prev) => {
+      const criteria = new Set(prev.criteria);
+      if (criteria.has(code)) criteria.delete(code);
+      else criteria.add(code);
+      return { ...prev, criteria };
+    });
+  }, []);
+
+  const handleClearCriteria = useCallback(() => {
+    setSelectedSite(null);
+    setExtra((prev) => ({ ...prev, criteria: new Set() }));
+  }, []);
+
+  const criteriaFilter = (layout: 'popover' | 'inline') => (
+    <CriteriaFilter
+      selected={extra.criteria}
+      counts={criteriaCounts}
+      onToggle={handleToggleCriterion}
+      onClear={handleClearCriteria}
+      layout={layout}
+    />
+  );
+
   const handleToggleSavedOnly = useCallback(() => {
     setSelectedSite(null);
     setExtra((prev) => ({ ...prev, savedOnly: !prev.savedOnly }));
@@ -817,6 +858,7 @@ export default function App() {
             </div>
             {sharedBanner && <div className="mt-3">{sharedBanner}</div>}
             <div className="mt-3">{typeFilter}</div>
+            <div className="mt-2">{criteriaFilter('popover')}</div>
           </div>
 
           <div className="flex items-center justify-between gap-2 border-t border-line px-4 py-2">
@@ -1008,6 +1050,7 @@ export default function App() {
       >
         <div className="flex min-h-0 flex-1 flex-col">
           {sharedBanner && <div className="px-4 pt-2">{sharedBanner}</div>}
+          <div className="px-4 pt-2">{criteriaFilter('inline')}</div>
           <DiscoverActions
             className="px-4 pb-1 pt-2"
             onSurprise={() => {

@@ -59,6 +59,14 @@ const CRITERIA: Record<string, Omit<Criterion, 'code'>> = {
   },
 };
 
+/** Every criterion in order: (i) to (vi) cultural, (vii) to (x) natural. */
+export const ALL_CRITERIA: Criterion[] = Object.entries(CRITERIA).map(([code, entry]) => ({
+  code,
+  ...entry,
+}));
+
+export const CULTURAL_CODES = ['i', 'ii', 'iii', 'iv', 'v', 'vi'];
+
 /** Parses Wikidata's "(ii)|(iv)" format into ordered, de-duplicated criteria. */
 export function parseCriteria(raw: string | null): Criterion[] {
   if (!raw) return [];

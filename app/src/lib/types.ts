@@ -20,6 +20,8 @@ export interface Site {
   officialUrl: string | null;
   unescoId: string | null;
   criteria: string | null;
+  /** Parsed criteria codes such as ["ii", "iv"], for filtering. */
+  criteriaCodes: string[];
 }
 
 export type YearRange = [number, number];
