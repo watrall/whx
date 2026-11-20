@@ -26,7 +26,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return (
       <div className="grid h-dvh place-items-center bg-canvas px-6 text-center text-ink" role="alert">
         <div className="max-w-sm">
-          <h1 className="font-serif text-xl font-medium">Something went wrong</h1>
+          <h1 className="text-xl font-medium">Something went wrong</h1>
           <p className="mt-2 text-sm text-muted">
             The map hit an unexpected error. Reloading usually fixes it, and your filters are kept
             in the address bar.

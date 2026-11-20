@@ -17,7 +17,7 @@ export function PlaybackReadout({ year, added, className = '' }: PlaybackReadout
       aria-hidden="true"
       className={`pointer-events-none animate-fade-in rounded-2xl border border-line bg-surface px-5 py-2.5 text-center shadow-card ${className}`}
     >
-      <div className="font-serif text-4xl font-medium leading-none tracking-tight tabular-nums text-ink">
+      <div className="text-4xl font-medium leading-none tracking-tight tabular-nums text-ink">
         {year}
       </div>
       <div className="mt-1.5 text-xs text-muted">

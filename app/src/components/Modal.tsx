@@ -74,7 +74,7 @@ export function Modal({ open, onClose, title, children, className = '' }: ModalP
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
-          <h2 id={titleId} className="font-serif text-lg font-medium text-ink">
+          <h2 id={titleId} className="text-lg font-medium text-ink">
             {title}
           </h2>
           <button

@@ -159,7 +159,7 @@ export function SiteDetail({
           {TYPE_LABEL[site.type]}
         </span>
 
-        <h2 className="mt-2 break-words font-serif text-xl font-medium leading-tight text-ink">
+        <h2 className="mt-2 break-words text-xl font-medium leading-tight text-ink">
           {site.name}
         </h2>
         <p className="mt-1 text-xs text-muted">{siteMeta(site)}</p>

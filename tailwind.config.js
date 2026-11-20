@@ -32,8 +32,8 @@ export default {
         'mixed-ink': 'oklch(var(--type-mixed-ink) / <alpha-value>)',
       },
       fontFamily: {
-        serif: ['Newsreader', 'Georgia', 'Iowan Old Style', 'Times New Roman', 'serif'],
         sans: [
+          'Rubik',
           'ui-sans-serif',
           'system-ui',
           '-apple-system',

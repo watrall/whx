@@ -86,7 +86,7 @@ export function SiteList({
                 className={selected ? 'ring-2 ring-ink ring-offset-2 ring-offset-sunken' : ''}
               />
               <span className="min-w-0 flex-1">
-                <span className="block truncate font-serif text-base font-medium leading-tight text-ink">
+                <span className="block truncate text-base font-medium leading-tight text-ink">
                   {site.name}
                 </span>
                 <span className="mt-1 flex items-center gap-1.5 truncate text-xs leading-none text-muted">
