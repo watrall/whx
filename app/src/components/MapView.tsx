@@ -26,6 +26,7 @@ interface MapViewProps {
   onBoundsChange?: (bounds: Bounds) => void;
   onMapClick?: () => void;
   controlsBottomClass?: string;
+  controlsSideClass?: string;
   /** Centre the first view on this site instead of fitting every marker. */
   initialFocus?: { site: Site; offset: [number, number] } | null;
   className?: string;
@@ -51,6 +52,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     onBoundsChange,
     onMapClick,
     controlsBottomClass = 'bottom-28',
+    controlsSideClass = 'right-4',
     initialFocus = null,
     className = '',
   },
@@ -315,7 +317,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
   return (
     <div className={`relative h-full w-full ${className}`}>
       <div ref={containerRef} className="absolute inset-0" aria-label="Map of World Heritage sites" />
-      <div className={`absolute right-4 z-[500] flex flex-col gap-2 ${controlsBottomClass}`}>
+      <div className={`absolute z-[500] flex flex-col gap-2 ${controlsSideClass} ${controlsBottomClass}`}>
         <button
           type="button"
           onClick={() => mapRef.current?.zoomIn()}

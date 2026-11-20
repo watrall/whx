@@ -611,6 +611,7 @@ export default function App() {
               onBoundsChange={setBounds}
               onMapClick={() => setSelectedSite(null)}
               controlsBottomClass="bottom-28"
+              controlsSideClass="left-4"
               initialFocus={initialFocus}
             />
             {selectedSite && (
