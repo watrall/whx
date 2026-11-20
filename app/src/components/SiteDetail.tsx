@@ -3,7 +3,7 @@ import type { PointerEvent as ReactPointerEvent } from 'react';
 import { ExternalLink, X } from 'lucide-react';
 import type { Site } from '../lib/types.ts';
 import { parseCriteria } from '../lib/criteria.ts';
-import { TYPE_INK, TYPE_LABEL, TYPE_TINT, siteMeta } from '../lib/utils.ts';
+import { TYPE_INK, TYPE_LABEL, TYPE_TINT, imageCreditUrl, siteMeta } from '../lib/utils.ts';
 import { SiteImage } from './SiteImage.tsx';
 import { TypeIcon } from './TypeIcon.tsx';
 
@@ -15,6 +15,7 @@ interface SiteDetailProps {
 
 export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailProps) {
   const criteria = parseCriteria(site.criteria);
+  const creditUrl = imageCreditUrl(site.image);
   const dragStartRef = useRef<number | null>(null);
   const dragYRef = useRef(0);
   const [dragY, setDragY] = useState(0);
@@ -66,7 +67,7 @@ export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailPro
       className={`animate-fade-up flex flex-col overflow-hidden border border-line bg-surface shadow-float ${
         mobile
           ? 'fixed inset-x-4 bottom-[calc(16px+env(safe-area-inset-bottom))] z-[1100] max-h-[62dvh] rounded-2xl'
-          : 'absolute right-6 top-6 z-[600] max-h-[calc(100%-3rem)] w-[360px] rounded-2xl'
+          : 'absolute right-6 top-6 z-[600] max-h-[calc(100%-3rem)] w-[400px] rounded-2xl'
       }`}
       style={
         mobile
@@ -92,13 +93,25 @@ export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailPro
         </div>
       )}
 
-      <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-canvas">
+      <div
+        className={`relative w-full shrink-0 overflow-hidden bg-sunken ${mobile ? 'aspect-[16/9]' : 'aspect-[4/3]'}`}
+      >
         <SiteImage
           site={site}
           alt={site.name}
           loading="eager"
           className="h-full w-full"
         />
+        {creditUrl && (
+          <a
+            href={creditUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="focus-ring absolute bottom-0 left-0 right-0 bg-gradient-to-t from-ink/70 to-transparent px-3 pb-2 pt-6 text-xs text-surface hover:underline"
+          >
+            Photo: Wikimedia Commons
+          </a>
+        )}
         <button
           type="button"
           onClick={onClose}
