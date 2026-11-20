@@ -7,10 +7,31 @@ interface SiteImageProps {
   site: Site;
   alt?: string;
   loading?: 'lazy' | 'eager';
+  /** Requested pixel width. Commons resizes server-side, so small slots stay small. */
+  width?: number;
   className?: string;
 }
 
-export function SiteImage({ site, alt = '', loading = 'lazy', className = '' }: SiteImageProps) {
+/** Re-sizes a Commons Special:FilePath URL; other URLs pass through untouched. */
+function withWidth(image: string, width?: number): string {
+  if (!width) return image;
+  try {
+    const url = new URL(image);
+    if (!url.pathname.startsWith('/wiki/Special:FilePath/')) return image;
+    url.searchParams.set('width', String(width));
+    return url.toString();
+  } catch {
+    return image;
+  }
+}
+
+export function SiteImage({
+  site,
+  alt = '',
+  loading = 'lazy',
+  width,
+  className = '',
+}: SiteImageProps) {
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
@@ -32,7 +53,7 @@ export function SiteImage({ site, alt = '', loading = 'lazy', className = '' }: 
 
   return (
     <img
-      src={site.image}
+      src={withWidth(site.image, width)}
       alt={alt}
       loading={loading}
       decoding="async"
@@ -42,6 +63,9 @@ export function SiteImage({ site, alt = '', loading = 'lazy', className = '' }: 
     />
   );
 }
+
+// 2x the rendered size (40, 48 and 64px) so thumbnails stay sharp on retina screens.
+const THUMB_WIDTH = { sm: 96, md: 120, lg: 160 } as const;
 
 const THUMB_SIZE = {
   sm: 'h-10 w-10',
@@ -62,7 +86,7 @@ export function SiteThumb({
     <div
       className={`shrink-0 overflow-hidden rounded-lg border border-line bg-canvas ${THUMB_SIZE[size]} ${className}`}
     >
-      <SiteImage site={site} className="h-full w-full" />
+      <SiteImage site={site} width={THUMB_WIDTH[size]} className="h-full w-full" />
     </div>
   );
 }
