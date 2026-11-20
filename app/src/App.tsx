@@ -14,6 +14,7 @@ import { Logo } from './components/Logo.tsx';
 import { MapView, type MapViewHandle } from './components/MapView.tsx';
 import { MobileSheet, type SheetSnap } from './components/MobileSheet.tsx';
 import { Modal } from './components/Modal.tsx';
+import { PlaybackReadout } from './components/PlaybackReadout.tsx';
 import { SearchOverlay } from './components/SearchOverlay.tsx';
 import { SiteDetail } from './components/SiteDetail.tsx';
 import { SiteList } from './components/SiteList.tsx';
@@ -230,6 +231,12 @@ export default function App() {
     }
     return counts;
   }, [sites, matchesYear, matchesQuery]);
+
+  const playYear = yearRange[1];
+  const addedInYear = useMemo(
+    () => (playing ? filtered.filter((site) => site.year === playYear).length : 0),
+    [playing, filtered, playYear],
+  );
 
   const typeTotal = typeCounts.cultural + typeCounts.natural + typeCounts.mixed;
   const countries = countryCount(filtered);
@@ -635,6 +642,13 @@ export default function App() {
               controlsSideClass="left-4"
               initialFocus={initialFocus}
             />
+            {playing && (
+              <PlaybackReadout
+                year={playYear}
+                added={addedInYear}
+                className="absolute left-1/2 top-4 z-[500] -translate-x-1/2"
+              />
+            )}
             {selectedSite && (
               <SiteDetail
                 site={selectedSite}
@@ -795,6 +809,14 @@ export default function App() {
           <div className="min-h-0 flex-1">{listBody}</div>
         </div>
       </MobileSheet>
+
+      {playing && (
+        <PlaybackReadout
+          year={playYear}
+          added={addedInYear}
+          className="fixed left-1/2 top-[calc(env(safe-area-inset-top)+80px)] z-[450] -translate-x-1/2"
+        />
+      )}
 
       <Attribution className="pointer-events-auto fixed left-2 z-[450] rounded bg-surface/85 px-1.5 py-1 bottom-[calc(152px+env(safe-area-inset-bottom)+4px)]" />
 

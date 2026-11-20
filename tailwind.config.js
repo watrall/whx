@@ -10,6 +10,7 @@ export default {
       lg: ['1.125rem', { lineHeight: '1.5rem' }],
       xl: ['1.375rem', { lineHeight: '1.75rem' }],
       '2xl': ['1.75rem', { lineHeight: '2rem' }],
+      '4xl': ['3rem', { lineHeight: '1' }],
     },
     extend: {
       colors: {
