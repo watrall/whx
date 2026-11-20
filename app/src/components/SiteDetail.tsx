@@ -159,13 +159,13 @@ export function SiteDetail({
           {TYPE_LABEL[site.type]}
         </span>
 
-        <h2 className="mt-2 font-serif text-xl font-medium leading-tight text-ink">
+        <h2 className="mt-2 break-words font-serif text-xl font-medium leading-tight text-ink">
           {site.name}
         </h2>
         <p className="mt-1 text-xs text-muted">{siteMeta(site)}</p>
 
         {site.description && (
-          <p className="mt-3 text-sm leading-relaxed text-muted">{sentenceCase(site.description)}</p>
+          <p className="mt-3 break-words text-sm leading-relaxed text-muted">{sentenceCase(site.description)}</p>
         )}
 
         <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-xs">
