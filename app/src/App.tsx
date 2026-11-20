@@ -31,7 +31,9 @@ import {
   formatNumber,
   formatRange,
   inBounds,
+  MOD_KEY,
   normalizeSearch,
+  pluralize,
   siteSearchText,
 } from './lib/utils.ts';
 
@@ -460,11 +462,18 @@ export default function App() {
     <SkeletonList />
   ) : error ? (
     <ErrorState message={error} onRetry={() => setReloadKey((key) => key + 1)} />
+  ) : filtered.length === 0 ? (
+    <EmptyState
+      title="No sites match"
+      description="Nothing fits this search, type and year range together."
+      actionLabel="Reset filters"
+      onAction={handleReset}
+    />
   ) : sortedListSites.length === 0 ? (
     <EmptyState
-      title="No sites in view"
-      description="Try widening the timeline, clearing filters, or fitting the map to all results."
-      actionLabel="Fit all results"
+      title="No sites in this part of the map"
+      description="There are matches elsewhere. Zoom out to find them."
+      actionLabel="Show all results"
       onAction={() => mapRef.current?.fitAll()}
     />
   ) : (
@@ -509,7 +518,7 @@ export default function App() {
             <X className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
         ) : (
-          <span className="kbd pointer-events-none">⌘K</span>
+          <span className="kbd pointer-events-none">{MOD_KEY}K</span>
         )}
       </div>
     </div>
@@ -569,7 +578,7 @@ export default function App() {
         </h3>
         <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs text-muted">
           <dt className="flex items-center gap-1">
-            <span className="kbd">⌘K</span>
+            <span className="kbd">{MOD_KEY}K</span>
             <span className="kbd">/</span>
           </dt>
           <dd>Search</dd>
@@ -642,7 +651,7 @@ export default function App() {
             <div className="flex items-baseline justify-between gap-2">
               <p className="text-xs text-muted">
                 <span className="font-semibold text-ink">{formatNumber(filtered.length)}</span>{' '}
-                sites · {formatNumber(countries)} countries
+                {filtered.length === 1 ? 'site' : 'sites'} · {pluralize(countries, 'country', 'countries')}
               </p>
               {isFiltered && (
                 <button
@@ -797,7 +806,7 @@ export default function App() {
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-ink">
-                {formatNumber(filtered.length)} sites · {formatNumber(countries)} countries
+                {pluralize(filtered.length, 'site')} · {pluralize(countries, 'country', 'countries')}
               </p>
               <p className="mt-0.5 text-xs text-muted">{formatRange(yearRange)}</p>
             </div>

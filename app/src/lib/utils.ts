@@ -46,6 +46,12 @@ export function imageCreditUrl(image: string | null): string | null {
   }
 }
 
+/** Modifier key label for shortcuts: Command on Apple devices, Ctrl elsewhere. */
+export const MOD_KEY =
+  typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent)
+    ? '⌘'
+    : 'Ctrl ';
+
 export function formatNumber(value: number): string {
   return new Intl.NumberFormat('en-US').format(value);
 }

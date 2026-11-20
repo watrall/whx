@@ -7,7 +7,7 @@ import type {
 } from 'react';
 import { Pause, Play } from 'lucide-react';
 import type { Site, SiteType, YearRange } from '../lib/types.ts';
-import { TYPE_COLOR, TYPE_ORDER, formatNumber, formatRange } from '../lib/utils.ts';
+import { TYPE_COLOR, TYPE_ORDER, formatNumber, formatRange, pluralize } from '../lib/utils.ts';
 
 interface TimelineProps {
   sites: Site[];
@@ -352,7 +352,7 @@ export function Timeline({
             >
               <div className="text-xs font-semibold leading-none">{hoverYear}</div>
               <div className="mt-1 text-xs leading-none text-canvas/70">
-                {formatNumber(hoverTotal)} sites
+                {pluralize(hoverTotal, 'site')}
               </div>
               {hoverCounts && (
                 <div className="mt-1.5 flex items-center gap-2 text-xs leading-none">
@@ -382,7 +382,7 @@ export function Timeline({
             <div className="text-right">
               <div className="text-xs leading-none text-muted">{formatRange(value)}</div>
               <div className="mt-1 text-xs font-semibold leading-none text-ink">
-                {formatNumber(count)} sites
+                {pluralize(count, 'site')}
               </div>
             </div>
             {onCycleSpeed && (
@@ -400,7 +400,7 @@ export function Timeline({
               type="button"
               onClick={onTogglePlay}
               aria-label={playing ? 'Pause timeline' : 'Play timeline'}
-              title={playing ? 'Pause timeline' : 'Play timeline'}
+              title={playing ? 'Pause timeline (Space)' : 'Play timeline (Space)'}
               className="focus-ring grid h-9 w-9 place-items-center rounded-full border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95"
             >
               {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
