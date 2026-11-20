@@ -280,11 +280,21 @@ export function Timeline({
 
   return (
     <div
-      className={`relative border-t border-line bg-surface ${compact ? 'h-16' : 'h-[88px]'} ${className}`}
+      className={`relative bg-surface ${compact ? 'h-14' : 'h-[88px] border-t border-line'} ${className}`}
       role="group"
       aria-label="Timeline of inscription years"
     >
       <div className={`flex h-full items-center gap-2 ${compact ? 'px-3' : 'px-4'}`}>
+        {compact && (
+          <button
+            type="button"
+            onClick={onTogglePlay}
+            aria-label={playing ? 'Pause timeline' : 'Play timeline'}
+            className="focus-ring grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-surface text-ink active:scale-95"
+          >
+            {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
+          </button>
+        )}
         <span
           className={`shrink-0 tabular-nums text-muted ${compact ? 'text-xs' : 'text-xs font-medium'}`}
         >

@@ -16,7 +16,17 @@ interface MobileSheetProps {
   className?: string;
 }
 
-const PEEK_VISIBLE = 96;
+// Handle (36) + chips (44) + timeline (56) + gaps (16). The safe-area inset is added at runtime.
+const PEEK_CONTENT = 152;
+
+function safeBottomInset(): number {
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;bottom:0;visibility:hidden;padding-bottom:env(safe-area-inset-bottom,0px)';
+  document.body.appendChild(probe);
+  const value = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
+  probe.remove();
+  return value;
+}
 const SNAP_ORDER: SheetSnap[] = ['peek', 'mid', 'full'];
 
 export function MobileSheet({
@@ -39,7 +49,7 @@ export function MobileSheet({
   const snapBases = () => {
     const height = sheetRef.current?.getBoundingClientRect().height ?? window.innerHeight * 0.92;
     return {
-      peek: Math.max(0, height - PEEK_VISIBLE),
+      peek: Math.max(0, height - (PEEK_CONTENT + safeBottomInset())),
       mid: Math.max(0, height - window.innerHeight * 0.46),
       full: 0,
     };
@@ -47,7 +57,7 @@ export function MobileSheet({
 
   const snapTransform = () => {
     if (dragY !== null) return `translateY(${dragY}px)`;
-    if (snap === 'peek') return 'translateY(calc(92dvh - 96px))';
+    if (snap === 'peek') return 'translateY(calc(92dvh - 152px - env(safe-area-inset-bottom, 0px)))';
     if (snap === 'mid') return 'translateY(46dvh)';
     return 'translateY(0px)';
   };
@@ -166,13 +176,13 @@ export function MobileSheet({
         aria-expanded={snap !== 'peek'}
         aria-controls={sheetId}
         title="Drag or tap to expand"
-        className="focus-ring flex h-11 shrink-0 touch-none items-start justify-center rounded-t-2xl pt-2"
+        className="focus-ring flex h-9 shrink-0 touch-none items-start justify-center rounded-t-2xl pt-2.5"
       >
         <span className="sheet-handle" aria-hidden="true" />
       </button>
 
-      <div className="shrink-0 px-4 pb-2">{header}</div>
       {peek && <div className="shrink-0 px-4 pb-2">{peek}</div>}
+      <div className="shrink-0 px-4 pb-2">{header}</div>
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-thin pb-[calc(env(safe-area-inset-bottom)+16px)]">
         {children}
       </div>

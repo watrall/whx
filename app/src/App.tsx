@@ -647,7 +647,7 @@ export default function App() {
         onHover={(site) => setHighlightedId(site?.id ?? null)}
         onBoundsChange={setBounds}
         onMapClick={() => setSelectedSite(null)}
-        controlsBottomClass="bottom-[176px]"
+        controlsBottomClass="bottom-[calc(152px+env(safe-area-inset-bottom)+16px)]"
       />
 
       <div className="pointer-events-none fixed inset-x-0 top-0 z-[400] bg-gradient-to-b from-canvas/90 to-transparent px-4 pb-6 pt-[calc(env(safe-area-inset-top)+12px)]">
@@ -673,19 +673,6 @@ export default function App() {
             </button>
           )}
         </div>
-      </div>
-
-      <div className="fixed inset-x-0 bottom-[96px] z-[500] border-t border-line bg-surface/95 backdrop-blur">
-        <Timeline
-          sites={timelineSites}
-          domain={domain}
-          value={yearRange}
-          onChange={setYearRange}
-          playing={playing}
-          onTogglePlay={handlePlayToggle}
-          count={filtered.length}
-          compact
-        />
       </div>
 
       <MobileSheet
@@ -732,11 +719,18 @@ export default function App() {
           </div>
         }
         peek={
-          <div className="pb-2">
+          <div className="space-y-2">
             {typeFilter}
-            <div className="px-4 pt-1">
-              <Attribution />
-            </div>
+            <Timeline
+              sites={timelineSites}
+              domain={domain}
+              value={yearRange}
+              onChange={setYearRange}
+              playing={playing}
+              onTogglePlay={handlePlayToggle}
+              count={filtered.length}
+              compact
+            />
           </div>
         }
       >
@@ -755,6 +749,8 @@ export default function App() {
           <div className="min-h-0 flex-1">{listBody}</div>
         </div>
       </MobileSheet>
+
+      <Attribution className="pointer-events-auto fixed left-2 z-[450] rounded bg-surface/85 px-1.5 py-1 bottom-[calc(152px+env(safe-area-inset-bottom)+4px)]" />
 
       {selectedSite && (
         <SiteDetail
