@@ -949,6 +949,7 @@ export default function App() {
                 saved={saved.has(selectedSite.id)}
                 onToggleSaved={() => toggleSaved(selectedSite.id)}
                 onFilterCountry={handleFilterCountry}
+                newFromYear={domain[1] - 1}
                 onClose={() => setSelectedSite(null)}
               />
             )}
@@ -1132,6 +1133,7 @@ export default function App() {
           saved={saved.has(selectedSite.id)}
           onToggleSaved={() => toggleSaved(selectedSite.id)}
           onFilterCountry={handleFilterCountry}
+          newFromYear={domain[1] - 1}
           onClose={() => setSelectedSite(null)}
         />
       )}

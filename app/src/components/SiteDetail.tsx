@@ -34,6 +34,8 @@ interface SiteDetailProps {
   onToggleSaved?: () => void;
   /** Filter the map to one of the site's countries. */
   onFilterCountry?: (country: string) => void;
+  /** Sites inscribed in this year or later get a "New" badge. */
+  newFromYear?: number;
 }
 
 export function SiteDetail({
@@ -47,6 +49,7 @@ export function SiteDetail({
   saved = false,
   onToggleSaved,
   onFilterCountry,
+  newFromYear,
 }: SiteDetailProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -187,6 +190,11 @@ export function SiteDetail({
             <TypeIcon type={site.type} className="h-3 w-3" />
             {TYPE_LABEL[site.type]}
           </span>
+          {newFromYear !== undefined && site.year !== null && site.year >= newFromYear && (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink px-2 py-1 text-xs font-semibold leading-none text-ink">
+              New in {site.year}
+            </span>
+          )}
           {site.danger && (
             <span
               className="inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1.5 text-sm font-semibold leading-none text-canvas"
