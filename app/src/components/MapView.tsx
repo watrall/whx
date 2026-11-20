@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import type { ReactNode } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import type { Bounds, Site } from '../lib/types.ts';
@@ -35,6 +36,8 @@ interface MapViewProps {
   initialFocus?: { site: Site; offset: [number, number] } | null;
   /** Sites inscribed in this year get a one-off ripple on the map (playback). */
   rippleYear?: number | null;
+  /** Extra buttons added to the end of the map control stack (such as locate). */
+  extraControls?: ReactNode;
   className?: string;
 }
 
@@ -61,6 +64,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     controlsSideClass = 'right-4',
     initialFocus = null,
     rippleYear = null,
+    extraControls,
     className = '',
   },
   ref,
@@ -396,6 +400,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
             <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" />
           </svg>
         </button>
+        {extraControls}
       </div>
     </div>
   );

@@ -10,7 +10,9 @@ interface TypeFilterProps {
   total: number;
   onToggle: (type: SiteType) => void;
   onClear: () => void;
-  variant?: 'desktop' | 'mobile';
+  variant?: 'desktop' | 'mobile' | 'strip';
+  /** Strip only: hide the labels and keep icons and counts. */
+  compact?: boolean;
   /** Extra on/off filters (such as In danger), shown after the types. */
   extras?: ReactNode;
   className?: string;
@@ -23,10 +25,61 @@ export function TypeFilter({
   onToggle,
   onClear,
   variant = 'desktop',
+  compact = false,
   extras,
   className = '',
 }: TypeFilterProps) {
   const allActive = types.size === 0;
+
+  if (variant === 'strip') {
+    const item =
+      'focus-ring inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium transition';
+    return (
+      <div
+        className={`inline-flex h-10 items-center gap-0.5 rounded-xl border border-line bg-surface p-1 shadow-card ${className}`}
+        role="group"
+        aria-label="Filter by site type"
+      >
+        <button
+          type="button"
+          onClick={onClear}
+          aria-pressed={allActive}
+          title="All types"
+          className={`${item} ${
+            allActive ? 'bg-ink text-canvas' : 'text-muted hover:bg-canvas hover:text-ink'
+          }`}
+        >
+          <Layers className="h-3.5 w-3.5" aria-hidden="true" />
+          All
+          <span className={`tabular-nums ${allActive ? 'text-canvas/70' : 'text-muted'}`}>
+            {formatNumber(total)}
+          </span>
+        </button>
+        {TYPE_ORDER.map((type) => {
+          const active = types.has(type);
+          return (
+            <button
+              key={type}
+              type="button"
+              onClick={() => onToggle(type)}
+              aria-pressed={active}
+              title={TYPE_LABEL[type]}
+              className={`${item} ${
+                active ? 'text-canvas' : 'text-muted hover:bg-canvas hover:text-ink'
+              }`}
+              style={active ? { backgroundColor: TYPE_COLOR[type] } : undefined}
+            >
+              <TypeIcon type={type} className="h-3.5 w-3.5" />
+              <span className={compact ? 'sr-only' : undefined}>{TYPE_LABEL[type]}</span>
+              <span className={`tabular-nums ${active ? 'text-canvas/75' : 'text-muted'}`}>
+                {formatNumber(counts[type])}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
 
   if (variant === 'mobile') {
     return (

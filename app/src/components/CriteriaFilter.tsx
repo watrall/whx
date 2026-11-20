@@ -11,6 +11,8 @@ interface CriteriaFilterProps {
   onClear: () => void;
   /** "popover" floats over the list (desktop rail); "inline" pushes content down (sheet). */
   layout?: 'popover' | 'inline';
+  /** "strip" sizes the button and panel for the floating strip. */
+  size?: 'rail' | 'strip';
   className?: string;
 }
 
@@ -24,6 +26,7 @@ export function CriteriaFilter({
   onToggle,
   onClear,
   layout = 'popover',
+  size = 'rail',
   className = '',
 }: CriteriaFilterProps) {
   const [open, setOpen] = useState(false);
@@ -88,7 +91,9 @@ export function CriteriaFilter({
     <div
       className={
         layout === 'popover'
-          ? 'absolute inset-x-0 top-full z-30 mt-1 max-h-[60vh] overflow-y-auto rounded-xl border border-line bg-surface p-1 shadow-float scroll-thin'
+          ? `absolute top-full z-30 mt-1 max-h-[60vh] overflow-y-auto rounded-xl border border-line bg-surface p-1 shadow-float scroll-thin ${
+              size === 'strip' ? 'left-0 w-[320px]' : 'inset-x-0'
+            }`
           : 'mt-1 rounded-xl border border-line bg-surface p-1'
       }
     >
@@ -107,12 +112,14 @@ export function CriteriaFilter({
   );
 
   return (
-    <div ref={rootRef} className={`relative ${className}`}>
+    <div ref={rootRef} className={`relative ${size === 'strip' ? 'shrink-0' : ''} ${className}`}>
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        className={`focus-ring flex min-h-10 w-full items-center justify-between gap-2 rounded-xl border px-3 text-xs font-medium transition ${
+        className={`focus-ring flex min-h-10 items-center justify-between gap-2 rounded-xl border px-3 text-xs font-medium transition ${
+          size === 'strip' ? 'h-10 shrink-0 shadow-card' : 'w-full'
+        } ${
           selected.size > 0
             ? 'border-ink bg-ink text-canvas'
             : 'border-line bg-surface text-muted hover:border-ink/30 hover:text-ink'
@@ -120,9 +127,11 @@ export function CriteriaFilter({
       >
         <span className="flex min-w-0 items-center gap-2">
           <span>Criteria</span>
-          <span className={`truncate ${selected.size > 0 ? 'text-canvas/80' : 'text-muted'}`}>
-            {summary}
-          </span>
+          {(selected.size > 0 || size !== 'strip') && (
+            <span className={`truncate ${selected.size > 0 ? 'text-canvas/80' : 'text-muted'}`}>
+              {summary}
+            </span>
+          )}
         </span>
         <ChevronDown
           className={`h-3.5 w-3.5 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}

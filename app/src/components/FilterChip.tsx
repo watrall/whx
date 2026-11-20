@@ -7,7 +7,7 @@ interface FilterChipProps {
   count?: number;
   active: boolean;
   onClick: () => void;
-  variant?: 'desktop' | 'mobile';
+  variant?: 'desktop' | 'mobile' | 'strip';
   /** "danger" fills with red when active and tints the icon red when off. */
   tone?: 'ink' | 'danger';
   className?: string;
@@ -31,7 +31,9 @@ export function FilterChip({
   const base =
     variant === 'mobile'
       ? 'inline-flex h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-medium'
-      : 'flex min-h-10 w-full items-center justify-between gap-2 rounded-xl border px-3 text-xs font-medium';
+      : variant === 'strip'
+        ? 'inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border px-3 text-xs font-medium shadow-card'
+        : 'flex min-h-10 w-full items-center justify-between gap-2 rounded-xl border px-3 text-xs font-medium';
   const danger = toneName === 'danger';
   const tone = active
     ? danger
@@ -50,7 +52,7 @@ export function FilterChip({
         {label}
       </span>
       {count !== undefined && (
-        <span className={`tabular-nums ${active ? 'text-canvas/70' : 'text-muted'}`}>
+        <span className={`${variant === 'strip' ? 'ml-1 ' : ''}tabular-nums ${active ? 'text-canvas/70' : 'text-muted'}`}>
           {formatNumber(count)}
         </span>
       )}
