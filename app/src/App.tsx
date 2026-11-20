@@ -1102,14 +1102,11 @@ export default function App() {
         onSnapChange={setSheetSnap}
         header={
           <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-ink">
-                {pluralize(filtered.length, 'site')} · {pluralize(countries, 'country', 'countries')}
-              </p>
-              <p className="mt-0.5 text-xs text-muted">{formatRange(yearRange)}</p>
-            </div>
+            <p className="min-w-0 truncate text-sm font-semibold text-ink">
+              <span className="font-normal text-muted">Inscribed</span> {formatRange(yearRange)}
+            </p>
             <div className="flex items-center gap-1">
-              {shareButtonFor(true)}
+              {sheetShareButton}
               {isFiltered && (
                 <button
                   type="button"
