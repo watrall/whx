@@ -41,13 +41,13 @@ export function SiteDescription({ site }: { site: Site }) {
     const expanded = expandedId === site.id;
     const { attribution } = unesco;
     return (
-      <div className="mt-4">
+      <div className="mt-5">
         {collapsible && !expanded ? (
-          <p className="line-clamp-6 break-words text-sm leading-relaxed text-ink/80">{total}</p>
+          <p className="line-clamp-6 text-pretty break-words text-sm leading-relaxed text-ink/80">{total}</p>
         ) : (
           <div className="space-y-2.5">
             {paragraphs.map((paragraph, index) => (
-              <p key={index} className="break-words text-sm leading-relaxed text-ink/80">
+              <p key={index} className="text-pretty break-words text-sm leading-relaxed text-ink/80">
                 {paragraph}
               </p>
             ))}
@@ -81,7 +81,7 @@ export function SiteDescription({ site }: { site: Site }) {
   // The text file is still loading and this site should have an entry.
   if (number && unesco === undefined) {
     return (
-      <div className="mt-4 space-y-2" aria-hidden="true">
+      <div className="mt-5 space-y-2" aria-hidden="true">
         <div className="h-3 w-full animate-pulse rounded bg-line/60" />
         <div className="h-3 w-11/12 animate-pulse rounded bg-line/60" />
         <div className="h-3 w-3/5 animate-pulse rounded bg-line/60" />
@@ -91,7 +91,7 @@ export function SiteDescription({ site }: { site: Site }) {
 
   if (site.description && isUsableDescription(site.description, site.name)) {
     return (
-      <p className="mt-4 break-words text-sm leading-relaxed text-ink/80">
+      <p className="mt-5 text-pretty break-words text-sm leading-relaxed text-ink/80">
         {sentenceCase(site.description)}
       </p>
     );

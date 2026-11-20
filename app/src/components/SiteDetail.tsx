@@ -29,6 +29,8 @@ interface SiteDetailProps {
   onStep?: (delta: -1 | 1) => void;
   /** The closest other sites, nearest first. */
   nearby?: NearbySite[];
+  /** "nearest" relabels the section when nothing is within day-trip distance. */
+  nearbyMode?: 'nearby' | 'nearest';
   onSelectNearby?: (site: Site) => void;
   saved?: boolean;
   onToggleSaved?: () => void;
@@ -45,6 +47,7 @@ export function SiteDetail({
   position = null,
   onStep,
   nearby = [],
+  nearbyMode = 'nearby',
   onSelectNearby,
   saved = false,
   onToggleSaved,
@@ -115,6 +118,10 @@ export function SiteDetail({
   };
 
   const mobile = variant === 'mobile';
+  // One height for every action button; 44px on touch.
+  const action = mobile ? 'min-h-11' : 'min-h-10';
+  const secondary =
+    'focus-ring inline-flex items-center justify-center gap-1.5 rounded-lg border border-line px-2 text-xs font-medium text-ink transition hover:bg-canvas';
 
   return (
     <div
@@ -151,7 +158,7 @@ export function SiteDetail({
 
       <div
         className={`relative w-full shrink-0 overflow-hidden bg-sunken ${
-          mobile ? 'aspect-[16/9]' : 'aspect-[4/3] [@media(max-height:820px)]:aspect-[16/9]'
+          mobile ? 'aspect-[16/9]' : 'aspect-[3/2] [@media(max-height:900px)]:aspect-[16/9]'
         }`}
       >
         <SiteImage
@@ -193,13 +200,13 @@ export function SiteDetail({
             {TYPE_LABEL[site.type]}
           </span>
           {newFromYear !== undefined && site.year !== null && site.year >= newFromYear && (
-            <span className="inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-xs font-semibold leading-none border border-ink text-ink">
+            <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-ink px-2.5 text-xs font-semibold leading-none text-ink">
               New in {site.year}
             </span>
           )}
           {site.danger && (
             <span
-              className="inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-xs font-semibold leading-none bg-danger text-canvas"
+              className="inline-flex h-7 items-center gap-1.5 rounded-full bg-danger px-2.5 text-xs font-semibold leading-none text-canvas"
               title="Listed by UNESCO as World Heritage in Danger"
             >
               <TriangleAlert className="h-3.5 w-3.5" aria-hidden="true" />
@@ -208,104 +215,96 @@ export function SiteDetail({
           )}
         </div>
 
-        <h2 className="mt-2 break-words text-xl font-medium leading-tight text-ink">
+        <h2 className="mt-3 text-balance break-words text-xl font-medium leading-tight text-ink">
           {site.name}
         </h2>
-        <p className="mt-1 text-xs text-muted">{siteMeta(site)}</p>
+        <p className="mt-1.5 text-sm leading-snug text-muted">
+          {site.countries.length > 0 && onFilterCountry
+            ? site.countries.map((name, index) => (
+                <span key={name}>
+                  {index > 0 && ', '}
+                  <button
+                    type="button"
+                    onClick={() => onFilterCountry(name)}
+                    title={`Show only sites in ${name}`}
+                    className="focus-ring rounded text-left underline decoration-line-strong underline-offset-2 transition hover:text-ink hover:decoration-ink"
+                  >
+                    {name}
+                  </button>
+                </span>
+              ))
+            : site.countries.length > 0
+              ? site.countries.join(', ')
+              : site.country}
+          {site.year !== null && (
+            <>
+              {(site.countries.length > 0 || site.country) && ' · '}
+              Inscribed {site.year}
+            </>
+          )}
+        </p>
 
         <p className="sr-only" role="status">
           {copied ? 'Link copied to clipboard' : ''}
         </p>
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="mt-4 space-y-2">
           {officialUrl && (
             <a
               href={officialUrl}
               target="_blank"
               rel="noreferrer"
-              className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-ink px-3 text-xs font-semibold text-canvas transition hover:bg-ink/90"
+              className={`focus-ring flex w-full items-center justify-center gap-2 rounded-lg bg-ink px-3 text-sm font-semibold text-canvas transition hover:bg-ink/90 ${action}`}
             >
               View on UNESCO
-              <ExternalLink className="h-3.5 w-3.5" />
+              <ExternalLink className="h-4 w-4" aria-hidden="true" />
             </a>
           )}
-          <a
-            href={directionsUrl(site)}
-            target="_blank"
-            rel="noreferrer"
-            className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-medium text-ink transition hover:bg-canvas"
-          >
-            <Navigation className="h-3.5 w-3.5" aria-hidden="true" />
-            Directions
-          </a>
-          {onToggleSaved && (
-            <button
-              type="button"
-              onClick={onToggleSaved}
-              aria-pressed={saved}
-              className={`focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition ${
-                saved
-                  ? 'border-ink bg-ink/5 text-ink'
-                  : 'border-line text-ink hover:bg-canvas'
-              }`}
+          <div className="grid grid-cols-3 gap-2">
+            <a
+              href={directionsUrl(site)}
+              target="_blank"
+              rel="noreferrer"
+              className={`${secondary} ${action}`}
             >
-              <Bookmark className={`h-3.5 w-3.5 ${saved ? 'fill-current' : ''}`} aria-hidden="true" />
-              {saved ? 'Saved' : 'Save'}
+              <Navigation className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              Directions
+            </a>
+            {onToggleSaved && (
+              <button
+                type="button"
+                onClick={onToggleSaved}
+                aria-pressed={saved}
+                className={`${secondary} ${action} ${saved ? 'border-ink bg-ink/5' : ''}`}
+              >
+                <Bookmark
+                  className={`h-3.5 w-3.5 shrink-0 ${saved ? 'fill-current' : ''}`}
+                  aria-hidden="true"
+                />
+                {saved ? 'Saved' : 'Save'}
+              </button>
+            )}
+            <button type="button" onClick={copyLink} className={`${secondary} ${action}`}>
+              {copied ? (
+                <Check className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              ) : (
+                <Link2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              )}
+              {copied ? 'Copied' : 'Copy link'}
             </button>
-          )}
-          <button
-            type="button"
-            onClick={copyLink}
-            className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-medium text-ink transition hover:bg-canvas"
-          >
-            {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
-            {copied ? 'Link copied' : 'Copy link'}
-          </button>
+          </div>
         </div>
 
         <SiteDescription site={site} />
 
-        <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-xs">
-          <div>
-            <dt className="text-muted">UNESCO ID</dt>
-            <dd className="mt-0.5 font-medium text-ink">{site.unescoId ?? '—'}</dd>
-          </div>
-          <div>
-            <dt className="text-muted">Inscribed</dt>
-            <dd className="mt-0.5 font-medium text-ink">{site.year ?? '—'}</dd>
-          </div>
-          <div className={site.countries.length > 1 ? 'col-span-2' : undefined}>
-            <dt className="text-muted">{site.countries.length > 1 ? 'Countries' : 'Country'}</dt>
-            <dd className="mt-0.5 font-medium text-ink">
-              {site.countries.length > 0 && onFilterCountry
-                ? site.countries.map((name, index) => (
-                    <span key={name}>
-                      {index > 0 && ', '}
-                      <button
-                        type="button"
-                        onClick={() => onFilterCountry(name)}
-                        title={`Show only sites in ${name}`}
-                        className="focus-ring rounded text-left underline decoration-line-strong underline-offset-2 transition hover:decoration-ink"
-                      >
-                        {name}
-                      </button>
-                    </span>
-                  ))
-                : site.countries.length > 0
-                  ? site.countries.join(', ')
-                  : site.country || '—'}
-            </dd>
-          </div>
-        </dl>
-
         {criteria.length > 0 && (
-          <section className="mt-5" aria-labelledby={`criteria-${site.id}`}>
+          <section className="mt-6" aria-labelledby={`criteria-${site.id}`}>
             <h3
               id={`criteria-${site.id}`}
               className="text-xs font-semibold uppercase tracking-[0.1em] text-muted"
             >
               Why it is listed
             </h3>
-            <ul className="mt-2 space-y-2.5">
+            <ul className="mt-2.5 space-y-3">
               {criteria.map((criterion) => (
                 <li key={criterion.code} className="flex gap-3">
                   <span
@@ -327,12 +326,12 @@ export function SiteDetail({
         )}
 
         {nearby.length > 0 && onSelectNearby && (
-          <section className="mt-5" aria-labelledby={`nearby-${site.id}`}>
+          <section className="mt-6" aria-labelledby={`nearby-${site.id}`}>
             <h3
               id={`nearby-${site.id}`}
               className="text-xs font-semibold uppercase tracking-[0.1em] text-muted"
             >
-              Nearby
+              {nearbyMode === 'nearby' ? 'Nearby' : 'Nearest sites'}
             </h3>
             <ul className="mt-2 space-y-1">
               {nearby.map(({ site: other, km }) => (
@@ -358,7 +357,8 @@ export function SiteDetail({
           </section>
         )}
 
-        <p className="mt-5 text-xs text-muted">
+        <p className="mt-6 border-t border-line pt-4 text-xs leading-relaxed text-muted">
+          {site.unescoId && <>UNESCO ID {site.unescoId} · </>}
           Site data from{' '}
           <a
             href={`https://www.wikidata.org/wiki/${site.id}`}
