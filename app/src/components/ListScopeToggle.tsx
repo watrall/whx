@@ -9,7 +9,7 @@ interface ListScopeToggleProps {
 
 const OPTIONS: { value: ListScope; label: string }[] = [
   { value: 'view', label: 'In view' },
-  { value: 'all', label: 'All' },
+  { value: 'all', label: 'All sites' },
 ];
 
 /** Switches the list between the sites on screen and every site matching the filters. */
