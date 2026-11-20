@@ -46,6 +46,7 @@ The app displays both the raw record count and the count of unique UNESCO IDs. W
 
 - **Live fallback is still slow.** If `data/sites.json` is missing, the first visit runs the SPARQL query (~5s server-side, 15–20s in a browser). Subsequent visits within 24 hours use the cache.
 - **No server-side filtering.** All filtering happens client-side.
+- **Daily commits grow the repo.** Each refresh commits ~1.1 MB. For high-traffic deployments, host `data/sites.json` on a CDN or use a GitHub Release instead of committing it.
 - **Wikidata data quality varies.** Coordinates, images, and descriptions are as good as the underlying Wikidata items.
 
 ## Tech stack

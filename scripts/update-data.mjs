@@ -12,7 +12,7 @@ import { dirname } from 'node:path';
 const ENDPOINT = 'https://query.wikidata.org/sparql';
 const SOURCE = 'scripts.js';
 const OUTPUT = 'data/sites.json';
-const USER_AGENT = 'WikidataWorldHeritageExplorer/1.0 (data update; https://github.com/)';
+const USER_AGENT = 'WikidataWorldHeritageExplorer/1.0 (data update; https://github.com/watrall/wikidata-world-heritage)';
 const REQUEST_TIMEOUT_MS = 60000;
 
 async function main() {
