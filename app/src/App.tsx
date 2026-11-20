@@ -35,7 +35,7 @@ import { useMediaQuery } from './lib/useMediaQuery.ts';
 import { useRecentSearches } from './lib/useRecentSearches.ts';
 import { useSavedSites } from './lib/useSavedSites.ts';
 import { downloadText, toCsv, toGeoJson } from './lib/export.ts';
-import { nearestSites } from './lib/geo.ts';
+import { distanceKm, formatDistance, nearestSites } from './lib/geo.ts';
 import { NO_EXTRA, hasExtraFilters, matchesExtra, shareListUrl } from './lib/filters.ts';
 import type { ExtraFilters } from './lib/filters.ts';
 import { buildUrlHash, parseUrlState } from './lib/urlState.ts';
@@ -51,7 +51,7 @@ import {
   siteSearchText,
 } from './lib/utils.ts';
 
-type SortKey = 'name' | 'year' | 'country';
+type SortKey = 'name' | 'year' | 'country' | 'distance';
 
 const FALLBACK_DOMAIN: YearRange = [1978, 2026];
 
@@ -114,6 +114,8 @@ export default function App() {
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const [sort, setSort] = useState<SortKey>('name');
+  // Where the visitor is, kept in memory only and only after they press Near me.
+  const [origin, setOrigin] = useState<{ lat: number; lon: number } | null>(null);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [discoverNotice, setDiscoverNotice] = useState<string | null>(null);
@@ -316,7 +318,12 @@ export default function App() {
 
   const sortedFiltered = useMemo(() => {
     const copy = [...filtered];
+    const km = new Map<string, number>();
+    if (sort === 'distance' && origin) {
+      for (const site of copy) km.set(site.id, distanceKm(origin, site));
+    }
     copy.sort((a, b) => {
+      if (sort === 'distance' && origin) return (km.get(a.id) ?? 0) - (km.get(b.id) ?? 0);
       if (sort === 'year') return (a.year ?? 9999) - (b.year ?? 9999);
       if (sort === 'country') {
         return a.country.localeCompare(b.country) || a.name.localeCompare(b.name);
@@ -324,7 +331,7 @@ export default function App() {
       return a.name.localeCompare(b.name);
     });
     return copy;
-  }, [filtered, sort]);
+  }, [filtered, sort, origin]);
 
   const sortedListSites = useMemo(
     () => sortedFiltered.filter((site) => inBounds(site, bounds)),
@@ -396,6 +403,7 @@ export default function App() {
   const handleReset = useCallback(() => {
     setQuery('');
     setTypes(new Set());
+    setSort((current) => (current === 'distance' ? 'name' : current));
     setExtra(NO_EXTRA);
     setYearRange(domain);
     setSelectedSite(null);
@@ -436,7 +444,10 @@ export default function App() {
       (position) => {
         setDiscoverNotice(null);
         setSelectedSite(null);
-        mapRef.current?.flyToPoint(position.coords.latitude, position.coords.longitude, 6);
+        const here = { lat: position.coords.latitude, lon: position.coords.longitude };
+        setOrigin(here);
+        setSort('distance');
+        mapRef.current?.flyToPoint(here.lat, here.lon, 6);
       },
       () => setDiscoverNotice('Could not get your location. Check browser permissions.'),
       { timeout: 8000, maximumAge: 300000 },
@@ -543,6 +554,7 @@ export default function App() {
         <option value="name">Name</option>
         <option value="year">Year</option>
         <option value="country">Country</option>
+        {origin && <option value="distance">Distance</option>}
       </select>
       <ChevronDown
         className="pointer-events-none absolute right-1.5 h-3 w-3 text-muted"
@@ -577,6 +589,11 @@ export default function App() {
       onSelect={handleSelect}
       onHover={(site) => setHighlightedId(site?.id ?? null)}
       rowHeight={isDesktop ? 72 : 56}
+      extraMeta={
+        sort === 'distance' && origin
+          ? (site) => `${formatDistance(distanceKm(origin, site))} away`
+          : undefined
+      }
       className="h-full"
     />
   );

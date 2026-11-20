@@ -13,6 +13,8 @@ interface SiteListProps {
   onSelect: (site: Site) => void;
   onHover: (site: Site | null) => void;
   rowHeight?: number;
+  /** Extra text after the site's meta line, such as a distance. */
+  extraMeta?: (site: Site) => string | null;
   emptyState?: ReactNode;
   className?: string;
 }
@@ -24,6 +26,7 @@ export function SiteList({
   onSelect,
   onHover,
   rowHeight = 72,
+  extraMeta,
   emptyState,
   className = '',
 }: SiteListProps) {
@@ -96,7 +99,9 @@ export function SiteList({
                     style={{ backgroundColor: TYPE_COLOR[site.type] }}
                     aria-hidden="true"
                   />
-                  <span className="truncate">{siteMeta(site)}</span>
+                  <span className="truncate">
+                    {[siteMeta(site), extraMeta?.(site)].filter(Boolean).join(' · ')}
+                  </span>
                   {site.danger && (
                     <TriangleAlert
                       className="h-3.5 w-3.5 shrink-0 text-ink"
