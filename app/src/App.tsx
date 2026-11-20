@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChevronDown,
-  Command,
   Info,
   Pause,
   Play,
@@ -515,14 +514,6 @@ export default function App() {
             <div className="flex items-center gap-1">
               <button
                 type="button"
-                onClick={() => setSearchOpen(true)}
-                aria-label="Open search"
-                className="focus-ring grid h-8 w-8 place-items-center rounded-lg text-muted transition hover:bg-canvas hover:text-ink"
-              >
-                <Command className="h-4 w-4" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
                 onClick={() => setAboutOpen(true)}
                 aria-label="About this project"
                 className="focus-ring grid h-8 w-8 place-items-center rounded-lg text-muted transition hover:bg-canvas hover:text-ink"
@@ -568,13 +559,6 @@ export default function App() {
 
           <footer className="flex items-center justify-between gap-2 border-t border-line px-4 py-2.5">
             <p className="text-xs text-muted">Data: Wikidata · UNESCO</p>
-            <button
-              type="button"
-              onClick={() => setAboutOpen(true)}
-              className="focus-ring text-xs font-medium text-muted transition hover:text-ink"
-            >
-              About
-            </button>
           </footer>
         </aside>
 
