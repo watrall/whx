@@ -6,6 +6,9 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, '..');
+// Static JSON served from /data. sites.json is Wikidata; the unesco files come from
+// scripts/import-unesco.mjs.
+const DATA_FILES = ['sites.json', 'unesco.json', 'unesco-text.json'];
 const base = process.env.VITE_BASE || '/wikidata-world-heritage/';
 
 export default defineConfig(({ command }) => ({
@@ -16,19 +19,24 @@ export default defineConfig(({ command }) => ({
     {
       name: 'serve-data',
       configureServer(server) {
-        server.middlewares.use('/data/sites.json', (req, res, next) => {
-          const file = resolve(repoRoot, 'data/sites.json');
-          if (!existsSync(file)) return next();
-          res.setHeader('Content-Type', 'application/json');
-          res.setHeader('Cache-Control', 'no-cache');
-          createReadStream(file).pipe(res);
-        });
+        for (const name of DATA_FILES) {
+          server.middlewares.use(`/data/${name}`, (req, res, next) => {
+            const file = resolve(repoRoot, 'data', name);
+            if (!existsSync(file)) return next();
+            res.setHeader('Content-Type', 'application/json');
+            res.setHeader('Cache-Control', 'no-cache');
+            createReadStream(file).pipe(res);
+          });
+        }
       },
       closeBundle() {
-        const src = resolve(repoRoot, 'data/sites.json');
-        const dest = resolve(__dirname, 'dist/data/sites.json');
-        mkdirSync(dirname(dest), { recursive: true });
-        copyFileSync(src, dest);
+        for (const name of DATA_FILES) {
+          const src = resolve(repoRoot, 'data', name);
+          if (!existsSync(src)) continue;
+          const dest = resolve(__dirname, 'dist/data', name);
+          mkdirSync(dirname(dest), { recursive: true });
+          copyFileSync(src, dest);
+        }
       },
     },
   ],
