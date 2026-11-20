@@ -1,4 +1,5 @@
 import type { Site, SiteType } from './types.ts';
+import { applyUnescoFacts, loadUnescoFacts } from './unesco.ts';
 
 const DATA_URL = 'data/sites.json';
 
@@ -50,7 +51,11 @@ export async function loadSites(signal?: AbortSignal): Promise<LoadResult> {
 
   // The update script writes SPARQL bindings; each field is validated by readValue.
   const records = bindings as Binding[];
-  const sites = normalizeBindings(records);
+  const [wikidataSites, facts] = await Promise.all([
+    Promise.resolve(normalizeBindings(records)),
+    loadUnescoFacts(signal),
+  ]);
+  const sites = applyUnescoFacts(wikidataSites, facts);
   if (sites.length === 0) {
     throw new Error('No usable site records found');
   }
@@ -83,10 +88,13 @@ export function normalizeBindings(bindings: Binding[]): Site[] {
     if (seen.has(key)) continue;
     seen.add(key);
 
+    const country = readValue(binding, 'country')?.trim() ?? '';
     sites.push({
       id: qid,
       name,
-      country: readValue(binding, 'country')?.trim() ?? '',
+      country,
+      countries: country ? [country] : [],
+      countryAlias: '',
       description: readValue(binding, 'description')?.trim() ?? '',
       lat: coordinate.lat,
       lon: coordinate.lon,

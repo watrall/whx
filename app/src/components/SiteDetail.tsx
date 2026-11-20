@@ -178,9 +178,11 @@ export function SiteDetail({
             <dt className="text-muted">Inscribed</dt>
             <dd className="mt-0.5 font-medium text-ink">{site.year ?? '—'}</dd>
           </div>
-          <div>
-            <dt className="text-muted">Country</dt>
-            <dd className="mt-0.5 font-medium text-ink">{site.country || '—'}</dd>
+          <div className={site.countries.length > 1 ? 'col-span-2' : undefined}>
+            <dt className="text-muted">{site.countries.length > 1 ? 'Countries' : 'Country'}</dt>
+            <dd className="mt-0.5 font-medium text-ink">
+              {site.countries.length > 0 ? site.countries.join(', ') : site.country || '—'}
+            </dd>
           </div>
         </dl>
 

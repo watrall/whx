@@ -79,11 +79,21 @@ export function pluralize(count: number, singular: string, plural = `${singular}
 }
 
 export function countryCount(sites: Site[]): number {
-  return new Set(sites.map((site) => site.country).filter(Boolean)).size;
+  return new Set(sites.flatMap((site) => site.countries)).size;
+}
+
+/** Short country label: one name, "A & B", or "A +N more" for large serial sites. */
+export function countryLabel(site: Pick<Site, 'countries' | 'country'>): string {
+  const list = site.countries.length > 0 ? site.countries : site.country ? [site.country] : [];
+  if (list.length <= 1) return list[0] ?? '';
+  if (list.length === 2) return `${list[0]} & ${list[1]}`;
+  return `${list[0]} +${list.length - 1} more`;
 }
 
 export function siteMeta(site: Site): string {
-  return [site.country, formatYear(site.year), TYPE_LABEL[site.type]].filter(Boolean).join(' · ');
+  return [countryLabel(site), formatYear(site.year), TYPE_LABEL[site.type]]
+    .filter(Boolean)
+    .join(' · ');
 }
 
 export function normalizeSearch(value: string): string {
@@ -96,7 +106,7 @@ export function normalizeSearch(value: string): string {
 
 export function siteSearchText(site: Site): string {
   return normalizeSearch(
-    [site.name, site.country, site.description, site.criteria, site.unescoId]
+    [site.name, site.countries.join(' '), site.countryAlias, site.description, site.criteria, site.unescoId]
       .filter(Boolean)
       .join(' '),
   );
