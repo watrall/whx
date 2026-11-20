@@ -71,9 +71,6 @@ export function imageCreditUrl(image: string | null): string | null {
 export const IS_APPLE =
   typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent);
 
-/** Modifier key label for shortcuts: Command on Apple devices, Ctrl elsewhere. */
-export const MOD_KEY = IS_APPLE ? '⌘' : 'Ctrl ';
-
 /** Opens the device's own maps app or site with the site as the destination. */
 export function directionsUrl(site: Pick<Site, 'lat' | 'lon' | 'name'>, apple = IS_APPLE): string {
   const point = `${site.lat},${site.lon}`;

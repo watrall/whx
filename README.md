@@ -12,7 +12,7 @@ A map-first explorer for UNESCO World Heritage Sites, sourced from Wikidata. Bro
 - **Sites in view** filtering as you pan and zoom the map.
 - **Detail panel** with a Wikimedia Commons image, description, UNESCO ID, criteria, and official links.
 - **Responsive layout**: desktop rail + map, mobile full-bleed map with a bottom sheet.
-- **Keyboard shortcuts**: `⌘K` / `/` search, `1`–`3` type filters, `Space` playback, `?` help.
+- **Keyboard shortcuts**: `/` search, `1`–`3` type filters, `Space` playback, `?` help.
 - **Precomputed dataset** (`data/sites.json`) refreshed nightly by GitHub Actions.
 
 ## Running locally

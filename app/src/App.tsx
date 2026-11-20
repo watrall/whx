@@ -45,7 +45,6 @@ import {
   formatNumber,
   formatRange,
   inBounds,
-  MOD_KEY,
   normalizeSearch,
   pluralize,
   siteSearchText,
@@ -492,19 +491,14 @@ export default function App() {
         return;
       }
 
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault();
-        setAboutOpen(false);
-        setSearchOpen(true);
-        return;
-      }
-
       if (aboutOpen || searchOpen) return;
       if (typing) return;
 
       if (event.key === '/') {
         event.preventDefault();
-        setSearchOpen(true);
+        // Desktop has a search field on screen; the full-screen overlay is for phones.
+        if (isDesktop) searchRef.current?.focus();
+        else setSearchOpen(true);
         return;
       }
       if (event.key === '1') {
@@ -535,7 +529,7 @@ export default function App() {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [aboutOpen, searchOpen, selectedSite, handleStep, handleToggleType, handlePlayToggle]);
+  }, [aboutOpen, searchOpen, selectedSite, isDesktop, handleStep, handleToggleType, handlePlayToggle]);
 
   useEffect(() => {
     if (!isDesktop) return;
@@ -614,7 +608,7 @@ export default function App() {
         }}
         placeholder="Search sites or countries"
         aria-label="Search sites or countries"
-        className="focus-ring h-10 w-full rounded-xl border border-line bg-canvas pl-9 pr-20 text-sm text-ink placeholder:text-muted/80"
+        className="focus-ring h-10 w-full rounded-xl border border-line bg-canvas pl-9 pr-10 text-sm text-ink placeholder:text-muted/80"
         spellCheck={false}
       />
       <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
@@ -627,9 +621,7 @@ export default function App() {
           >
             <X className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
-        ) : (
-          <span className="kbd pointer-events-none">{MOD_KEY}K</span>
-        )}
+        ) : null}
       </div>
     </div>
   );
@@ -816,7 +808,6 @@ export default function App() {
         </h3>
         <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs text-muted">
           <dt className="flex items-center gap-1">
-            <span className="kbd">{MOD_KEY}K</span>
             <span className="kbd">/</span>
           </dt>
           <dd>Search</dd>
