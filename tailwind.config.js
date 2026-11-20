@@ -2,6 +2,15 @@
 export default {
   content: ['./app/index.html', './app/src/**/*.{ts,tsx}'],
   theme: {
+    // Fixed rem scale (ratio about 1.2). 12px is the floor for functional text.
+    fontSize: {
+      xs: ['0.75rem', { lineHeight: '1.125rem' }],
+      sm: ['0.8125rem', { lineHeight: '1.25rem' }],
+      base: ['0.9375rem', { lineHeight: '1.4rem' }],
+      lg: ['1.125rem', { lineHeight: '1.5rem' }],
+      xl: ['1.375rem', { lineHeight: '1.75rem' }],
+      '2xl': ['1.75rem', { lineHeight: '2rem' }],
+    },
     extend: {
       colors: {
         ink: 'oklch(var(--ink) / <alpha-value>)',

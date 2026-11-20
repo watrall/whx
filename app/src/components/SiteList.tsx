@@ -83,10 +83,10 @@ export function SiteList({
             >
               <SiteThumb site={site} size="sm" />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-medium leading-tight text-ink">
+                <span className="block truncate text-sm font-medium leading-tight text-ink">
                   {site.name}
                 </span>
-                <span className="mt-1 flex items-center gap-1.5 truncate text-[11px] leading-none text-muted">
+                <span className="mt-1 flex items-center gap-1.5 truncate text-xs leading-none text-muted">
                   <span
                     className="inline-block h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-ink/10"
                     style={{ backgroundColor: TYPE_COLOR[site.type] }}

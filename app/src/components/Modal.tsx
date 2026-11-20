@@ -74,7 +74,7 @@ export function Modal({ open, onClose, title, children, className = '' }: ModalP
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
-          <h2 id={titleId} className="text-[15px] font-semibold tracking-tight text-ink">
+          <h2 id={titleId} className="text-base font-semibold tracking-tight text-ink">
             {title}
           </h2>
           <button
@@ -87,7 +87,7 @@ export function Modal({ open, onClose, title, children, className = '' }: ModalP
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="mt-3 text-[13px] leading-relaxed text-muted">{children}</div>
+        <div className="mt-3 text-sm leading-relaxed text-muted">{children}</div>
       </div>
     </div>
   );

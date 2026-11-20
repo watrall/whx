@@ -61,12 +61,12 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
       <span className="grid h-11 w-11 place-items-center rounded-full border border-line bg-canvas text-muted">
         <Info className="h-5 w-5" aria-hidden="true" />
       </span>
-      <h3 className="mt-3 text-[14px] font-semibold text-ink">Could not load sites</h3>
-      <p className="mt-1 max-w-[30ch] text-[12px] leading-relaxed text-muted">{message}</p>
+      <h3 className="mt-3 text-base font-semibold text-ink">Could not load sites</h3>
+      <p className="mt-1 max-w-[30ch] text-xs leading-relaxed text-muted">{message}</p>
       <button
         type="button"
         onClick={onRetry}
-        className="focus-ring mt-4 inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-line bg-surface px-3 text-[12px] font-medium text-ink transition hover:bg-canvas"
+        className="focus-ring mt-4 inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-line bg-surface px-3 text-xs font-medium text-ink transition hover:bg-canvas"
       >
         <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
         Try again
@@ -338,7 +338,7 @@ export default function App() {
       <select
         value={sort}
         onChange={(event) => setSort(event.target.value as SortKey)}
-        className="focus-ring h-7 appearance-none rounded-md border border-line bg-surface pl-2 pr-6 text-[11px] font-medium text-ink"
+        className="focus-ring h-7 appearance-none rounded-md border border-line bg-surface pl-2 pr-6 text-xs font-medium text-ink"
       >
         <option value="name">Name</option>
         <option value="year">Year</option>
@@ -390,7 +390,7 @@ export default function App() {
         }}
         placeholder="Search sites, countries, keywords"
         aria-label="Search sites, countries, keywords"
-        className="focus-ring h-10 w-full rounded-xl border border-line bg-canvas pl-9 pr-20 text-[13px] text-ink placeholder:text-muted/80"
+        className="focus-ring h-10 w-full rounded-xl border border-line bg-canvas pl-9 pr-20 text-sm text-ink placeholder:text-muted/80"
         spellCheck={false}
       />
       <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
@@ -423,11 +423,11 @@ export default function App() {
 
   const aboutModal = (
     <Modal open={aboutOpen} onClose={() => setAboutOpen(false)} title="About World Heritage Explorer">
-      <p className="text-[13px] leading-relaxed text-muted">
+      <p className="text-sm leading-relaxed text-muted">
         An independent, map-first explorer for UNESCO World Heritage Sites, built from open
         Wikidata. Browse by type, scrub the inscription timeline, and open a site for its story.
       </p>
-      <p className="mt-3 text-[13px] leading-relaxed text-muted">
+      <p className="mt-3 text-sm leading-relaxed text-muted">
         Data comes from Wikidata and the UNESCO World Heritage list. Basemap © OpenStreetMap
         contributors, © CARTO. Boundaries and labels are illustrative. Not affiliated with UNESCO;
         verify details on the official site.
@@ -437,7 +437,7 @@ export default function App() {
           href="https://www.wikidata.org/"
           target="_blank"
           rel="noreferrer"
-          className="focus-ring inline-flex h-8 items-center rounded-lg border border-line bg-surface px-3 text-[12px] font-medium text-ink transition hover:bg-canvas"
+          className="focus-ring inline-flex h-8 items-center rounded-lg border border-line bg-surface px-3 text-xs font-medium text-ink transition hover:bg-canvas"
         >
           Wikidata
         </a>
@@ -445,7 +445,7 @@ export default function App() {
           href="https://whc.unesco.org/"
           target="_blank"
           rel="noreferrer"
-          className="focus-ring inline-flex h-8 items-center rounded-lg border border-line bg-surface px-3 text-[12px] font-medium text-ink transition hover:bg-canvas"
+          className="focus-ring inline-flex h-8 items-center rounded-lg border border-line bg-surface px-3 text-xs font-medium text-ink transition hover:bg-canvas"
         >
           UNESCO
         </a>
@@ -453,16 +453,16 @@ export default function App() {
           href="https://github.com/watrall/wikidata-world-heritage"
           target="_blank"
           rel="noreferrer"
-          className="focus-ring inline-flex h-8 items-center rounded-lg border border-line bg-surface px-3 text-[12px] font-medium text-ink transition hover:bg-canvas"
+          className="focus-ring inline-flex h-8 items-center rounded-lg border border-line bg-surface px-3 text-xs font-medium text-ink transition hover:bg-canvas"
         >
           GitHub
         </a>
       </div>
       <div className="mt-5 border-t border-line pt-4">
-        <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink">
+        <h3 className="text-xs font-semibold uppercase tracking-[0.1em] text-ink">
           Keyboard shortcuts
         </h3>
-        <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-[12px] text-muted">
+        <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs text-muted">
           <dt className="flex items-center gap-1">
             <span className="kbd">⌘K</span>
             <span className="kbd">/</span>
@@ -536,14 +536,14 @@ export default function App() {
 
           <div className="px-4 pb-3">
             <div className="flex items-baseline justify-between gap-2">
-              <p className="text-[12px] text-muted">
+              <p className="text-xs text-muted">
                 <span className="font-semibold text-ink">{formatNumber(filtered.length)}</span>{' '}
                 sites · {formatNumber(countries)} countries
               </p>
               <button
                 type="button"
                 onClick={handleReset}
-                className="focus-ring inline-flex items-center gap-1 rounded-md text-[11px] font-medium text-muted transition hover:text-ink"
+                className="focus-ring inline-flex items-center gap-1 rounded-md text-xs font-medium text-muted transition hover:text-ink"
               >
                 <RotateCcw className="h-3 w-3" aria-hidden="true" />
                 Reset
@@ -553,11 +553,11 @@ export default function App() {
           </div>
 
           <div className="flex items-center justify-between gap-2 border-t border-line px-4 py-2">
-            <h2 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
               Sites in view
             </h2>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] tabular-nums text-muted">
+              <span className="text-xs tabular-nums text-muted">
                 {formatNumber(listSites.length)}
               </span>
               {sortSelect}
@@ -567,11 +567,11 @@ export default function App() {
           <div className="min-h-0 flex-1">{listBody}</div>
 
           <footer className="flex items-center justify-between gap-2 border-t border-line px-4 py-2.5">
-            <p className="text-[10px] text-muted">Data: Wikidata · UNESCO</p>
+            <p className="text-xs text-muted">Data: Wikidata · UNESCO</p>
             <button
               type="button"
               onClick={() => setAboutOpen(true)}
-              className="focus-ring text-[11px] font-medium text-muted transition hover:text-ink"
+              className="focus-ring text-xs font-medium text-muted transition hover:text-ink"
             >
               About
             </button>
@@ -600,12 +600,12 @@ export default function App() {
               />
             )}
             {loading && (
-              <div className="pointer-events-none absolute left-4 top-4 z-[500] rounded-full border border-line bg-surface/95 px-3 py-1.5 text-[11px] font-medium text-muted shadow-card backdrop-blur">
+              <div className="pointer-events-none absolute left-4 top-4 z-[500] rounded-full border border-line bg-surface/95 px-3 py-1.5 text-xs font-medium text-muted shadow-card backdrop-blur">
                 Loading sites from Wikidata…
               </div>
             )}
             {error && (
-              <div className="absolute left-4 top-4 z-[500] flex items-center gap-2 rounded-full border border-line bg-surface/95 px-3 py-1.5 text-[11px] text-muted shadow-card backdrop-blur">
+              <div className="absolute left-4 top-4 z-[500] flex items-center gap-2 rounded-full border border-line bg-surface/95 px-3 py-1.5 text-xs text-muted shadow-card backdrop-blur">
                 Data unavailable.
                 <button
                   type="button"
@@ -658,7 +658,7 @@ export default function App() {
             className="flex h-[52px] w-full items-center gap-2 rounded-2xl border border-line bg-surface/95 px-4 pr-12 text-left shadow-float backdrop-blur"
           >
             <Search className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
-            <span className="flex-1 truncate text-[14px] text-muted">
+            <span className="flex-1 truncate text-base text-muted">
               {query || 'Search sites, countries, keywords'}
             </span>
           </button>
@@ -694,10 +694,10 @@ export default function App() {
         header={
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="truncate text-[13px] font-semibold text-ink">
+              <p className="truncate text-sm font-semibold text-ink">
                 {formatNumber(filtered.length)} sites · {formatNumber(countries)} countries
               </p>
-              <p className="mt-0.5 text-[11px] text-muted">{formatRange(yearRange)}</p>
+              <p className="mt-0.5 text-xs text-muted">{formatRange(yearRange)}</p>
             </div>
             <div className="flex items-center gap-1">
               <button
@@ -742,11 +742,11 @@ export default function App() {
       >
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex items-center justify-between gap-2 border-t border-line px-4 py-2">
-            <h2 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
               Sites in view
             </h2>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] tabular-nums text-muted">
+              <span className="text-xs tabular-nums text-muted">
                 {formatNumber(listSites.length)}
               </span>
               {sortSelect}
@@ -765,12 +765,12 @@ export default function App() {
       )}
 
       {loading && (
-        <div className="pointer-events-none fixed left-4 top-[calc(env(safe-area-inset-top)+76px)] z-[450] rounded-full border border-line bg-surface/95 px-3 py-1.5 text-[11px] font-medium text-muted shadow-card backdrop-blur">
+        <div className="pointer-events-none fixed left-4 top-[calc(env(safe-area-inset-top)+76px)] z-[450] rounded-full border border-line bg-surface/95 px-3 py-1.5 text-xs font-medium text-muted shadow-card backdrop-blur">
           Loading sites…
         </div>
       )}
       {error && (
-        <div className="fixed left-4 top-[calc(env(safe-area-inset-top)+76px)] z-[450] flex items-center gap-2 rounded-full border border-line bg-surface/95 px-3 py-1.5 text-[11px] text-muted shadow-card backdrop-blur">
+        <div className="fixed left-4 top-[calc(env(safe-area-inset-top)+76px)] z-[450] flex items-center gap-2 rounded-full border border-line bg-surface/95 px-3 py-1.5 text-xs text-muted shadow-card backdrop-blur">
           Data unavailable.
           <button
             type="button"

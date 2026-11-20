@@ -109,7 +109,7 @@ export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailPro
 
       <div className="scroll-thin min-h-0 overflow-y-auto overscroll-contain p-4">
         <span
-          className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[10px] font-semibold leading-none"
+          className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-semibold leading-none"
           style={{
             backgroundColor: TYPE_TINT[site.type],
             color: TYPE_INK[site.type],
@@ -119,16 +119,16 @@ export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailPro
           {TYPE_LABEL[site.type]}
         </span>
 
-        <h2 className="mt-2 text-[17px] font-semibold leading-tight tracking-tight text-ink">
+        <h2 className="mt-2 text-lg font-semibold leading-tight tracking-tight text-ink">
           {site.name}
         </h2>
-        <p className="mt-1 text-[12px] text-muted">{siteMeta(site)}</p>
+        <p className="mt-1 text-xs text-muted">{siteMeta(site)}</p>
 
         {site.description && (
-          <p className="mt-3 text-[13px] leading-relaxed text-muted">{site.description}</p>
+          <p className="mt-3 text-sm leading-relaxed text-muted">{site.description}</p>
         )}
 
-        <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-[11px]">
+        <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-xs">
           <div>
             <dt className="text-muted">UNESCO ID</dt>
             <dd className="mt-0.5 font-medium text-ink">{site.unescoId ?? '—'}</dd>
@@ -153,7 +153,7 @@ export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailPro
               href={site.officialUrl}
               target="_blank"
               rel="noreferrer"
-              className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-ink px-3 text-[12px] font-semibold text-canvas transition hover:bg-ink/90"
+              className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-ink px-3 text-xs font-semibold text-canvas transition hover:bg-ink/90"
             >
               View on UNESCO
               <ExternalLink className="h-3.5 w-3.5" />
@@ -163,7 +163,7 @@ export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailPro
             href={`https://www.wikidata.org/wiki/${site.id}`}
             target="_blank"
             rel="noreferrer"
-            className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-[12px] font-medium text-ink transition hover:bg-canvas"
+            className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-medium text-ink transition hover:bg-canvas"
           >
             Wikidata
             <ExternalLink className="h-3.5 w-3.5" />

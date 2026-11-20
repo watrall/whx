@@ -286,7 +286,7 @@ export function Timeline({
     >
       <div className={`flex h-full items-center gap-2 ${compact ? 'px-3' : 'px-4'}`}>
         <span
-          className={`shrink-0 tabular-nums text-muted ${compact ? 'text-[10px]' : 'text-[11px] font-medium'}`}
+          className={`shrink-0 tabular-nums text-muted ${compact ? 'text-xs' : 'text-xs font-medium'}`}
         >
           {domain[0]}
         </span>
@@ -336,12 +336,12 @@ export function Timeline({
               style={{ left: `${hoverX}%` }}
               aria-hidden="true"
             >
-              <div className="text-[11px] font-semibold leading-none">{hoverYear}</div>
-              <div className="mt-1 text-[10px] leading-none text-canvas/70">
+              <div className="text-xs font-semibold leading-none">{hoverYear}</div>
+              <div className="mt-1 text-xs leading-none text-canvas/70">
                 {formatNumber(hoverTotal)} sites
               </div>
               {hoverCounts && (
-                <div className="mt-1.5 flex items-center gap-2 text-[10px] leading-none">
+                <div className="mt-1.5 flex items-center gap-2 text-xs leading-none">
                   {TYPE_ORDER.map((type) =>
                     hoverCounts[type] > 0 ? (
                       <span key={type} className="inline-flex items-center gap-1 text-canvas/80">
@@ -359,15 +359,15 @@ export function Timeline({
           )}
         </div>
         <span
-          className={`shrink-0 tabular-nums text-muted ${compact ? 'text-[10px]' : 'text-[11px] font-medium'}`}
+          className={`shrink-0 tabular-nums text-muted ${compact ? 'text-xs' : 'text-xs font-medium'}`}
         >
           {domain[1]}
         </span>
         {!compact && (
           <div className="ml-1 flex shrink-0 items-center gap-2">
             <div className="text-right">
-              <div className="text-[10px] leading-none text-muted">{formatRange(value)}</div>
-              <div className="mt-1 text-[11px] font-semibold leading-none text-ink">
+              <div className="text-xs leading-none text-muted">{formatRange(value)}</div>
+              <div className="mt-1 text-xs font-semibold leading-none text-ink">
                 {formatNumber(count)} sites
               </div>
             </div>

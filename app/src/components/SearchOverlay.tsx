@@ -167,7 +167,7 @@ export function SearchOverlay({
             onKeyDown={handleInputKeyDown}
             autoComplete="off"
             spellCheck={false}
-            className="min-w-0 flex-1 bg-transparent text-[15px] text-ink placeholder:text-muted/70 focus:outline-none"
+            className="min-w-0 flex-1 bg-transparent text-base text-ink placeholder:text-muted/70 focus:outline-none"
           />
           {query && (
             <button
@@ -186,7 +186,7 @@ export function SearchOverlay({
             type="button"
             onClick={onClose}
             aria-label="Close search"
-            className="focus-ring inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-2 text-[12px] font-medium text-muted transition hover:bg-canvas hover:text-ink"
+            className="focus-ring inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-muted transition hover:bg-canvas hover:text-ink"
           >
             {mobile ? 'Cancel' : <X className="h-4 w-4" />}
           </button>
@@ -196,13 +196,13 @@ export function SearchOverlay({
           {query === '' && recent.length > 0 && (
             <div className="border-b border-line px-4 py-3">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
+                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
                   Recent searches
                 </p>
                 <button
                   type="button"
                   onClick={onClearRecent}
-                  className="focus-ring text-[11px] font-medium text-muted transition hover:text-ink"
+                  className="focus-ring text-xs font-medium text-muted transition hover:text-ink"
                 >
                   Clear
                 </button>
@@ -216,7 +216,7 @@ export function SearchOverlay({
                       onQueryChange(term);
                       inputRef.current?.focus();
                     }}
-                    className="focus-ring inline-flex h-8 items-center rounded-full border border-line bg-canvas px-3 text-[12px] text-ink transition hover:border-ink/20 hover:bg-surface"
+                    className="focus-ring inline-flex h-8 items-center rounded-full border border-line bg-canvas px-3 text-xs text-ink transition hover:border-ink/20 hover:bg-surface"
                   >
                     {term}
                   </button>
@@ -228,11 +228,11 @@ export function SearchOverlay({
           {results.length > 0 ? (
             <div id="search-results" role="listbox" aria-label="Search results">
               <div className="flex items-center justify-between px-4 pt-3 pb-1">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
+                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
                   {formatNumber(sites.length)} {sites.length === 1 ? 'site' : 'sites'}
                 </p>
                 {sites.length > results.length && (
-                  <p className="text-[10px] text-muted">Showing first {results.length}</p>
+                  <p className="text-xs text-muted">Showing first {results.length}</p>
                 )}
               </div>
               {results.map((site, index) => {
@@ -256,10 +256,10 @@ export function SearchOverlay({
                   >
                     <SiteThumb site={site} size="sm" />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] font-medium leading-tight text-ink">
+                      <span className="block truncate text-sm font-medium leading-tight text-ink">
                         {site.name}
                       </span>
-                      <span className="mt-1 block truncate text-[11px] leading-none text-muted">
+                      <span className="mt-1 block truncate text-xs leading-none text-muted">
                         {siteMeta(site)}
                       </span>
                     </span>
@@ -273,8 +273,8 @@ export function SearchOverlay({
               <span className="grid h-10 w-10 place-items-center rounded-full border border-line bg-canvas text-muted">
                 <Search className="h-4 w-4" aria-hidden="true" />
               </span>
-              <p className="mt-3 text-[13px] font-medium text-ink">No sites match</p>
-              <p className="mt-1 max-w-[28ch] text-[12px] leading-relaxed text-muted">
+              <p className="mt-3 text-sm font-medium text-ink">No sites match</p>
+              <p className="mt-1 max-w-[28ch] text-xs leading-relaxed text-muted">
                 Try a country, a site name, or a broader keyword.
               </p>
               {query && (
@@ -284,7 +284,7 @@ export function SearchOverlay({
                     onQueryChange('');
                     inputRef.current?.focus();
                   }}
-                  className="focus-ring mt-3 inline-flex min-h-9 items-center rounded-lg border border-line bg-surface px-3 text-[12px] font-medium text-ink transition hover:bg-canvas"
+                  className="focus-ring mt-3 inline-flex min-h-9 items-center rounded-lg border border-line bg-surface px-3 text-xs font-medium text-ink transition hover:bg-canvas"
                 >
                   Clear search
                 </button>
@@ -294,7 +294,7 @@ export function SearchOverlay({
         </div>
 
         {!mobile && (
-          <div className="flex shrink-0 items-center justify-between border-t border-line px-4 py-2 text-[10px] text-muted">
+          <div className="flex shrink-0 items-center justify-between border-t border-line px-4 py-2 text-xs text-muted">
             <span>↑↓ to navigate · ↵ to select · Esc to close</span>
             <span className="hidden sm:inline">Search runs across all sites</span>
           </div>

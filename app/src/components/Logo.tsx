@@ -7,8 +7,8 @@ export function Logo({ className = '' }: { className?: string }) {
         <Globe2 className="h-[18px] w-[18px]" strokeWidth={1.8} aria-hidden="true" />
       </span>
       <span className="leading-tight">
-        <span className="block text-[15px] font-semibold tracking-tight text-ink">World Heritage</span>
-        <span className="block text-[11px] font-medium tracking-[0.14em] text-muted">EXPLORER</span>
+        <span className="block text-base font-semibold tracking-tight text-ink">World Heritage</span>
+        <span className="block text-xs font-medium tracking-[0.14em] text-muted">EXPLORER</span>
       </span>
     </div>
   );

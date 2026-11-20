@@ -1,6 +1,6 @@
 export function Attribution({ className = '' }: { className?: string }) {
   return (
-    <p className={`text-[10px] leading-none text-muted ${className}`}>
+    <p className={`text-xs leading-none text-muted ${className}`}>
       ©{' '}
       <a
         href="https://www.openstreetmap.org/copyright"
