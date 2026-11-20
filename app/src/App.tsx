@@ -297,7 +297,20 @@ export default function App() {
 
   const fitKey = `${debouncedQuery}|${Array.from(types).sort().join(',')}`;
 
+  // Changing a filter refits the map to the results, so a card left open would
+  // sit over a view that no longer matches it. Close it.
+  const handleQueryChange = useCallback((value: string) => {
+    setQuery(value);
+    setSelectedSite(null);
+  }, []);
+
+  const handleClearTypes = useCallback(() => {
+    setTypes(new Set());
+    setSelectedSite(null);
+  }, []);
+
   const handleToggleType = useCallback((type: SiteType) => {
+    setSelectedSite(null);
     setTypes((prev) => {
       const next = new Set(prev);
       if (next.has(type)) next.delete(type);
@@ -504,9 +517,9 @@ export default function App() {
         ref={searchRef}
         type="search"
         value={query}
-        onChange={(event) => setQuery(event.target.value)}
+        onChange={(event) => handleQueryChange(event.target.value)}
         onKeyDown={(event) => {
-          if (event.key === 'Escape') setQuery('');
+          if (event.key === 'Escape') handleQueryChange('');
         }}
         placeholder="Search sites or countries"
         aria-label="Search sites or countries"
@@ -517,7 +530,7 @@ export default function App() {
         {query ? (
           <button
             type="button"
-            onClick={() => setQuery('')}
+            onClick={() => handleQueryChange('')}
             aria-label="Clear search"
             className="focus-ring grid h-7 w-7 place-items-center rounded-md text-muted transition hover:bg-surface hover:text-ink"
           >
@@ -536,7 +549,7 @@ export default function App() {
       counts={typeCounts}
       total={typeTotal}
       onToggle={handleToggleType}
-      onClear={() => setTypes(new Set())}
+      onClear={handleClearTypes}
       variant={isDesktop ? 'desktop' : 'mobile'}
     />
   );
@@ -616,7 +629,7 @@ export default function App() {
       open={searchOpen}
       onClose={() => setSearchOpen(false)}
       query={query}
-      onQueryChange={setQuery}
+      onQueryChange={handleQueryChange}
       sites={filtered}
       selectedId={selectedSite?.id ?? null}
       onSelect={handleSelect}
@@ -796,7 +809,7 @@ export default function App() {
           {query && (
             <button
               type="button"
-              onClick={() => setQuery('')}
+              onClick={() => handleQueryChange('')}
               aria-label="Clear search"
               className="focus-ring absolute right-1 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full text-muted"
             >
