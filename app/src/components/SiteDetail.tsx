@@ -123,7 +123,7 @@ export function SiteDetail({
       className={`animate-fade-up flex flex-col overflow-hidden border border-line bg-surface shadow-float ${
         mobile
           ? 'fixed inset-x-4 bottom-[calc(16px+env(safe-area-inset-bottom))] z-[1100] max-h-[62dvh] rounded-2xl'
-          : 'absolute right-6 top-6 z-[600] max-h-[calc(100%-3rem)] w-[400px] rounded-2xl'
+          : 'absolute right-6 top-[4.5rem] z-[600] max-h-[calc(100%-6rem)] w-[400px] rounded-2xl'
       }`}
       style={
         mobile
@@ -150,7 +150,9 @@ export function SiteDetail({
       )}
 
       <div
-        className={`relative w-full shrink-0 overflow-hidden bg-sunken ${mobile ? 'aspect-[16/9]' : 'aspect-[4/3]'}`}
+        className={`relative w-full shrink-0 overflow-hidden bg-sunken ${
+          mobile ? 'aspect-[16/9]' : 'aspect-[4/3] [@media(max-height:820px)]:aspect-[16/9]'
+        }`}
       >
         <SiteImage
           site={site}

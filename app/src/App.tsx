@@ -4,9 +4,11 @@ import {
   Check,
   ChevronDown,
   Info,
+  LocateFixed,
   RotateCcw,
   Search,
   Share2,
+  Shuffle,
   TriangleAlert,
   X,
 } from 'lucide-react';
@@ -15,9 +17,11 @@ import { CountryChip } from './components/CountryChip.tsx';
 import { CriteriaFilter } from './components/CriteriaFilter.tsx';
 import { DiscoverActions } from './components/DiscoverActions.tsx';
 import { ExportMenu } from './components/ExportMenu.tsx';
+import { FiltersMenu } from './components/FiltersMenu.tsx';
+import { MapStrip } from './components/MapStrip.tsx';
 import { EmptyState } from './components/EmptyState.tsx';
 import { FilterChip } from './components/FilterChip.tsx';
-import { SharedListBanner } from './components/SharedListBanner.tsx';
+import { SharedListBanner, SharedListChip } from './components/SharedListBanner.tsx';
 import { Logo } from './components/Logo.tsx';
 import { MapView, type MapViewHandle } from './components/MapView.tsx';
 import { MobileSheet, type SheetSnap } from './components/MobileSheet.tsx';
@@ -592,40 +596,6 @@ export default function App() {
     />
   );
 
-  const searchField = (
-    <div className="relative">
-      <Search
-        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
-        aria-hidden="true"
-      />
-      <input
-        ref={searchRef}
-        type="search"
-        value={query}
-        onChange={(event) => handleQueryChange(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === 'Escape') handleQueryChange('');
-        }}
-        placeholder="Search sites or countries"
-        aria-label="Search sites or countries"
-        className="focus-ring h-10 w-full rounded-xl border border-line bg-canvas pl-9 pr-10 text-sm text-ink placeholder:text-muted/80"
-        spellCheck={false}
-      />
-      <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
-        {query ? (
-          <button
-            type="button"
-            onClick={() => handleQueryChange('')}
-            aria-label="Clear search"
-            className="focus-ring grid h-7 w-7 place-items-center rounded-md text-muted transition hover:bg-surface hover:text-ink"
-          >
-            <X className="h-3.5 w-3.5" aria-hidden="true" />
-          </button>
-        ) : null}
-      </div>
-    </div>
-  );
-
   const handleToggleDanger = useCallback(() => {
     setSelectedSite(null);
     setExtra((prev) => ({ ...prev, danger: !prev.danger }));
@@ -667,13 +637,14 @@ export default function App() {
     setExtra((prev) => ({ ...prev, criteria: new Set() }));
   }, []);
 
-  const criteriaFilter = (layout: 'popover' | 'inline') => (
+  const criteriaFilter = (layout: 'popover' | 'inline', size: 'rail' | 'strip' = 'rail') => (
     <CriteriaFilter
       selected={extra.criteria}
       counts={criteriaCounts}
       onToggle={handleToggleCriterion}
       onClear={handleClearCriteria}
       layout={layout}
+      size={size}
     />
   );
 
@@ -724,26 +695,26 @@ export default function App() {
       </button>
     ) : null;
 
-  const dangerChip = (
+  const dangerChipFor = (variant: 'desktop' | 'mobile' | 'strip') => (
     <FilterChip
       label="In danger"
-      icon={<TriangleAlert className={isDesktop ? 'h-3.5 w-3.5' : 'h-4 w-4'} aria-hidden="true" />}
+      icon={<TriangleAlert className={variant === 'mobile' ? 'h-4 w-4' : 'h-3.5 w-3.5'} aria-hidden="true" />}
       count={dangerCount}
       active={extra.danger}
       onClick={handleToggleDanger}
-      variant={isDesktop ? 'desktop' : 'mobile'}
+      variant={variant}
       tone="danger"
     />
   );
 
-  const savedChip = (
+  const savedChipFor = (variant: 'desktop' | 'mobile' | 'strip') => (
     <FilterChip
       label="Saved"
-      icon={<Bookmark className={isDesktop ? 'h-3.5 w-3.5' : 'h-4 w-4'} aria-hidden="true" />}
+      icon={<Bookmark className={variant === 'mobile' ? 'h-4 w-4' : 'h-3.5 w-3.5'} aria-hidden="true" />}
       count={saved.size}
       active={extra.savedOnly}
       onClick={handleToggleSavedOnly}
-      variant={isDesktop ? 'desktop' : 'mobile'}
+      variant={variant}
     />
   );
 
@@ -754,14 +725,106 @@ export default function App() {
       total={typeTotal}
       onToggle={handleToggleType}
       onClear={handleClearTypes}
-      variant={isDesktop ? 'desktop' : 'mobile'}
+      variant="mobile"
       extras={
         <>
-          {dangerChip}
-          {savedChip}
+          {dangerChipFor('mobile')}
+          {savedChipFor('mobile')}
         </>
       }
     />
+  );
+
+  // Desktop strip pieces. The tier (wide, medium, compact) comes from the strip's own width.
+  const stripTypes = (compact: boolean) => (
+    <TypeFilter
+      types={types}
+      counts={typeCounts}
+      total={typeTotal}
+      onToggle={handleToggleType}
+      onClear={handleClearTypes}
+      variant="strip"
+      compact={compact}
+    />
+  );
+
+  const stripFilters = (wide: boolean) =>
+    wide ? (
+      <>
+        {dangerChipFor('strip')}
+        {savedChipFor('strip')}
+        {criteriaFilter('popover', 'strip')}
+      </>
+    ) : (
+      <>
+        {dangerChipFor('strip')}
+        <FiltersMenu activeCount={(extra.savedOnly ? 1 : 0) + extra.criteria.size}>
+          {savedChipFor('desktop')}
+          {criteriaFilter('inline')}
+        </FiltersMenu>
+      </>
+    );
+
+  const stripExtras =
+    extra.country || extra.listIds || (extra.savedOnly && saved.size > 0) ? (
+      <>
+        {countryChip}
+        {extra.listIds && (
+          <SharedListChip
+            count={extra.listIds.size}
+            unsaved={sharedUnsaved}
+            onSaveAll={() => extra.listIds && saveMany(extra.listIds)}
+            onShowAll={() => {
+              setSelectedSite(null);
+              setExtra((prev) => ({ ...prev, listIds: null }));
+            }}
+          />
+        )}
+        {extra.savedOnly && saved.size > 0 && (
+          <button
+            type="button"
+            onClick={handleShareSaved}
+            className="focus-ring inline-flex h-10 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-xs font-medium text-ink shadow-card transition hover:bg-canvas"
+          >
+            {shareCopied ? (
+              <Check className="h-3.5 w-3.5" aria-hidden="true" />
+            ) : (
+              <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
+            )}
+            {shareCopied ? 'Link copied' : 'Share list'}
+          </button>
+        )}
+      </>
+    ) : null;
+
+  // Locate and shuffle join the zoom controls, using the same button style.
+  const mapActionControls = (
+    <>
+      <button
+        type="button"
+        onClick={handleNearMe}
+        aria-label="Near me"
+        title="Near me"
+        className="focus-ring grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95"
+      >
+        <LocateFixed className="h-4 w-4" aria-hidden="true" />
+      </button>
+      <button
+        type="button"
+        onClick={handleSurprise}
+        aria-label="Surprise me"
+        title="Surprise me"
+        className="focus-ring grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95"
+      >
+        <Shuffle className="h-4 w-4" aria-hidden="true" />
+      </button>
+      <p
+        role="status"
+        className="absolute bottom-0 left-12 w-max max-w-[240px] rounded-lg border border-line bg-surface px-3 py-2 text-xs text-muted shadow-card empty:hidden"
+      >
+        {discoverNotice ?? ''}
+      </p>
+    </>
   );
 
   const aboutModal = (
@@ -867,55 +930,23 @@ export default function App() {
             </div>
           </header>
 
-          <div className="px-4 pb-3">{searchField}</div>
-
-          <DiscoverActions
-            className="px-4 pb-1"
-            onSurprise={handleSurprise}
-            onNearMe={handleNearMe}
-            notice={discoverNotice}
-          />
-
-          <div className="px-4 pb-3">
-            <div className="flex items-baseline justify-between gap-2">
-              <p className="text-xs text-muted">
-                <span className="font-semibold text-ink">{formatNumber(filtered.length)}</span>{' '}
-                {filtered.length === 1 ? 'site' : 'sites'} · {pluralize(countries, 'country', 'countries')}
-              </p>
-              <div className="flex items-center gap-3">
-                {shareButtonFor(false)}
-                {isFiltered && (
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    className="focus-ring inline-flex items-center gap-1 rounded-md text-xs font-medium text-muted transition hover:text-ink"
-                  >
-                    <RotateCcw className="h-3 w-3" aria-hidden="true" />
-                    Reset
-                  </button>
-                )}
+          <div className="border-t border-line px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
+                Sites in view
+              </h2>
+              <div className="flex shrink-0 items-center gap-2">
+                {sortSelect}
+                <ExportMenu count={sortedFiltered.length} onExport={handleExport} touch={false} />
               </div>
             </div>
-            {countryChip && <div className="mt-3">{countryChip}</div>}
-            {sharedBanner && <div className="mt-3">{sharedBanner}</div>}
-            <div className="mt-3">{typeFilter}</div>
-            <div className="mt-2">{criteriaFilter('popover')}</div>
+            <p className="mt-1 text-xs text-muted">
+              <span className="font-semibold text-ink">{formatNumber(listCount)}</span> in view of{' '}
+              {pluralize(filtered.length, 'site')} · {pluralize(countries, 'country', 'countries')}
+            </p>
           </div>
 
-          <div className="flex items-center justify-between gap-2 border-t border-line px-4 py-2">
-            <h2 className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
-              Sites in view
-            </h2>
-            <div className="flex items-center gap-2">
-              <span className="text-xs tabular-nums text-muted">
-                {formatNumber(listCount)}
-              </span>
-              {sortSelect}
-              <ExportMenu count={sortedFiltered.length} onExport={handleExport} touch={!isDesktop} />
-            </div>
-          </div>
-
-          <div className="min-h-0 flex-1">{listBody}</div>
+          <div className="min-h-0 flex-1 border-t border-line">{listBody}</div>
 
           <footer className="flex items-center justify-between gap-2 border-t border-line px-4 py-2.5">
             <p className="text-xs text-muted">Data: Wikidata · UNESCO</p>
@@ -924,6 +955,16 @@ export default function App() {
 
         <main className="relative flex min-w-0 flex-1 flex-col">
           <div className="relative min-h-0 flex-1">
+            <MapStrip
+              query={query}
+              onQueryChange={handleQueryChange}
+              searchRef={searchRef}
+              renderTypes={stripTypes}
+              renderFilters={stripFilters}
+              extras={stripExtras}
+              isFiltered={isFiltered}
+              onReset={handleReset}
+            />
             <MapView
               ref={mapRef}
               sites={filtered}
@@ -936,6 +977,7 @@ export default function App() {
               onMapClick={() => setSelectedSite(null)}
               controlsBottomClass="bottom-28"
               controlsSideClass="left-4"
+              extraControls={mapActionControls}
               initialFocus={initialFocus}
               rippleYear={playing ? playYear : null}
             />
@@ -944,7 +986,7 @@ export default function App() {
               <PlaybackReadout
                 year={playYear}
                 added={addedInYear}
-                className="absolute left-1/2 top-4 z-[500] -translate-x-1/2"
+                className="absolute left-1/2 top-[4.5rem] z-[500] -translate-x-1/2"
               />
             )}
             {selectedSite && (
@@ -963,12 +1005,12 @@ export default function App() {
               />
             )}
             {loading && (
-              <div className="pointer-events-none absolute left-4 top-4 z-[500] rounded-full border border-line bg-surface/95 px-3 py-1.5 text-xs font-medium text-muted shadow-card backdrop-blur">
+              <div className="pointer-events-none absolute left-4 top-[4.5rem] z-[500] rounded-full border border-line bg-surface/95 px-3 py-1.5 text-xs font-medium text-muted shadow-card backdrop-blur">
                 Loading sites from Wikidata…
               </div>
             )}
             {error && (
-              <div className="absolute left-4 top-4 z-[500] flex items-center gap-2 rounded-full border border-line bg-surface/95 px-3 py-1.5 text-xs text-muted shadow-card backdrop-blur">
+              <div className="absolute left-4 top-[4.5rem] z-[500] flex items-center gap-2 rounded-full border border-line bg-surface/95 px-3 py-1.5 text-xs text-muted shadow-card backdrop-blur">
                 Data unavailable.
                 <button
                   type="button"
