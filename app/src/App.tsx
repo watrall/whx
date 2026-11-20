@@ -39,7 +39,7 @@ import { useMediaQuery } from './lib/useMediaQuery.ts';
 import { useRecentSearches } from './lib/useRecentSearches.ts';
 import { useSavedSites } from './lib/useSavedSites.ts';
 import { downloadText, toCsv, toGeoJson } from './lib/export.ts';
-import { distanceKm, formatDistance, nearestSites } from './lib/geo.ts';
+import { distanceKm, formatDistance, nearbyOrNearest } from './lib/geo.ts';
 import { NO_EXTRA, hasExtraFilters, matchesExtra, shareListUrl } from './lib/filters.ts';
 import type { ExtraFilters } from './lib/filters.ts';
 import { buildUrlHash, parseUrlState } from './lib/urlState.ts';
@@ -348,7 +348,7 @@ export default function App() {
   );
   // Nearby uses the current results, so every suggestion has a marker on the map.
   const nearby = useMemo(
-    () => (selectedSite ? nearestSites(selectedSite, filtered, 3) : []),
+    () => (selectedSite ? nearbyOrNearest(selectedSite, filtered, 3) : null),
     [selectedSite, filtered],
   );
   const detailPosition =
@@ -995,7 +995,8 @@ export default function App() {
                 variant="desktop"
                 position={detailPosition}
                 onStep={handleStep}
-                nearby={nearby}
+                nearby={nearby?.items}
+                nearbyMode={nearby?.mode}
                 onSelectNearby={handleSelect}
                 saved={saved.has(selectedSite.id)}
                 onToggleSaved={() => toggleSaved(selectedSite.id)}
@@ -1179,7 +1180,8 @@ export default function App() {
           variant="mobile"
           position={detailPosition}
           onStep={handleStep}
-          nearby={nearby}
+          nearby={nearby?.items}
+          nearbyMode={nearby?.mode}
           onSelectNearby={handleSelect}
           saved={saved.has(selectedSite.id)}
           onToggleSaved={() => toggleSaved(selectedSite.id)}

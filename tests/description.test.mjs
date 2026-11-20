@@ -60,3 +60,21 @@ test('formatDistance picks sensible precision and units', () => {
   assert.equal(formatDistance(1234, false), '1,234 km');
   assert.equal(formatDistance(100, true), '62 mi');
 });
+
+import { NEARBY_KM, nearbyOrNearest } from '../app/src/lib/geo.ts';
+
+test('nearbyOrNearest keeps only sites within day-trip distance', () => {
+  const mk = (id, lon) => ({ id, lat: 0, lon });
+  // 1 degree of longitude at the equator is about 111 km.
+  const out = nearbyOrNearest(mk('a', 0), [mk('a', 0), mk('close', 1), mk('mid', 2), mk('far', 40)], 3);
+  assert.equal(out.mode, 'nearby');
+  assert.deepEqual(out.items.map((x) => x.site.id), ['close', 'mid']);
+  assert.ok(out.items.every((x) => x.km <= NEARBY_KM));
+});
+
+test('nearbyOrNearest falls back to the nearest sites when none are close', () => {
+  const mk = (id, lon) => ({ id, lat: 0, lon });
+  const out = nearbyOrNearest(mk('island', 0), [mk('island', 0), mk('x', 30), mk('y', 60), mk('z', 90), mk('w', 120)], 3);
+  assert.equal(out.mode, 'nearest');
+  assert.deepEqual(out.items.map((x) => x.site.id), ['x', 'y', 'z']);
+});

@@ -33,6 +33,27 @@ export function nearestSites(origin: Site, candidates: Site[], limit = 3): Nearb
     .slice(0, limit);
 }
 
+/** Beyond this distance a site is not "nearby" in any useful sense (about a day trip). */
+export const NEARBY_KM = 300;
+
+export interface NearbyResult {
+  /** "nearby" when something is within reach; "nearest" when the closest sites are far away. */
+  mode: 'nearby' | 'nearest';
+  items: NearbySite[];
+}
+
+/**
+ * Up to three sites within day-trip distance. If none are, the three nearest
+ * overall, labelled as such, so remote sites do not claim a neighbour that is
+ * thousands of kilometres away.
+ */
+export function nearbyOrNearest(origin: Site, candidates: Site[], limit = 3): NearbyResult {
+  const ranked = nearestSites(origin, candidates, limit);
+  const within = ranked.filter((item) => item.km <= NEARBY_KM);
+  if (within.length > 0) return { mode: 'nearby', items: within };
+  return { mode: 'nearest', items: ranked };
+}
+
 const USES_MILES = typeof navigator !== 'undefined' && /^en-(US|GB)\b/.test(navigator.language);
 
 /** "12 km" or "7 mi", with a floor so very close sites do not read as "0". */
