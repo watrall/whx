@@ -119,7 +119,7 @@ export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailPro
           {TYPE_LABEL[site.type]}
         </span>
 
-        <h2 className="mt-2 text-lg font-semibold leading-tight tracking-tight text-ink">
+        <h2 className="mt-2 font-serif text-xl font-medium leading-tight text-ink">
           {site.name}
         </h2>
         <p className="mt-1 text-xs text-muted">{siteMeta(site)}</p>
