@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Refreshes data/sites.json from Wikidata.
+ * Refreshes data/sites.json from Wikidata, then rebuilds data/photos.json from it.
  *
  * The SPARQL query is read from scripts.js so there is a single source of
  * truth. Run manually with `node scripts/update-data.mjs`; the GitHub Action
@@ -8,6 +8,7 @@
  */
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
+import { writePhotos } from './build-photos.mjs';
 
 const ENDPOINT = 'https://query.wikidata.org/sparql';
 const SOURCE = 'scripts.js';
@@ -56,6 +57,7 @@ async function main() {
   await mkdir(dirname(OUTPUT), { recursive: true });
   await writeFile(OUTPUT, JSON.stringify(data), 'utf8');
   console.log(`Wrote ${bindings.length} bindings to ${OUTPUT}`);
+  await writePhotos(OUTPUT);
 }
 
 main().catch((error) => {
