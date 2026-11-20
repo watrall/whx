@@ -69,19 +69,23 @@ export function SiteList({
               onBlur={() => onHover(null)}
               aria-current={selected ? 'true' : undefined}
               aria-label={`${site.name}, ${siteMeta(site)}`}
-              className={`focus-ring absolute left-0 top-0 flex w-full items-center gap-3 border-l-2 border-b border-line/60 px-4 text-left transition-colors ${
+              className={`focus-ring absolute left-0 top-0 flex w-full items-center gap-3 border-b border-line/60 px-4 text-left transition-colors ${
                 selected
-                  ? 'border-l-ink bg-ink/5'
+                  ? 'bg-sunken'
                   : highlighted
-                    ? 'border-l-transparent bg-canvas'
-                    : 'border-l-transparent bg-surface hover:bg-canvas'
+                    ? 'bg-canvas'
+                    : 'bg-surface hover:bg-canvas'
               }`}
               style={{
                 height: item.size,
                 transform: `translateY(${item.start}px)`,
               }}
             >
-              <SiteThumb site={site} size="sm" />
+              <SiteThumb
+                site={site}
+                size="sm"
+                className={selected ? 'ring-2 ring-ink ring-offset-2 ring-offset-sunken' : ''}
+              />
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-serif text-base font-medium leading-tight text-ink">
                   {site.name}
