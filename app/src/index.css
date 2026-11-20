@@ -89,7 +89,7 @@ input {
 
 /* Leaflet baseline */
 .leaflet-container {
-  background: oklch(var(--paper-sunken));
+  background: oklch(0.87 0.008 215);
   font-family: inherit;
   outline: none;
 }
