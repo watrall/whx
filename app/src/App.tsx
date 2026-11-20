@@ -629,7 +629,7 @@ export default function App() {
   if (isDesktop) {
     return (
       <div className="flex h-dvh min-h-0 bg-canvas text-ink">
-        <aside className="flex w-[340px] shrink-0 flex-col border-r border-line bg-surface">
+        <aside className="flex w-[384px] shrink-0 flex-col border-r border-line bg-surface">
           <header className="flex items-center justify-between gap-3 px-4 pb-3 pt-4">
             <Logo />
             <div className="flex items-center gap-1">
@@ -637,7 +637,7 @@ export default function App() {
                 type="button"
                 onClick={() => setAboutOpen(true)}
                 aria-label="About this project"
-                className="focus-ring grid h-8 w-8 place-items-center rounded-lg text-muted transition hover:bg-canvas hover:text-ink"
+                className="focus-ring grid h-8 w-8 shrink-0 place-items-center rounded-lg text-muted transition hover:bg-canvas hover:text-ink"
               >
                 <Info className="h-4 w-4" aria-hidden="true" />
               </button>
