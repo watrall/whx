@@ -1,138 +1,63 @@
 # World Heritage Explorer
 
-A map-first explorer for UNESCO World Heritage Sites, sourced from Wikidata. Browse by type, scrub the inscription timeline, and open a site for its story.
+An independent, map-first explorer for UNESCO World Heritage Sites. It puts every property on one map and lets you explore them by place, type, theme and time, instead of paging through a list. It is not affiliated with UNESCO, and every site links back to its official UNESCO page.
+
+It runs entirely in the browser from static files. There are no accounts and no server.
 
 ## Features
 
-- **1,265 unique sites** across 173 countries, plotted from Wikidata's `P1435` (heritage designation) and `P757` (UNESCO ID) properties.
-- **Clustered map** with hover sync between markers and the site list.
-- **Type filters** for cultural, natural, and mixed sites.
-- **Inscription timeline** with drag handles and playback.
-- **Search** by site name, country, or keyword (accent-insensitive).
-- **Sites in view** filtering as you pan and zoom the map.
-- **Detail panel** with a Wikimedia Commons image, description, UNESCO ID, criteria, and official links.
-- **Responsive layout**: desktop rail + map, mobile full-bleed map with a bottom sheet.
-- **Keyboard shortcuts**: `/` search, `1`–`3` type filters, `Space` playback, `?` help.
-- **Precomputed dataset** (`data/sites.json`) refreshed nightly by GitHub Actions.
+**Explore the map**
+- Every site on one map, with pins by type (cultural, natural, mixed) and clusters whose coloured ring shows what mix of types they contain.
+- Search by site name or country.
+- Filters that combine: type, In danger, Saved, selection criterion, and country. The counts on each filter update live to show what turning it on would give.
+- An inscription timeline: drag the handles to a range of years, or press play to watch the List grow year by year, with a ripple on each new site.
+- Near me flies the map to where you are. Surprise me opens a random site, preferring ones with a photo.
 
-## Running locally
+**Learn about a site**
+- UNESCO's own description, with credit.
+- The selection criteria in plain language, for example "Ideas and beliefs" instead of "(vi)".
+- Every country a transboundary site spans, each one a filter.
+- For sites on the List of World Heritage in Danger: a red flag, the year they were listed, and a short reason.
+- A photo with its credit, and a "New" badge on recent inscriptions.
+- The nearest sites, with distances. Where nothing is within a day trip, it says "Nearest sites" instead.
+- Directions in the device's maps app, and a link to the official UNESCO page.
 
-```sh
-npm install
-npm run dev
-```
+**Keep and share**
+- Save sites, filter to them, and share the list as a link.
+- Every view has its own link, covering the open site, search, filters and year range.
+- Export what you are looking at as CSV or GeoJSON.
+- The list can follow the map ("In view") or show every match ("All sites"), sorted by name, year, country or, after Near me, distance.
 
-Open <http://localhost:5173>. The dev server serves `data/sites.json` from the repository root.
+**On any device**
+- A phone layout with a search pill, a bottom sheet and large touch targets, separate from the desktop layout.
+- Keyboard shortcuts, screen-reader labels, visible focus, reduced-motion support, and colour contrast checked by automated tests.
 
-### Production build
+## Data
 
-```sh
-npm run build
-npm run preview
-```
+All of the data is public. The app combines five sources, and a few things it works out itself.
 
-The build outputs `app/dist`. The GitHub Pages base path defaults to `/wikidata-world-heritage/`; override it with `VITE_BASE` when building for another path.
+### Where it comes from
 
-### Tests
+| Source | What the app takes from it | How it is refreshed | Licence |
+|---|---|---|---|
+| **Wikidata** | The list of World Heritage Sites, each with its UNESCO ID, coordinates, photo, selection criteria, a one-line description, and a country and year as fallbacks | Re-queried every night | CC0 |
+| **UNESCO World Heritage Centre**, XML export | The official site name, every country, the year of inscription, whether the site is in danger, and UNESCO's short description of the site | Imported by hand from UNESCO's syndication page | Descriptions: CC BY-SA 3.0 IGO |
+| **Wikipedia**, "List of World Heritage in Danger" | A short reason, and the year listed, for sites that UNESCO flags as in danger | Imported by hand | CC BY-SA 4.0 |
+| **Wikimedia Commons** | The photographs. Each one is requested at the size it is shown, and credited with a link to its Commons page, where the author and licence are given | Fetched live from Commons | Set per photo |
+| **OpenStreetMap** | The basemap tiles, softened so the markers stand out | Fetched live | ODbL |
 
-Unit tests use Node's built-in test runner:
+The plain-language wording of the ten selection criteria is written in the app, shortened from UNESCO's published criteria.
 
-```sh
-npm test
-```
+### How the sources are combined
 
-The tests cover UNESCO ID normalization, inscription-year parsing, type resolution, search normalization, URL safety, binding normalization, colour contrast, and the UNESCO import parsing.
+1. **Wikidata supplies the sites.** Entries that are extensions or revisions of the same property (UNESCO IDs ending in bis, ter, rev and similar) are folded into one by their UNESCO ID, and anything without a name or coordinates is dropped. Coordinates are Wikidata's, so each site is a single point on the map.
+2. **UNESCO's export is joined on the UNESCO number.** It overrides Wikidata's name, countries and year of inscription, and supplies the danger flag. Wikidata's name stays searchable, so either spelling finds the site, and Wikidata's country name stays searchable too, so "Turkey" finds "Türkiye". A site missing from UNESCO's file keeps Wikidata's values, with years before 1978 (the first inscriptions) treated as unknown.
+3. **Type comes from the criteria.** A site meeting any of criteria (i) to (vi) is cultural, any of (vii) to (x) is natural, and both is mixed.
+4. **The description is UNESCO's.** Where UNESCO has none, Wikidata's one-liner is shown only if it says something, so boilerplate like "World Heritage site in Iran and Azerbaijan" is hidden.
+5. **"In danger" follows UNESCO's flag.** Wikipedia's list adds the reason and start year only for sites UNESCO flags, matched by UNESCO number or name. Where the two sources disagree about which sites are in danger, UNESCO's flag wins and the Wikipedia entry is ignored. A few recent additions have no reason in either source yet, so they show the status and year only.
+6. **Links are built from the UNESCO number.** The "View on UNESCO" link always points to the canonical page for the property, even when Wikidata holds an extension ID.
+7. **Some figures are computed in the browser.** These are the nearest sites and their distances, the live filter counts, the "New" badge (the latest two inscription years), the cluster rings, and the CSV and GeoJSON exports, which contain facts and links but not UNESCO's description text.
 
-## Data source
+### What stays in your browser
 
-The app fetches `data/sites.json`, a precomputed SPARQL response. There is no live SPARQL fallback; if the file is missing or invalid, the app shows an error and a retry action.
-
-### UNESCO data
-
-Wikidata supplies the sites, coordinates and images. UNESCO's own World Heritage Centre export supplies the **descriptions, every country, and inscription years**:
-
-- `data/unesco.json`: countries and years, loaded with the sites.
-- `data/unesco-text.json`: UNESCO's short description for each site, loaded the first time a detail card opens (about 0.75 MB).
-
-Descriptions are © UNESCO/World Heritage Centre, published under [CC BY-SA 3.0 IGO](https://creativecommons.org/licenses/by-sa/3.0/igo/). The card credits them and links the canonical UNESCO page. To refresh, download the English XML from the [WHC syndication page](https://whc.unesco.org/en/syndication/) and run:
-
-```bash
-node scripts/import-unesco.mjs path/to/heritage.xml
-```
-
-Why a site is on the List of World Heritage in Danger is not in UNESCO's export, so `data/danger.json` holds a short reason and the year it was listed, read from [Wikipedia's list](https://en.wikipedia.org/wiki/List_of_World_Heritage_in_Danger) (CC BY-SA 4.0, credited on the card):
-
-```bash
-node scripts/import-danger.mjs
-```
-
-It prints where Wikipedia and UNESCO's flag disagree. The app follows UNESCO's flag and uses Wikipedia only for the reason text.
-
-The source XML is not stored in the repo, and the import is manual. Automating it needs permission from the World Heritage Centre. Sites missing from the UNESCO file fall back to Wikidata's country and year, and Wikidata's description is shown only when it says something useful.
-
-To refresh the Wikidata dataset locally:
-
-```sh
-npm run update-data
-```
-
-The nightly workflow `.github/workflows/update-sites.yml` runs the same script and commits the refreshed file.
-
-### Count caveat
-
-Wikidata contains ~1,400 records for UNESCO World Heritage Sites, while the official UNESCO list has ~1,270 entries. The difference comes from:
-
-- Serial sites whose individual components are separate Wikidata items (e.g., the 21 components of the Historic Centre of Macau).
-- Extension IDs (`123bis`, `123ter`, `123quater`, `123rev`) and numeric sub-site suffixes (`430-001`) that are counted as separate sites.
-
-The app strips `bis`, `ter`, `quater`, `rev`, and numeric sub-site suffixes so extensions and sub-sites collapse onto their parent. This brings the unique count to 1,265 after filtering invalid coordinates, close to the official ~1,270.
-
-## Limitations
-
-- **Static data only.** The app reads `data/sites.json`; refreshing the dataset requires the update workflow or a local script run.
-- **Client-side filtering.** All type, year, search, and viewport filtering happens in the browser.
-- **Daily commits grow the repo.** Each refresh commits ~1.2 MB. For high-traffic deployments, host `data/sites.json` on a CDN or use a GitHub Release instead of committing it.
-- **Wikidata data quality varies.** Coordinates, images, and descriptions are as good as the underlying Wikidata items. Inscription years and countries come from the UNESCO file where available; for the few sites missing from it, years before 1978 are treated as missing and Serengeti is overridden to 1981 (Wikidata records its 1960 establishment date).
-- **Basemap tile usage.** The app uses OpenStreetMap standard tiles. Keep usage light and preserve the attribution; for higher traffic, use a tile provider with a proper plan.
-- **Image licensing varies.** Detail images come from Wikimedia Commons; reuse requires checking each file's license and attribution.
-
-## Tech stack
-
-- React 19 + TypeScript
-- Vite
-- Tailwind CSS
-- [Leaflet](https://leafletjs.com/) + [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster)
-- [Lucide](https://lucide.dev/) icons
-- OpenStreetMap standard tiles
-
-## Project structure
-
-```
-app/
-  index.html                     # Vite HTML shell
-  vite.config.ts                 # Vite config, data middleware, base path
-  src/
-    main.tsx                     # React entry point
-    App.tsx                      # Application shell and state
-    index.css                    # Tailwind and map/marker styles
-    components/                  # Map, timeline, list, detail, overlays
-    lib/                         # Data loading, types, utilities, hooks
-  public/favicon.svg
-scripts/update-data.mjs          # Refreshes data/sites.json from WDQS
-scripts/import-unesco.mjs        # Imports UNESCO's XML export (manual)
-scripts/import-danger.mjs        # Imports danger-list reasons from Wikipedia (manual)
-data/sites.json                  # Precomputed SPARQL response (nightly)
-data/unesco.json                 # UNESCO countries and years
-data/unesco-text.json            # UNESCO descriptions (CC BY-SA 3.0 IGO)
-data/danger.json                 # Why sites are in danger (Wikipedia, CC BY-SA 4.0)
-tests/unit.test.mjs              # Unit tests for pure helpers
-.github/workflows/update-sites.yml  # Daily refresh action
-.github/workflows/test.yml       # CI test workflow
-package.json                     # npm scripts and dependencies
-README.md
-LICENSE
-```
-
-## License
-
-MIT. See [LICENSE](LICENSE).
+Saved sites are kept in your browser's local storage and never leave it. A shared list is just a link containing the site IDs. Your location is used only when you press Near me, is held in memory, and is not sent anywhere. The app does not collect any other information about you.
