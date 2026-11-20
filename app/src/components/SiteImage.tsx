@@ -53,7 +53,7 @@ export function SiteImage({
 
   return (
     <img
-      src={withWidth(site.image, width)}
+      src={withWidth(site.image, width ?? 900)}
       alt={alt}
       loading={loading}
       decoding="async"

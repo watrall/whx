@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { TriangleAlert } from 'lucide-react';
 import { loadDangerNotes, withPeriod } from '../lib/danger.ts';
 import type { DangerData } from '../lib/danger.ts';
-import { unescoNumber } from '../lib/unesco.ts';
 import type { Site } from '../lib/types.ts';
 
 const LINK = 'underline decoration-danger/40 underline-offset-2 hover:decoration-danger-ink';
@@ -28,8 +27,7 @@ export function DangerNote({ site }: { site: Site }) {
 
   if (!site.danger) return null;
 
-  const number = unescoNumber(site.unescoId);
-  const note = number ? data?.sites[number] : undefined;
+  const note = data?.sites[site.id];
   const headingId = `danger-${site.id}`;
 
   return (
@@ -61,7 +59,7 @@ export function DangerNote({ site }: { site: Site }) {
             </p>
           )}
         </>
-      ) : data === undefined && number ? (
+      ) : data === undefined ? (
         <div className="mt-2 space-y-1.5" aria-hidden="true">
           <div className="h-3 w-full animate-pulse rounded bg-danger/10" />
           <div className="h-3 w-2/3 animate-pulse rounded bg-danger/10" />

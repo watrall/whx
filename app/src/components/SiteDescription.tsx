@@ -1,25 +1,18 @@
 import { useEffect, useState } from 'react';
 import type { Site } from '../lib/types.ts';
-import { loadUnescoText, unescoNumber } from '../lib/unesco.ts';
+import { loadUnescoText } from '../lib/unesco.ts';
 import type { UnescoText } from '../lib/unesco.ts';
-import { isUsableDescription, unescoUrl } from '../lib/utils.ts';
-
-/** Wikidata descriptions are lowercase fragments; start them like a sentence. */
-function sentenceCase(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
+import { unescoUrl } from '../lib/utils.ts';
 
 const COLLAPSE_OVER = 520;
 
 const LINK = 'underline decoration-line-strong underline-offset-2 hover:text-ink';
 
 /**
- * UNESCO's own description when we have it, with the credit its CC BY-SA 3.0
- * IGO licence requires. Falls back to Wikidata's description only when that
- * says something useful, and to nothing otherwise.
+ * UNESCO's own description, with the credit its CC BY-SA 3.0 IGO licence requires.
+ * A site without one shows nothing here.
  */
 export function SiteDescription({ site }: { site: Site }) {
-  const number = unescoNumber(site.unescoId);
   const [unesco, setUnesco] = useState<UnescoText | null | undefined>(undefined);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -33,7 +26,7 @@ export function SiteDescription({ site }: { site: Site }) {
     };
   }, []);
 
-  const paragraphs = number ? unesco?.text[number] : undefined;
+  const paragraphs = unesco?.text[site.id];
 
   if (paragraphs && unesco) {
     const total = paragraphs.join(' ');
@@ -65,7 +58,7 @@ export function SiteDescription({ site }: { site: Site }) {
         )}
         <p className="mt-2 text-xs leading-snug text-muted">
           Description ©{' '}
-          <a href={unescoUrl(site) ?? attribution.source} target="_blank" rel="noreferrer" className={LINK}>
+          <a href={unescoUrl(site)} target="_blank" rel="noreferrer" className={LINK}>
             {attribution.holder}
           </a>
           ,{' '}
@@ -79,21 +72,13 @@ export function SiteDescription({ site }: { site: Site }) {
   }
 
   // The text file is still loading and this site should have an entry.
-  if (number && unesco === undefined) {
+  if (unesco === undefined) {
     return (
       <div className="mt-5 space-y-2" aria-hidden="true">
         <div className="h-3 w-full animate-pulse rounded bg-line/60" />
         <div className="h-3 w-11/12 animate-pulse rounded bg-line/60" />
         <div className="h-3 w-3/5 animate-pulse rounded bg-line/60" />
       </div>
-    );
-  }
-
-  if (site.description && isUsableDescription(site.description, site.name)) {
-    return (
-      <p className="mt-5 text-pretty break-words text-sm leading-relaxed text-ink/80">
-        {sentenceCase(site.description)}
-      </p>
     );
   }
 

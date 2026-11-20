@@ -14,6 +14,8 @@ export interface UrlState {
   country: string | null;
 }
 
+/** A UNESCO number, or a Wikidata item from links made before sites were keyed by UNESCO number. */
+const SITE_ID = /^(Q?\d+)$/;
 const CRITERIA_CODES = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x'];
 const TYPES: SiteType[] = ['cultural', 'natural', 'mixed'];
 
@@ -34,14 +36,14 @@ export function parseUrlState(hash: string): UrlState {
 
   const site = params.get('site');
   return {
-    site: site && /^Q\d+$/.test(site) ? site : null,
+    site: site && SITE_ID.test(site) ? site : null,
     query: params.get('q') ?? '',
     types,
     years,
     danger: params.get('danger') === '1',
     list: (params.get('list') ?? '')
       .split(',')
-      .filter((id) => /^Q\d+$/.test(id))
+      .filter((id) => SITE_ID.test(id))
       .slice(0, 150),
     country: (params.get('country') ?? '').slice(0, 80) || null,
     criteria: (params.get('crit') ?? '').split(',').filter((code) => CRITERIA_CODES.includes(code)),

@@ -14,7 +14,7 @@ import {
 import type { Site } from '../lib/types.ts';
 import { formatDistance } from '../lib/geo.ts';
 import type { NearbySite } from '../lib/geo.ts';
-import { parseCriteria } from '../lib/criteria.ts';
+import { criteriaFromCodes } from '../lib/criteria.ts';
 import { TYPE_INK, TYPE_LABEL, TYPE_TINT, directionsUrl, imageCreditUrl, unescoUrl } from '../lib/utils.ts';
 import { DangerNote } from './DangerNote.tsx';
 import { SiteDescription } from './SiteDescription.tsx';
@@ -62,7 +62,7 @@ export function SiteDetail({
     scrollRef.current?.scrollTo({ top: 0 });
   }, [site.id]);
 
-  const criteria = parseCriteria(site.criteria);
+  const criteria = criteriaFromCodes(site.criteriaCodes);
   const creditUrl = imageCreditUrl(site.image);
   const officialUrl = unescoUrl(site);
   const [copied, setCopied] = useState(false);
@@ -361,16 +361,20 @@ export function SiteDetail({
         )}
 
         <p className="mt-6 border-t border-line pt-4 text-xs leading-relaxed text-muted">
-          {site.unescoId && <>UNESCO ID {site.unescoId} · </>}
-          Site data from{' '}
-          <a
-            href={`https://www.wikidata.org/wiki/${site.id}`}
-            target="_blank"
-            rel="noreferrer"
-            className="underline decoration-line-strong underline-offset-2 hover:text-ink"
-          >
-            Wikidata {site.id}
-          </a>
+          UNESCO ID {site.id}
+          {site.qid && (
+            <>
+              {' · '}Photo and links from{' '}
+              <a
+                href={`https://www.wikidata.org/wiki/${site.qid}`}
+                target="_blank"
+                rel="noreferrer"
+                className="underline decoration-line-strong underline-offset-2 hover:text-ink"
+              >
+                Wikidata {site.qid}
+              </a>
+            </>
+          )}
         </p>
       </div>
 

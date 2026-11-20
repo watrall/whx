@@ -27,7 +27,7 @@ export function csvCell(value: string | number | boolean | null | undefined): st
 
 function row(site: Site): string[] {
   return [
-    site.unescoId ?? '',
+    site.id,
     site.name,
     site.countries.join('; '),
     site.year === null ? '' : String(site.year),
@@ -36,8 +36,8 @@ function row(site: Site): string[] {
     site.danger ? 'yes' : 'no',
     String(site.lat),
     String(site.lon),
-    unescoUrl(site) ?? '',
-    site.id,
+    unescoUrl(site),
+    site.qid ?? '',
   ];
 }
 
@@ -55,7 +55,7 @@ export function toGeoJson(sites: Site[]): string {
         type: 'Feature',
         geometry: { type: 'Point', coordinates: [site.lon, site.lat] },
         properties: {
-          unesco_id: site.unescoId,
+          unesco_id: site.id,
           name: site.name,
           countries: site.countries,
           inscribed: site.year,
@@ -63,7 +63,7 @@ export function toGeoJson(sites: Site[]): string {
           criteria: site.criteriaCodes,
           in_danger: site.danger,
           unesco_url: unescoUrl(site),
-          wikidata_id: site.id,
+          wikidata_id: site.qid,
         },
       })),
     },

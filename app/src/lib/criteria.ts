@@ -67,6 +67,11 @@ export const ALL_CRITERIA: Criterion[] = Object.entries(CRITERIA).map(([code, en
 
 export const CULTURAL_CODES = ['i', 'ii', 'iii', 'iv', 'v', 'vi'];
 
+/** The criteria for a list of codes such as ["ii", "iv"], in criteria order. */
+export function criteriaFromCodes(codes: string[]): Criterion[] {
+  return ALL_CRITERIA.filter((criterion) => codes.includes(criterion.code));
+}
+
 /** Parses Wikidata's "(ii)|(iv)" format into ordered, de-duplicated criteria. */
 export function parseCriteria(raw: string | null): Criterion[] {
   if (!raw) return [];

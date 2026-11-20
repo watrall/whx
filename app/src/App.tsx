@@ -42,6 +42,7 @@ import { useRecentSearches } from './lib/useRecentSearches.ts';
 import { useSavedSites } from './lib/useSavedSites.ts';
 import { downloadText, toCsv, toGeoJson } from './lib/export.ts';
 import { distanceKm, formatDistance, nearbyOrNearest } from './lib/geo.ts';
+import { canonicalIds, findSite } from './lib/ids.ts';
 import { NO_EXTRA, hasExtraFilters, matchesExtra, shareListUrl } from './lib/filters.ts';
 import type { ExtraFilters } from './lib/filters.ts';
 import { buildUrlHash, parseUrlState } from './lib/urlState.ts';
@@ -139,7 +140,7 @@ export default function App() {
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const debouncedQuery = useDebouncedValue(query, 350);
   const { recent, addRecent, clearRecent } = useRecentSearches();
-  const { saved, toggle: toggleSaved, addMany: saveMany } = useSavedSites();
+  const { saved, toggle: toggleSaved, addMany: saveMany, migrate: migrateSaved } = useSavedSites();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -161,9 +162,12 @@ export default function App() {
             ? [Math.max(wanted[0], nextDomain[0]), Math.min(wanted[1], nextDomain[1])]
             : nextDomain,
         );
-        const linked = initialUrl.current.site
-          ? result.sites.find((site) => site.id === initialUrl.current.site)
-          : undefined;
+        // Links and saves made before sites were keyed by UNESCO number carry Wikidata IDs.
+        const linked = findSite(initialUrl.current.site, result.sites);
+        setExtra((prev) =>
+          prev.listIds ? { ...prev, listIds: canonicalIds(prev.listIds, result.sites) } : prev,
+        );
+        migrateSaved(result.sites);
         initialUrl.current.site = null;
         if (linked) {
           setSelectedSite(linked);

@@ -1,17 +1,17 @@
 export type SiteType = 'cultural' | 'natural' | 'mixed';
 
 export interface Site {
+  /** UNESCO's numeric ID, such as "20". It is also the number in the UNESCO page address. */
   id: string;
+  /** The matching Wikidata item, for the source link. Absent for a few sites. */
+  qid: string | null;
+  /** UNESCO's official name. */
   name: string;
-  /** Wikidata's label when it differs from the official name, kept for search. */
-  altName: string;
   /** Primary country, used for sorting and short labels. */
   country: string;
-  /** Every country the property spans, from UNESCO where available. */
+  /** Every country the property spans. */
   countries: string[];
-  /** Wikidata's country name when it differs from UNESCO's, kept for search. */
-  countryAlias: string;
-  description: string;
+  /** The pin: for a serial site, the component nearest the middle of its parts. */
   lat: number;
   lon: number;
   year: number | null;
@@ -19,11 +19,10 @@ export interface Site {
   danger: boolean;
   type: SiteType;
   image: string | null;
-  officialUrl: string | null;
-  unescoId: string | null;
-  criteria: string | null;
-  /** Parsed criteria codes such as ["ii", "iv"], for filtering. */
+  /** Selection criteria codes such as ["ii", "iv"]. */
   criteriaCodes: string[];
+  /** How many separate places make up the property. 1 for most sites. */
+  parts: number;
 }
 
 export type YearRange = [number, number];

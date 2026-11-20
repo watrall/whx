@@ -1,4 +1,6 @@
 import { useCallback, useState } from 'react';
+import { canonicalIds } from './ids.ts';
+import type { Site } from './types.ts';
 
 const STORAGE_KEY = 'wh-saved-sites';
 const MAX_SAVED = 150; // keeps a shared link comfortably under URL length limits
@@ -10,7 +12,7 @@ function readSaved(): Set<string> {
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return new Set();
     return new Set(
-      parsed.filter((value): value is string => typeof value === 'string' && /^Q\d+$/.test(value)),
+      parsed.filter((value): value is string => typeof value === 'string' && /^Q?\d+$/.test(value)),
     );
   } catch {
     return new Set();
@@ -59,5 +61,14 @@ export function useSavedSites() {
     [update],
   );
 
-  return { saved, toggle, addMany, atLimit: saved.size >= MAX_SAVED };
+  /** Rewrites saves made under Wikidata IDs to UNESCO numbers, once the sites are known. */
+  const migrate = useCallback(
+    (sites: Site[]) =>
+      update((current) =>
+        [...current].some((id) => id.startsWith('Q')) ? canonicalIds(current, sites) : current,
+      ),
+    [update],
+  );
+
+  return { saved, toggle, addMany, migrate, atLimit: saved.size >= MAX_SAVED };
 }
