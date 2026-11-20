@@ -3,7 +3,7 @@ import type { PointerEvent as ReactPointerEvent } from 'react';
 import { Check, ChevronLeft, ChevronRight, ExternalLink, Link2, X } from 'lucide-react';
 import type { Site } from '../lib/types.ts';
 import { parseCriteria } from '../lib/criteria.ts';
-import { TYPE_INK, TYPE_LABEL, TYPE_TINT, imageCreditUrl, siteMeta } from '../lib/utils.ts';
+import { TYPE_INK, TYPE_LABEL, TYPE_TINT, imageCreditUrl, siteMeta, unescoUrl } from '../lib/utils.ts';
 import { SiteImage } from './SiteImage.tsx';
 import { TypeIcon } from './TypeIcon.tsx';
 
@@ -30,6 +30,7 @@ export function SiteDetail({
 }: SiteDetailProps) {
   const criteria = parseCriteria(site.criteria);
   const creditUrl = imageCreditUrl(site.image);
+  const officialUrl = unescoUrl(site);
   const [copied, setCopied] = useState(false);
 
   const copyLink = async () => {
@@ -183,6 +184,40 @@ export function SiteDetail({
           </div>
         </dl>
 
+        <p className="sr-only" role="status">
+          {copied ? 'Link copied to clipboard' : ''}
+        </p>
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          {officialUrl && (
+            <a
+              href={officialUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-ink px-3 text-xs font-semibold text-canvas transition hover:bg-ink/90"
+            >
+              View on UNESCO
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          )}
+          <button
+            type="button"
+            onClick={copyLink}
+            className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-medium text-ink transition hover:bg-canvas"
+          >
+            {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+            {copied ? 'Link copied' : 'Copy link'}
+          </button>
+          <a
+            href={`https://www.wikidata.org/wiki/${site.id}`}
+            target="_blank"
+            rel="noreferrer"
+            className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-medium text-ink transition hover:bg-canvas"
+          >
+            Wikidata
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        </div>
+
         {criteria.length > 0 && (
           <section className="mt-5" aria-labelledby={`criteria-${site.id}`}>
             <h3
@@ -212,39 +247,6 @@ export function SiteDetail({
           </section>
         )}
 
-        <p className="sr-only" role="status">
-          {copied ? 'Link copied to clipboard' : ''}
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          {site.officialUrl && (
-            <a
-              href={site.officialUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-ink px-3 text-xs font-semibold text-canvas transition hover:bg-ink/90"
-            >
-              View on UNESCO
-              <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          )}
-          <button
-            type="button"
-            onClick={copyLink}
-            className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-medium text-ink transition hover:bg-canvas"
-          >
-            {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
-            {copied ? 'Link copied' : 'Copy link'}
-          </button>
-          <a
-            href={`https://www.wikidata.org/wiki/${site.id}`}
-            target="_blank"
-            rel="noreferrer"
-            className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-medium text-ink transition hover:bg-canvas"
-          >
-            Wikidata
-            <ExternalLink className="h-3.5 w-3.5" />
-          </a>
-        </div>
       </div>
 
       {position && onStep && (
