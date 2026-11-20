@@ -13,6 +13,8 @@ export interface Site {
   lat: number;
   lon: number;
   year: number | null;
+  /** On UNESCO's List of World Heritage in Danger. */
+  danger: boolean;
   type: SiteType;
   image: string | null;
   officialUrl: string | null;

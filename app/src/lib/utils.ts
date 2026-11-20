@@ -124,7 +124,12 @@ export function siteSearchText(site: Site): string {
   );
 }
 
-export function markerIconHtml(type: SiteType, selected = false, highlighted = false): string {
+export function markerIconHtml(
+  type: SiteType,
+  selected = false,
+  highlighted = false,
+  danger = false,
+): string {
   const classes = [
     'wh-marker',
     selected ? 'wh-marker--selected' : '',
@@ -132,7 +137,10 @@ export function markerIconHtml(type: SiteType, selected = false, highlighted = f
   ]
     .filter(Boolean)
     .join(' ');
-  return `<div class="${classes}" style="--marker-color:${TYPE_COLOR[type]}"><span class="wh-marker__pin"><span class="wh-marker__icon">${TYPE_ICON[type]}</span></span></div>`;
+  const badge = danger
+    ? `<span class="wh-marker__danger" title="In danger"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Zm1 13h-2v-2h2v2Zm0-4h-2V9h2v3Z" fill="currentColor"/></svg></span>`
+    : '';
+  return `<div class="${classes}" style="--marker-color:${TYPE_COLOR[type]}"><span class="wh-marker__pin"><span class="wh-marker__icon">${TYPE_ICON[type]}</span></span>${badge}</div>`;
 }
 
 export function clusterSize(count: number): number {

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { TriangleAlert } from 'lucide-react';
 import type { Site } from '../lib/types.ts';
 import { TYPE_COLOR, siteMeta } from '../lib/utils.ts';
 import { SiteThumb } from './SiteImage.tsx';
@@ -96,6 +97,12 @@ export function SiteList({
                     aria-hidden="true"
                   />
                   <span className="truncate">{siteMeta(site)}</span>
+                  {site.danger && (
+                    <TriangleAlert
+                      className="h-3.5 w-3.5 shrink-0 text-ink"
+                      aria-label="In danger"
+                    />
+                  )}
                 </span>
               </span>
             </button>

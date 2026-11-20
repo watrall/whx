@@ -40,7 +40,7 @@ interface MapViewProps {
 
 function makeMarkerIcon(site: Site, selected: boolean, highlighted: boolean) {
   return L.divIcon({
-    html: markerIconHtml(site.type, selected, highlighted),
+    html: markerIconHtml(site.type, selected, highlighted, site.danger),
     className: 'wh-marker-wrapper',
     iconSize: [34, 42],
     iconAnchor: [17, 40],

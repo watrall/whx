@@ -99,6 +99,7 @@ export function normalizeBindings(bindings: Binding[]): Site[] {
       lat: coordinate.lat,
       lon: coordinate.lon,
       year: resolveYear(qid, readValue(binding, 'inscriptionYear')),
+      danger: false,
       type: resolveType(readValue(binding, 'criteria'), readValue(binding, 'description')),
       image: normalizeImage(readValue(binding, 'image')),
       officialUrl: safeUrl(readValue(binding, 'officialUrl')),

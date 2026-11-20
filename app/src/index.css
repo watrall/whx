@@ -179,6 +179,23 @@ input {
   font-size: 14px;
   line-height: 1;
 }
+.wh-marker__danger {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: oklch(var(--ink));
+  color: oklch(var(--paper-raised));
+  border: 1.5px solid oklch(var(--paper-raised));
+}
+.wh-marker__danger svg {
+  width: 9px;
+  height: 9px;
+}
 .wh-marker--selected .wh-marker__pin {
   box-shadow: 0 0 0 2px oklch(var(--paper-raised)), 0 0 0 4px oklch(var(--ink));
 }

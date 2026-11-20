@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
-import { Check, ChevronLeft, ChevronRight, ExternalLink, Link2, X } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, ExternalLink, Link2, TriangleAlert, X } from 'lucide-react';
 import type { Site } from '../lib/types.ts';
 import { parseCriteria } from '../lib/criteria.ts';
 import { TYPE_INK, TYPE_LABEL, TYPE_TINT, imageCreditUrl, siteMeta, unescoUrl } from '../lib/utils.ts';
@@ -145,16 +145,27 @@ export function SiteDetail({
       </div>
 
       <div className="scroll-thin min-h-0 overflow-y-auto overscroll-contain p-4">
-        <span
-          className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-semibold leading-none"
-          style={{
-            backgroundColor: TYPE_TINT[site.type],
-            color: TYPE_INK[site.type],
-          }}
-        >
-          <TypeIcon type={site.type} className="h-3 w-3" />
-          {TYPE_LABEL[site.type]}
-        </span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-semibold leading-none"
+            style={{
+              backgroundColor: TYPE_TINT[site.type],
+              color: TYPE_INK[site.type],
+            }}
+          >
+            <TypeIcon type={site.type} className="h-3 w-3" />
+            {TYPE_LABEL[site.type]}
+          </span>
+          {site.danger && (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1.5 text-sm font-semibold leading-none text-canvas"
+              title="Listed by UNESCO as World Heritage in Danger"
+            >
+              <TriangleAlert className="h-3.5 w-3.5" aria-hidden="true" />
+              In danger
+            </span>
+          )}
+        </div>
 
         <h2 className="mt-2 break-words text-xl font-medium leading-tight text-ink">
           {site.name}

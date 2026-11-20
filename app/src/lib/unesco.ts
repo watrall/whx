@@ -14,6 +14,7 @@ export interface UnescoAttribution {
 interface UnescoFacts {
   countries: string[];
   year: number | null;
+  danger: boolean;
 }
 
 /** Numeric UNESCO ID without extension suffixes: "710bis" and "686rev" give "710" and "686". */
@@ -41,10 +42,11 @@ export async function loadUnescoFacts(signal?: AbortSignal): Promise<Record<stri
     const facts: Record<string, UnescoFacts> = {};
     for (const [id, value] of Object.entries(sites)) {
       if (typeof value !== 'object' || value === null) continue;
-      const record = value as { countries?: unknown; year?: unknown };
+      const record = value as { countries?: unknown; year?: unknown; danger?: unknown };
       facts[id] = {
         countries: isStringArray(record.countries) ? record.countries : [],
         year: typeof record.year === 'number' ? record.year : null,
+        danger: record.danger === true,
       };
     }
     return facts;
@@ -67,6 +69,7 @@ export function applyUnescoFacts(sites: Site[], facts: Record<string, UnescoFact
       // Wikidata's name stays searchable ("Turkey" still finds "Türkiye").
       countryAlias: site.country && site.country !== countries[0] ? site.country : '',
       year: record.year ?? site.year,
+      danger: record.danger,
     };
   });
 }
