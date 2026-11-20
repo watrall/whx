@@ -9,9 +9,9 @@ export const TYPE_LABEL: Record<SiteType, string> = {
 };
 
 export const TYPE_COLOR: Record<SiteType, string> = {
-  cultural: 'oklch(0.55 0.17 22)',
-  natural: 'oklch(0.55 0.12 165)',
-  mixed: 'oklch(0.52 0.14 300)',
+  cultural: 'oklch(var(--type-cultural))',
+  natural: 'oklch(var(--type-natural))',
+  mixed: 'oklch(var(--type-mixed))',
 };
 
 export const TYPE_ICON: Record<SiteType, string> = {

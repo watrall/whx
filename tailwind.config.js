@@ -4,15 +4,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: '#1c1917',
-        muted: '#78716c',
-        line: '#e7e5e4',
-        surface: '#fdfcfa',
-        canvas: '#faf9f7',
-        cultural: 'oklch(0.55 0.15 55)',
-        natural: 'oklch(0.55 0.12 165)',
-        mixed: 'oklch(0.52 0.14 300)',
-        accent: '#1d4ed8',
+        ink: 'oklch(var(--ink) / <alpha-value>)',
+        muted: 'oklch(var(--ink-muted) / <alpha-value>)',
+        line: 'oklch(var(--rule) / <alpha-value>)',
+        'line-strong': 'oklch(var(--rule-strong) / <alpha-value>)',
+        surface: 'oklch(var(--paper-raised) / <alpha-value>)',
+        canvas: 'oklch(var(--paper) / <alpha-value>)',
+        sunken: 'oklch(var(--paper-sunken) / <alpha-value>)',
+        cultural: 'oklch(var(--type-cultural) / <alpha-value>)',
+        natural: 'oklch(var(--type-natural) / <alpha-value>)',
+        mixed: 'oklch(var(--type-mixed) / <alpha-value>)',
       },
       fontFamily: {
         sans: [
@@ -27,8 +28,8 @@ export default {
         ],
       },
       boxShadow: {
-        card: '0 1px 2px rgba(28,25,23,0.06), 0 8px 24px rgba(28,25,23,0.08)',
-        float: '0 2px 6px rgba(28,25,23,0.08), 0 16px 40px rgba(28,25,23,0.12)',
+        card: '0 1px 2px oklch(var(--ink) / 0.06), 0 8px 24px oklch(var(--ink) / 0.08)',
+        float: '0 2px 6px oklch(var(--ink) / 0.08), 0 16px 40px oklch(var(--ink) / 0.12)',
       },
       borderRadius: {
         '2xl': '1.25rem',

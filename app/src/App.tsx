@@ -610,7 +610,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setReloadKey((key) => key + 1)}
-                  className="font-medium text-accent hover:underline"
+                  className="font-medium text-ink underline underline-offset-2"
                 >
                   Retry
                 </button>
@@ -775,7 +775,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => setReloadKey((key) => key + 1)}
-            className="font-medium text-accent hover:underline"
+            className="font-medium text-ink underline underline-offset-2"
           >
             Retry
           </button>

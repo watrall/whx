@@ -263,7 +263,7 @@ export function SearchOverlay({
                         {siteMeta(site)}
                       </span>
                     </span>
-                    {selected && <Check className="h-4 w-4 shrink-0 text-accent" aria-hidden="true" />}
+                    {selected && <Check className="h-4 w-4 shrink-0 text-ink" aria-hidden="true" />}
                   </button>
                 );
               })}

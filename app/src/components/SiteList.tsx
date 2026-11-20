@@ -71,7 +71,7 @@ export function SiteList({
               aria-label={`${site.name}, ${siteMeta(site)}`}
               className={`focus-ring absolute left-0 top-0 flex w-full items-center gap-3 border-l-2 border-b border-line/60 px-4 text-left transition-colors ${
                 selected
-                  ? 'border-l-accent bg-accent/5'
+                  ? 'border-l-ink bg-ink/5'
                   : highlighted
                     ? 'border-l-transparent bg-canvas'
                     : 'border-l-transparent bg-surface hover:bg-canvas'

@@ -114,7 +114,7 @@ export function Timeline({
         y1={0}
         x2={x}
         y2={48}
-        stroke="#e7e5e4"
+        style={{ stroke: 'oklch(var(--rule))' }}
         strokeWidth={1}
         vectorEffect="non-scaling-stroke"
       />,
@@ -249,7 +249,7 @@ export function Timeline({
       onLostPointerCapture={onHandleLostPointerCapture}
       onClick={onHandleClick}
     >
-      <span className="absolute left-1/2 top-1/2 h-5 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-accent bg-surface shadow-card" />
+      <span className="absolute left-1/2 top-1/2 h-5 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-ink bg-surface shadow-card" />
     </div>
   );
 
@@ -274,7 +274,7 @@ export function Timeline({
       onLostPointerCapture={onHandleLostPointerCapture}
       onClick={onHandleClick}
     >
-      <span className="absolute left-1/2 top-1/2 h-5 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-accent bg-surface shadow-card" />
+      <span className="absolute left-1/2 top-1/2 h-5 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-ink bg-surface shadow-card" />
     </div>
   );
 
@@ -309,7 +309,7 @@ export function Timeline({
               y1="48"
               x2="1000"
               y2="48"
-              stroke="#e7e5e4"
+              style={{ stroke: 'oklch(var(--rule))' }}
               strokeWidth="1"
               vectorEffect="non-scaling-stroke"
             />
@@ -325,7 +325,7 @@ export function Timeline({
             style={{ left: `${endPct}%`, right: 0 }}
           />
           <div
-            className="pointer-events-none absolute inset-y-0 border-x border-accent/20 bg-accent/[0.04]"
+            className="pointer-events-none absolute inset-y-0 border-x border-ink/20 bg-ink/[0.04]"
             style={{ left: `${startPct}%`, width: `${Math.max(endPct - startPct, 0)}%` }}
           />
           {handleStart}
