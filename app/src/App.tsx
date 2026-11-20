@@ -652,6 +652,7 @@ export default function App() {
               controlsBottomClass="bottom-28"
               controlsSideClass="left-4"
               initialFocus={initialFocus}
+              rippleYear={playing ? playYear : null}
             />
             {playing && (
               <PlaybackReadout
@@ -719,6 +720,7 @@ export default function App() {
         onMapClick={() => setSelectedSite(null)}
         controlsBottomClass="bottom-[calc(152px+env(safe-area-inset-bottom)+16px)]"
         initialFocus={initialFocus}
+        rippleYear={playing ? playYear : null}
       />
 
       <div className="pointer-events-none fixed inset-x-0 top-0 z-[400] bg-gradient-to-b from-canvas/90 to-transparent px-4 pb-6 pt-[calc(env(safe-area-inset-top)+12px)]">

@@ -7,6 +7,7 @@ import {
   clusterSize,
   escapeHtml,
   markerIconHtml,
+  TYPE_COLOR,
   siteMeta,
   typeCounts,
 } from '../lib/utils.ts';
@@ -29,6 +30,8 @@ interface MapViewProps {
   controlsSideClass?: string;
   /** Centre the first view on this site instead of fitting every marker. */
   initialFocus?: { site: Site; offset: [number, number] } | null;
+  /** Sites inscribed in this year get a one-off ripple on the map (playback). */
+  rippleYear?: number | null;
   className?: string;
 }
 
@@ -54,6 +57,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     controlsBottomClass = 'bottom-28',
     controlsSideClass = 'right-4',
     initialFocus = null,
+    rippleYear = null,
     className = '',
   },
   ref,
@@ -68,6 +72,9 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
   const hasFitRef = useRef(false);
   const lastFitKeyRef = useRef('');
   const selectedIdRef = useRef<string | null>(null);
+  const rippleLayerRef = useRef<L.LayerGroup | null>(null);
+  const sitesRef = useRef<Site[]>([]);
+  sitesRef.current = sites;
   const initialFocusRef = useRef(initialFocus);
   initialFocusRef.current = initialFocusRef.current ?? initialFocus;
   const highlightedIdRef = useRef<string | null>(null);
@@ -133,6 +140,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       },
     });
     cluster.addTo(map);
+    rippleLayerRef.current = L.layerGroup().addTo(map);
 
     const emitBounds = () => {
       const bounds = map.getBounds();
@@ -157,6 +165,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       map.off('moveend', emitBounds);
       map.off('zoomend', emitBounds);
       map.remove();
+      rippleLayerRef.current = null;
       mapRef.current = null;
       clusterRef.current = null;
       markerRefs.current.clear();
@@ -289,6 +298,27 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       prevHighlightedRef.current = null;
     }
   }, [highlightedId]);
+
+  // Ripples sit outside the cluster group, so a new inscription is visible
+  // even when its marker is folded into a cluster at world zoom.
+  useEffect(() => {
+    const layer = rippleLayerRef.current;
+    if (!layer) return;
+    layer.clearLayers();
+    if (rippleYear === null) return;
+    const fresh = sitesRef.current.filter((site) => site.year === rippleYear).slice(0, 80);
+    for (const site of fresh) {
+      L.marker([site.lat, site.lon], {
+        interactive: false,
+        keyboard: false,
+        icon: L.divIcon({
+          className: 'wh-ripple-wrapper',
+          html: `<span class="wh-ripple" style="--ripple-color:${TYPE_COLOR[site.type]}"></span>`,
+          iconSize: [0, 0],
+        }),
+      }).addTo(layer);
+    }
+  }, [rippleYear]);
 
   useImperativeHandle(
     ref,
