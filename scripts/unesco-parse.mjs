@@ -67,16 +67,83 @@ export function splitStates(value) {
     .filter(Boolean);
 }
 
-/** Reads the flat <row><tag>value</tag>...</row> records into objects of raw strings. */
+/** Reads the <row><tag>value</tag>...</row> records into objects of raw strings (geolocations stay as raw XML). */
 export function parseRows(xml) {
   const rows = [];
   for (const rowMatch of xml.matchAll(/<row>([\s\S]*?)<\/row>/g)) {
     const row = {};
     for (const field of rowMatch[1].matchAll(/<([a-z_0-9]+)>([\s\S]*?)<\/\1>/g)) {
-      if (field[1] === 'geolocations') continue;
       row[field[1]] = field[2];
     }
     rows.push(row);
   }
   return rows;
+}
+
+/** The component points of a property from its <geolocations> XML. */
+export function parsePois(geolocations) {
+  const points = [];
+  for (const match of (geolocations ?? '').matchAll(
+    /<latitude>\s*(-?[\d.]+)\s*<\/latitude>\s*<longitude>\s*(-?[\d.]+)\s*<\/longitude>/g,
+  )) {
+    const lat = Number(match[1]);
+    const lon = Number(match[2]);
+    if (Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+      points.push([lat, lon]);
+    }
+  }
+  return points;
+}
+
+function toVector([lat, lon]) {
+  const p = (lat * Math.PI) / 180;
+  const l = (lon * Math.PI) / 180;
+  return [Math.cos(p) * Math.cos(l), Math.cos(p) * Math.sin(l), Math.sin(p)];
+}
+
+/**
+ * The real point nearest the middle of a set of points. A serial property needs one
+ * representative pin; the average could fall in the sea or another country, so the pin
+ * is the component closest to the average (computed on the sphere, so the antimeridian
+ * is safe).
+ */
+export function medoid(points) {
+  if (points.length === 0) return null;
+  if (points.length === 1) return points[0];
+  const vectors = points.map(toVector);
+  const mean = [0, 1, 2].map((axis) => vectors.reduce((sum, v) => sum + v[axis], 0) / vectors.length);
+  let best = 0;
+  let bestDot = -Infinity;
+  vectors.forEach((v, index) => {
+    const dot = v[0] * mean[0] + v[1] * mean[1] + v[2] * mean[2];
+    if (dot > bestDot) {
+      bestDot = dot;
+      best = index;
+    }
+  });
+  return points[best];
+}
+
+/** "(viii)(ix)(x)" or "(ii)|(iv)" to ["viii", "ix", "x"], in criteria order. */
+export function parseCriteriaCodes(text) {
+  const order = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x'];
+  const found = new Set();
+  for (const match of (text ?? '').matchAll(/\(([ivx]+)\)/gi)) {
+    const code = match[1].toLowerCase();
+    if (order.includes(code)) found.add(code);
+  }
+  return order.filter((code) => found.has(code));
+}
+
+/** UNESCO's category label to the app's site type. */
+export function categoryToType(category) {
+  const value = (category ?? '').trim().toLowerCase();
+  if (value === 'natural') return 'natural';
+  if (value === 'mixed') return 'mixed';
+  return 'cultural';
+}
+
+/** Rounds to 4 decimal places (about 10 m), enough for a map pin and much smaller on disk. */
+export function round4(value) {
+  return Math.round(value * 10000) / 10000;
 }
