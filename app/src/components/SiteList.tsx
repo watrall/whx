@@ -42,12 +42,25 @@ export function SiteList({
     getItemKey: (index) => sites[index]?.id ?? index,
   });
 
+  // Bring the selected row into view when the selection changes, such as a click on a map pin
+  // while the list shows every site.
+  const lastSelectedRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!highlightedId) return;
+    if (selectedId === lastSelectedRef.current) return;
+    lastSelectedRef.current = selectedId;
+    if (!selectedId) return;
+    const index = sites.findIndex((site) => site.id === selectedId);
+    if (index < 0) return;
+    // Wait a frame: on first mount the scroll area has not been measured yet.
+    window.requestAnimationFrame(() => virtualizer.scrollToIndex(index, { align: 'center' }));
+  }, [selectedId, sites, virtualizer]);
+
+  useEffect(() => {
+    if (!followHighlight || !highlightedId) return;
     const index = sites.findIndex((site) => site.id === highlightedId);
     if (index < 0) return;
     virtualizer.scrollToIndex(index, { align: 'auto' });
-  }, [highlightedId, sites, virtualizer]);
+  }, [followHighlight, highlightedId, sites, virtualizer]);
 
   if (sites.length === 0) {
     return <div className={`h-full ${className}`}>{emptyState}</div>;
