@@ -226,14 +226,15 @@ input {
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: oklch(var(--ink));
-  color: oklch(var(--paper-raised));
+  /* A light disc: the coloured ring carries the meaning, so the centre can stay quiet. */
+  background: oklch(var(--paper-raised));
+  color: oklch(var(--ink));
   font-weight: 600;
   font-size: 12px;
   letter-spacing: -0.01em;
   border: 2px solid oklch(var(--paper-raised));
-  box-shadow: 0 2px 8px oklch(var(--ink) / 0.28);
-  transition: transform 120ms ease;
+  box-shadow: 0 1px 4px oklch(var(--ink) / 0.22);
+  transition: transform 120ms var(--ease-out);
 }
 .wh-cluster:hover {
   transform: scale(1.06);
