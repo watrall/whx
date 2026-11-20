@@ -44,6 +44,12 @@ test('danger red works as an icon on paper and as a fill under paper text', () =
   assert.ok(contrast(token('paper'), token('danger')) >= 4.5, 'paper text on danger');
 });
 
+test('danger note text is legible on its tint', () => {
+  assert.ok(contrast(token('danger-ink'), token('danger-tint')) >= 4.5, 'danger-ink on danger-tint');
+  assert.ok(contrast(token('ink'), token('danger-tint')) >= 7, 'ink on danger-tint');
+  assert.ok(contrast(token('ink-muted'), token('danger-tint')) >= 4.5, 'muted on danger-tint');
+});
+
 test('danger red differs from the Cultural terracotta in luminance', () => {
   assert.ok(contrast(token('danger'), token('type-cultural')) >= 1.25);
 });

@@ -16,6 +16,7 @@ import { formatDistance } from '../lib/geo.ts';
 import type { NearbySite } from '../lib/geo.ts';
 import { parseCriteria } from '../lib/criteria.ts';
 import { TYPE_INK, TYPE_LABEL, TYPE_TINT, directionsUrl, imageCreditUrl, siteMeta, unescoUrl } from '../lib/utils.ts';
+import { DangerNote } from './DangerNote.tsx';
 import { SiteDescription } from './SiteDescription.tsx';
 import { SiteImage, SiteThumb } from './SiteImage.tsx';
 import { TypeIcon } from './TypeIcon.tsx';
@@ -243,6 +244,8 @@ export function SiteDetail({
             </>
           )}
         </p>
+
+        <DangerNote site={site} />
 
         <p className="sr-only" role="status">
           {copied ? 'Link copied to clipboard' : ''}

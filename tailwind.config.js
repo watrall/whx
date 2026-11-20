@@ -16,6 +16,8 @@ export default {
       colors: {
         ink: 'oklch(var(--ink) / <alpha-value>)',
         danger: 'oklch(var(--danger) / <alpha-value>)',
+        'danger-tint': 'oklch(var(--danger-tint) / <alpha-value>)',
+        'danger-ink': 'oklch(var(--danger-ink) / <alpha-value>)',
         muted: 'oklch(var(--ink-muted) / <alpha-value>)',
         line: 'oklch(var(--rule) / <alpha-value>)',
         'line-strong': 'oklch(var(--rule-strong) / <alpha-value>)',

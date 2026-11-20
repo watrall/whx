@@ -18,6 +18,8 @@
      the terracotta Cultural colour (hue 42, lightness 0.56); the triangle icon is the
      non-colour signal. Paper text on it is 6.2:1. */
   --danger: 0.5 0.2 27;
+  --danger-tint: 0.96 0.025 27;
+  --danger-ink: 0.4 0.15 27;
 
   /* Motion: exponential ease-out (quart) for everything that moves. */
   --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
