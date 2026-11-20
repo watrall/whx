@@ -4,11 +4,13 @@ import {
   Info,
   RotateCcw,
   Search,
+  TriangleAlert,
   X,
 } from 'lucide-react';
 import { Attribution } from './components/Attribution.tsx';
 import { DiscoverActions } from './components/DiscoverActions.tsx';
 import { EmptyState } from './components/EmptyState.tsx';
+import { FilterChip } from './components/FilterChip.tsx';
 import { Logo } from './components/Logo.tsx';
 import { MapView, type MapViewHandle } from './components/MapView.tsx';
 import { MobileSheet, type SheetSnap } from './components/MobileSheet.tsx';
@@ -24,6 +26,8 @@ import type { Bounds, Site, SiteType, YearRange } from './lib/types.ts';
 import { useDebouncedValue } from './lib/useDebouncedValue.ts';
 import { useMediaQuery } from './lib/useMediaQuery.ts';
 import { useRecentSearches } from './lib/useRecentSearches.ts';
+import { NO_EXTRA, hasExtraFilters, matchesExtra } from './lib/filters.ts';
+import type { ExtraFilters } from './lib/filters.ts';
 import { buildUrlHash, parseUrlState } from './lib/urlState.ts';
 import {
   TYPE_ORDER,
@@ -87,6 +91,10 @@ export default function App() {
 
   const [query, setQuery] = useState(initialUrl.current.query);
   const [types, setTypes] = useState<Set<SiteType>>(new Set(initialUrl.current.types));
+  const [extra, setExtra] = useState<ExtraFilters>({
+    ...NO_EXTRA,
+    danger: initialUrl.current.danger,
+  });
   const [yearRange, setYearRange] = useState<YearRange>(FALLBACK_DOMAIN);
   const [domain, setDomain] = useState<YearRange>(FALLBACK_DOMAIN);
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
@@ -159,10 +167,11 @@ export default function App() {
       types,
       years: yearRange,
       domain,
+      danger: extra.danger,
     });
     const next = `${window.location.pathname}${window.location.search}${hash}`;
     window.history.replaceState(null, '', next);
-  }, [loading, selectedSite, debouncedQuery, types, yearRange, domain]);
+  }, [loading, selectedSite, debouncedQuery, types, yearRange, domain, extra]);
 
   useEffect(() => {
     const onVisibility = () => {
@@ -209,23 +218,38 @@ export default function App() {
         (site) =>
           (types.size === 0 || types.has(site.type)) &&
           matchesYear(site) &&
-          matchesQuery(site),
+          matchesQuery(site) &&
+          matchesExtra(site, extra),
       ),
-    [sites, types, matchesYear, matchesQuery],
+    [sites, types, matchesYear, matchesQuery, extra],
   );
 
   const typeCounts = useMemo(() => {
     const counts: Record<SiteType, number> = { cultural: 0, natural: 0, mixed: 0 };
     for (const site of sites) {
-      if (!matchesYear(site) || !matchesQuery(site)) continue;
+      if (!matchesYear(site) || !matchesQuery(site) || !matchesExtra(site, extra)) continue;
       counts[site.type] += 1;
     }
     return counts;
-  }, [sites, matchesYear, matchesQuery]);
+  }, [sites, matchesYear, matchesQuery, extra]);
+
+  // Danger count ignores the danger filter itself, so the chip shows what turning it on would give.
+  const dangerCount = useMemo(
+    () =>
+      sites.filter(
+        (site) =>
+          site.danger &&
+          (types.size === 0 || types.has(site.type)) &&
+          matchesYear(site) &&
+          matchesQuery(site),
+      ).length,
+    [sites, types, matchesYear, matchesQuery],
+  );
 
   const isFiltered =
     query.trim() !== '' ||
     types.size > 0 ||
+    hasExtraFilters(extra) ||
     yearRange[0] !== domain[0] ||
     yearRange[1] !== domain[1];
   const playYear = yearRange[1];
@@ -242,9 +266,10 @@ export default function App() {
       sites.filter(
         (site) =>
           (types.size === 0 || types.has(site.type)) &&
-          matchesQuery(site),
+          matchesQuery(site) &&
+          matchesExtra(site, extra),
       ),
-    [sites, types, matchesQuery],
+    [sites, types, matchesQuery, extra],
   );
 
   // Years that have at least one matching site. Playback jumps between these
@@ -339,6 +364,7 @@ export default function App() {
   const handleReset = useCallback(() => {
     setQuery('');
     setTypes(new Set());
+    setExtra(NO_EXTRA);
     setYearRange(domain);
     setSelectedSite(null);
     setHighlightedId(null);
@@ -543,6 +569,22 @@ export default function App() {
     </div>
   );
 
+  const handleToggleDanger = useCallback(() => {
+    setSelectedSite(null);
+    setExtra((prev) => ({ ...prev, danger: !prev.danger }));
+  }, []);
+
+  const dangerChip = (
+    <FilterChip
+      label="In danger"
+      icon={<TriangleAlert className={isDesktop ? 'h-3.5 w-3.5' : 'h-4 w-4'} aria-hidden="true" />}
+      count={dangerCount}
+      active={extra.danger}
+      onClick={handleToggleDanger}
+      variant={isDesktop ? 'desktop' : 'mobile'}
+    />
+  );
+
   const typeFilter = (
     <TypeFilter
       types={types}
@@ -551,6 +593,7 @@ export default function App() {
       onToggle={handleToggleType}
       onClear={handleClearTypes}
       variant={isDesktop ? 'desktop' : 'mobile'}
+      extras={dangerChip}
     />
   );
 

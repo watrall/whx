@@ -5,6 +5,7 @@ export interface UrlState {
   query: string;
   types: SiteType[];
   years: YearRange | null;
+  danger: boolean;
 }
 
 const TYPES: SiteType[] = ['cultural', 'natural', 'mixed'];
@@ -30,6 +31,7 @@ export function parseUrlState(hash: string): UrlState {
     query: params.get('q') ?? '',
     types,
     years,
+    danger: params.get('danger') === '1',
   };
 }
 
@@ -40,6 +42,7 @@ export function buildUrlHash(state: {
   types: Set<SiteType>;
   years: YearRange;
   domain: YearRange;
+  danger: boolean;
 }): string {
   const params = new URLSearchParams();
   if (state.site) params.set('site', state.site);
@@ -50,6 +53,7 @@ export function buildUrlHash(state: {
   if (state.years[0] !== state.domain[0] || state.years[1] !== state.domain[1]) {
     params.set('years', `${state.years[0]}-${state.years[1]}`);
   }
+  if (state.danger) params.set('danger', '1');
   const text = params.toString();
   return text ? `#${text}` : '';
 }
