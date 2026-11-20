@@ -59,6 +59,37 @@ interface MapViewProps {
   className?: string;
 }
 
+// Space a tooltip needs on each side of a pin, in pixels. The top figure also clears the
+// search strip that floats over the map (strip 56 + tooltip 46 + pin 42 + gap).
+const TOOLTIP_SIDE = 130;
+const TOOLTIP_TOP = 152;
+
+/**
+ * Opens the tooltip on the side with room. Pins near the top get it below, pins near the
+ * left or right edge get it beside them, so it never lands off screen or under the strip.
+ */
+function placeTooltip(map: L.Map | null, marker: L.Marker) {
+  const tip = marker.getTooltip();
+  if (!map || !tip) return;
+  const size = map.getSize();
+  const point = map.latLngToContainerPoint(marker.getLatLng());
+  const nearTop = point.y < TOOLTIP_TOP;
+
+  if (point.x < TOOLTIP_SIDE) {
+    tip.options.direction = 'right';
+    tip.options.offset = L.point(16, nearTop ? 6 : -22);
+  } else if (point.x > size.x - TOOLTIP_SIDE) {
+    tip.options.direction = 'left';
+    tip.options.offset = L.point(-16, nearTop ? 6 : -22);
+  } else if (nearTop) {
+    tip.options.direction = 'bottom';
+    tip.options.offset = L.point(0, 6);
+  } else {
+    tip.options.direction = 'top';
+    tip.options.offset = L.point(0, -38);
+  }
+}
+
 function makeMarkerIcon(site: Site, selected: boolean, highlighted: boolean) {
   return L.divIcon({
     html: markerIconHtml(site.type, selected, highlighted, site.danger),
@@ -230,6 +261,8 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
         alt: site.name,
         riseOnHover: true,
       });
+      // Registered before bindTooltip so it runs first and can pick a side before Leaflet opens the tip.
+      marker.on('mouseover', () => placeTooltip(mapRef.current, marker));
       marker.bindTooltip(
         `<strong>${escapeHtml(site.name)}</strong><br><span>${escapeHtml(siteMeta(site))}</span>`,
         { direction: 'top', offset: [0, -38], className: 'wh-tooltip', opacity: 1 },
