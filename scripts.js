@@ -63,6 +63,19 @@ function escapeHtml(value = '') {
         .replace(/'/g, '&#039;');
 }
 
+function safeExternalUrl(value) {
+    if (!value) return '';
+    try {
+        const url = new URL(String(value), window.location.href);
+        if (url.protocol === 'http:' || url.protocol === 'https:') {
+            return url.href;
+        }
+    } catch (error) {
+        // Ignore malformed URLs.
+    }
+    return '';
+}
+
 function normalizeSearchValue(value) {
     if (value == null) return '';
     let normalized = String(value).toLowerCase();
@@ -116,16 +129,7 @@ const REGION_FALLBACK_CODES = 'AD,AE,AF,AG,AI,AL,AM,AO,AQ,AR,AS,AT,AU,AW,AX,AZ,B
 
 let FALLBACK_REGION_CODES = REGION_FALLBACK_CODES;
 
-if (typeof Intl !== 'undefined' && typeof Intl.supportedValuesOf === 'function') {
-    try {
-        const supported = Intl.supportedValuesOf('region');
-        if (Array.isArray(supported) && supported.length > 0) {
-            FALLBACK_REGION_CODES = supported.filter(code => /^[A-Z]{2}$/.test(code));
-        }
-    } catch (error) {
-        console.warn('Intl.supportedValuesOf is unavailable or unsupported, using fallback region codes.', error);
-    }
-}
+
 
 const REGION_DISPLAY = typeof Intl?.DisplayNames === 'function'
     ? new Intl.DisplayNames(['en'], { type: 'region' })
@@ -482,6 +486,7 @@ function setupEventListeners() {
         });
         clearTimeout(sliderTimer);
         sliderTimer = setTimeout(() => {
+            updateCounts();
             updateProgress();
             filterSites();
             updateMap();
@@ -495,10 +500,14 @@ function setupEventListeners() {
     // Filter buttons
     elements.filterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Remove active class from all buttons
-            elements.filterButtons.forEach(b => b.classList.remove('active'));
-            // Add active class to clicked button
+            // Remove active state from all buttons
+            elements.filterButtons.forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-pressed', 'false');
+            });
+            // Add active state to clicked button
             btn.classList.add('active');
+            btn.setAttribute('aria-pressed', 'true');
             // Update selected type
             state.selectedType = btn.dataset.type;
             // Filter and update
@@ -538,6 +547,10 @@ function setupSearchEvents() {
             event.preventDefault();
             removeSearchTerm(state.searchTerms.length - 1, { apply: true });
         }
+    });
+
+    elements.searchInput.addEventListener('input', () => {
+        updateSearchControlsState();
     });
 
     elements.searchInput.addEventListener('blur', () => {
@@ -670,8 +683,8 @@ function updateSearchControlsState() {
     if (elements.searchClear) {
         elements.searchClear.disabled = !hasContent;
     }
-    if (elements.searchBar) {
-        elements.searchBar.classList.toggle('has-active-search', state.activeSearchTerms.length > 0);
+    if (elements.searchForm) {
+        elements.searchForm.classList.toggle('has-active-search', state.activeSearchTerms.length > 0);
     }
 }
 
@@ -702,6 +715,9 @@ function updateControlsVisibility() {
     if (elements.toggleControls) {
         elements.toggleControls.setAttribute('aria-expanded', String(!state.controlsCollapsed));
     }
+    if (elements.expandedControls) {
+        elements.expandedControls.toggleAttribute('inert', state.controlsCollapsed);
+    }
 }
 
 // Load UNESCO sites directly from Wikidata's SPARQL endpoint.
@@ -730,7 +746,7 @@ SELECT ?item ?itemLabel ?country ?description ?coordinate ?inscriptionYear ?imag
       OPTIONAL { ?item wdt:P625 ?coordVal }
       ?item wdt:P757 ?id .
       OPTIONAL { ?item wdt:P973 ?url973 . FILTER(CONTAINS(STR(?url973), "whc.unesco.org/en/list/")) }
-      OPTIONAL { ?item p:P1435 ?st . ?st ps:P1435 wd:Q9259 ; pq:P585 ?date . BIND(YEAR(?date) AS ?year) }
+      OPTIONAL { ?item p:P1435 ?st . ?st ps:P1435 wd:Q9259 ; pq:P580 ?date . BIND(YEAR(?date) AS ?year) }
       OPTIONAL { ?item wdt:P18 ?img }
       OPTIONAL { ?item wdt:P2614 ?crit . ?crit rdfs:label ?critLabel . FILTER(LANG(?critLabel)="en") }
     }
@@ -743,7 +759,7 @@ SELECT ?item ?itemLabel ?country ?description ?coordinate ?inscriptionYear ?imag
 }
 `;
 
-const SITE_CACHE_KEY = 'wh-sites-v3';
+const SITE_CACHE_KEY = 'wh-sites-v5';
 const SITE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 function readSiteCache() {
@@ -939,13 +955,11 @@ function processSitesData(sites) {
         .filter(year => Number.isFinite(year));
 
     if (inscriptionYears.length > 0) {
-        const computedMin = Math.min(...inscriptionYears);
         const computedMax = Math.max(...inscriptionYears);
         const DEFAULT_MIN_YEAR = 1978;
-        const DEFAULT_MAX_YEAR = 2025;
         state.minYear = DEFAULT_MIN_YEAR;
-        state.maxYear = Math.max(DEFAULT_MAX_YEAR, computedMax);
-        state.selectedYear = Math.max(computedMax, state.minYear);
+        state.maxYear = Math.max(computedMax, state.minYear);
+        state.selectedYear = state.maxYear;
     }
 
     if (elements.yearSlider) {
@@ -964,6 +978,9 @@ function processSitesData(sites) {
     state.loading = false;
     hideLoading();
     requestFitBounds();
+    if (mapState.map) {
+        updateMap();
+    }
     updateSliderBubble();
 }
 
@@ -1061,7 +1078,7 @@ function filterSites() {
         if (id) filteredUniqueIds.add(id);
     }
     const filteredUniqueCount = filteredUniqueIds.size;
-    const yearSuffix = state.selectedYear < new Date().getFullYear() ? ` up to ${state.selectedYear}` : '';
+    const yearSuffix = state.selectedYear < state.maxYear ? ` up to ${state.selectedYear}` : '';
     if (filteredCount === 0) {
         elements.siteCount.innerHTML = `No UNESCO World Heritage Sites match your filters${yearSuffix}`;
     } else if (filteredCount === filteredUniqueCount) {
@@ -1097,6 +1114,7 @@ function updateSliderBubble() {
     ).length;
 
     bubble.textContent = `Up to ${year} | ${count} ${count === 1 ? 'Site' : 'Sites'}`;
+    slider.setAttribute('aria-valuetext', `Up to ${year}, ${count} ${count === 1 ? 'site' : 'sites'}`);
 
     const min = Number(slider.min);
     const max = Number(slider.max);
@@ -1460,7 +1478,7 @@ function renderMediaSlides(mediaElement, urls, siteName) {
     if (!track) return;
     track.classList.remove('is-loading');
     track.innerHTML = sanitized.map((url, index) => `
-        <div class="popup-media-slide${index === 0 ? ' active' : ''}">
+        <div class="popup-media-slide${index === 0 ? ' active' : ''}" role="tabpanel" aria-hidden="${index === 0 ? 'false' : 'true'}">
             <img src="${escapeHtml(url)}" alt="${escapeHtml(siteName)} image ${index + 1}" loading="lazy" />
         </div>
     `).join('');
@@ -1475,7 +1493,7 @@ function renderMediaSlides(mediaElement, urls, siteName) {
         dots.setAttribute('role', 'tablist');
         dots.setAttribute('aria-label', `${siteName} images`);
         dots.innerHTML = sanitized.map((_, index) => `
-            <button type="button" class="popup-media-dot${index === 0 ? ' active' : ''}" data-index="${index}" aria-label="Show image ${index + 1}"></button>
+            <button type="button" role="tab" class="popup-media-dot${index === 0 ? ' active' : ''}" data-index="${index}" aria-label="Show image ${index + 1}" aria-selected="${index === 0}"></button>
         `).join('');
         mediaElement.appendChild(dots);
     }
@@ -1571,6 +1589,7 @@ function buildPopupContent(site, config) {
         : '';
     const formattedDescription = formatDescriptionText(site.description);
     const descriptionText = formattedDescription ? escapeHtml(formattedDescription) : '';
+    const officialUrl = safeExternalUrl(site.officialUrl);
 
     const typeBadgeMarkup = `
         <span class="popup-chip popup-chip-overlay" style="--chip-color:${config.color}">${config.label}</span>
@@ -1611,7 +1630,7 @@ function buildPopupContent(site, config) {
                 ${metaMarkup}
                 ${inscriptionText ? `<p class="popup-meta-line">${inscriptionText}</p>` : ''}
                 ${descriptionText ? `<p class="popup-description">${descriptionText}</p>` : ''}
-                ${site.officialUrl ? `<a href="${escapeHtml(site.officialUrl)}" target="_blank" rel="noopener noreferrer" class="popup-link">View on UNESCO →</a>` : ''}
+                ${officialUrl ? `<a href="${escapeHtml(officialUrl)}" target="_blank" rel="noopener noreferrer" class="popup-link">View official site →</a>` : ''}
             </div>
         </div>
     `;
@@ -1851,7 +1870,12 @@ function initializePopupMedia(root) {
                     slide.classList.toggle('active', slideIndex === index);
                 });
                 dots.forEach((button, dotIndex) => {
-                    button.classList.toggle('active', dotIndex === index);
+                    const active = dotIndex === index;
+                    button.classList.toggle('active', active);
+                    button.setAttribute('aria-selected', String(active));
+                });
+                slides.forEach((slide, slideIndex) => {
+                    slide.setAttribute('aria-hidden', String(slideIndex !== index));
                 });
                 container.dataset.activeIndex = String(index);
             }, { once: false });
