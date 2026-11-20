@@ -84,3 +84,8 @@ test('type colours differ in luminance as well as hue', () => {
     }
   }
 });
+
+test('cluster discs hold paper text and stay lighter than ink', () => {
+  assert.ok(contrast(token('paper-raised'), token('cluster')) >= 4.5, 'paper text on cluster');
+  assert.ok(token('cluster')[0] > token('ink')[0] + 0.15, 'cluster is clearly lighter than ink');
+});

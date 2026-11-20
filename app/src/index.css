@@ -18,6 +18,8 @@
      the terracotta Cultural colour (hue 42, lightness 0.56); the triangle icon is the
      non-colour signal. Paper text on it is 6.2:1. */
   --danger: 0.5 0.2 27;
+  /* Cluster discs: lighter than ink, still dark enough to stand out on the map. */
+  --cluster: 0.46 0.035 58;
   --danger-tint: 0.96 0.025 27;
   --danger-ink: 0.4 0.15 27;
 
@@ -231,14 +233,14 @@ input {
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  /* A light disc: the coloured ring carries the meaning, so the centre can stay quiet. */
-  background: oklch(var(--paper-raised));
-  color: oklch(var(--ink));
+  /* A mid-dark warm disc: it has to read against the pale map without the weight of black. */
+  background: oklch(var(--cluster));
+  color: oklch(var(--paper-raised));
   font-weight: 600;
   font-size: 12px;
   letter-spacing: -0.01em;
   border: 2px solid oklch(var(--paper-raised));
-  box-shadow: 0 1px 4px oklch(var(--ink) / 0.22);
+  box-shadow: 0 2px 6px oklch(var(--ink) / 0.25);
   transition: transform 120ms var(--ease-out);
 }
 .wh-cluster:hover {
