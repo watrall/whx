@@ -535,12 +535,6 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [aboutOpen, searchOpen, selectedSite, isDesktop, handleStep, handleToggleType, handlePlayToggle]);
 
-  useEffect(() => {
-    if (!isDesktop) return;
-    const id = window.setTimeout(() => searchRef.current?.focus(), 0);
-    return () => window.clearTimeout(id);
-  }, [isDesktop]);
-
   const sortSelect = (
     <label className="relative inline-flex items-center">
       <span className="sr-only">Sort sites</span>
@@ -830,8 +824,9 @@ export default function App() {
   const aboutModal = (
     <Modal open={aboutOpen} onClose={() => setAboutOpen(false)} title="About World Heritage Explorer">
       <p className="text-sm leading-relaxed text-muted">
-        An independent, map-first explorer for UNESCO World Heritage Sites, built from open
-        Wikidata. Browse by type, scrub the inscription timeline, and open a site for its story.
+        An independent, map-first explorer for UNESCO World Heritage Sites, built from Wikidata and
+        the World Heritage Centre's own data. Filter by type, criterion or danger, scrub the
+        inscription timeline, and open a site for its story.
       </p>
       <p className="mt-3 text-sm leading-relaxed text-muted">
         Sites, coordinates and images come from Wikidata. Descriptions, countries and

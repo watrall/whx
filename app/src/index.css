@@ -19,6 +19,9 @@
      non-colour signal. Paper text on it is 6.2:1. */
   --danger: 0.5 0.2 27;
 
+  /* Motion: exponential ease-out (quart) for everything that moves. */
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+
   /* Site types. Hues sit 100-135 degrees apart; lightness steps differ so the
      three also separate by luminance for red-green colour blindness. Icons
      (monument, leaf, hybrid) still carry the non-colour signal.
@@ -148,7 +151,7 @@ input {
   width: 34px;
   height: 42px;
   filter: drop-shadow(0 2px 3px oklch(var(--ink) / 0.28));
-  transition: transform 140ms ease;
+  transition: transform 140ms var(--ease-out);
 }
 .wh-marker:hover {
   transform: translateY(-2px) scale(1.04);
