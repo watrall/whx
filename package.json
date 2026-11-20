@@ -39,7 +39,7 @@
     "vite": "^6.4.6"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.18"
   },
   "license": "MIT"
 }
