@@ -4,13 +4,9 @@ import { Check, ChevronLeft, ChevronRight, ExternalLink, Link2, X } from 'lucide
 import type { Site } from '../lib/types.ts';
 import { parseCriteria } from '../lib/criteria.ts';
 import { TYPE_INK, TYPE_LABEL, TYPE_TINT, imageCreditUrl, siteMeta, unescoUrl } from '../lib/utils.ts';
+import { SiteDescription } from './SiteDescription.tsx';
 import { SiteImage } from './SiteImage.tsx';
 import { TypeIcon } from './TypeIcon.tsx';
-
-/** Wikidata descriptions are lowercase fragments; start them like a sentence. */
-function sentenceCase(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
 
 interface SiteDetailProps {
   site: Site;
@@ -165,31 +161,10 @@ export function SiteDetail({
         </h2>
         <p className="mt-1 text-xs text-muted">{siteMeta(site)}</p>
 
-        {site.description && (
-          <p className="mt-3 break-words text-sm leading-relaxed text-muted">{sentenceCase(site.description)}</p>
-        )}
-
-        <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-xs">
-          <div>
-            <dt className="text-muted">UNESCO ID</dt>
-            <dd className="mt-0.5 font-medium text-ink">{site.unescoId ?? '—'}</dd>
-          </div>
-          <div>
-            <dt className="text-muted">Inscribed</dt>
-            <dd className="mt-0.5 font-medium text-ink">{site.year ?? '—'}</dd>
-          </div>
-          <div className={site.countries.length > 1 ? 'col-span-2' : undefined}>
-            <dt className="text-muted">{site.countries.length > 1 ? 'Countries' : 'Country'}</dt>
-            <dd className="mt-0.5 font-medium text-ink">
-              {site.countries.length > 0 ? site.countries.join(', ') : site.country || '—'}
-            </dd>
-          </div>
-        </dl>
-
         <p className="sr-only" role="status">
           {copied ? 'Link copied to clipboard' : ''}
         </p>
-        <div className="mt-5 flex flex-wrap items-center gap-2">
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           {officialUrl && (
             <a
               href={officialUrl}
@@ -219,6 +194,25 @@ export function SiteDetail({
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
         </div>
+
+        <SiteDescription site={site} />
+
+        <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-xs">
+          <div>
+            <dt className="text-muted">UNESCO ID</dt>
+            <dd className="mt-0.5 font-medium text-ink">{site.unescoId ?? '—'}</dd>
+          </div>
+          <div>
+            <dt className="text-muted">Inscribed</dt>
+            <dd className="mt-0.5 font-medium text-ink">{site.year ?? '—'}</dd>
+          </div>
+          <div className={site.countries.length > 1 ? 'col-span-2' : undefined}>
+            <dt className="text-muted">{site.countries.length > 1 ? 'Countries' : 'Country'}</dt>
+            <dd className="mt-0.5 font-medium text-ink">
+              {site.countries.length > 0 ? site.countries.join(', ') : site.country || '—'}
+            </dd>
+          </div>
+        </dl>
 
         {criteria.length > 0 && (
           <section className="mt-5" aria-labelledby={`criteria-${site.id}`}>

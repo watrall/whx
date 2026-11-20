@@ -43,6 +43,18 @@ export function unescoUrl(site: Pick<Site, 'unescoId' | 'officialUrl'>): string 
   return site.officialUrl;
 }
 
+/**
+ * Wikidata descriptions are often empty boilerplate ("World Heritage site in
+ * Iran and Azerbaijan"). Only show one that says something.
+ */
+export function isUsableDescription(description: string, name: string): boolean {
+  const text = description.trim();
+  if (text.length < 40) return false;
+  if (/^(unesco )?world heritage (site|property|area)\b/i.test(text)) return false;
+  if (text.toLowerCase() === name.trim().toLowerCase()) return false;
+  return true;
+}
+
 /** Commons file page for an image served via Special:FilePath, for attribution. */
 export function imageCreditUrl(image: string | null): string | null {
   if (!image) return null;
