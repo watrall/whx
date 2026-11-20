@@ -314,8 +314,14 @@ export default function App() {
     if (yearRange[1] >= domain[1]) {
       setYearRange([domain[0], domain[0]]);
     }
+    // Playback is a global story: clear the detail card, tuck the sheet away and
+    // frame every site that will appear, not just the ones drawn at this instant.
+    setSelectedSite(null);
+    setHighlightedId(null);
+    setSheetSnap('peek');
+    mapRef.current?.fitSites(timelineSites);
     setPlaying(true);
-  }, [playing, yearRange, domain]);
+  }, [playing, yearRange, domain, timelineSites]);
 
   const handleReset = useCallback(() => {
     setQuery('');

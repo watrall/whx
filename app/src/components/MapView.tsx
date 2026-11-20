@@ -14,6 +14,8 @@ import {
 
 export interface MapViewHandle {
   flyToPoint: (lat: number, lon: number, zoom?: number) => void;
+  /** Fit the view to these sites, regardless of what is currently drawn. */
+  fitSites: (sites: Site[]) => void;
   focusSite: (site: Site, options?: { offset?: [number, number] }) => void;
   fitAll: () => void;
 }
@@ -336,6 +338,12 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       },
       flyToPoint: (lat, lon, zoom = 6) => {
         mapRef.current?.flyTo([lat, lon], zoom, { duration: 1.1 });
+      },
+      fitSites: (target) => {
+        const map = mapRef.current;
+        if (!map || target.length === 0) return;
+        const bounds = L.latLngBounds(target.map((site) => [site.lat, site.lon] as [number, number]));
+        map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
       },
       fitAll: () => {
         const map = mapRef.current;
