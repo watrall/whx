@@ -10,7 +10,8 @@ An interactive map of UNESCO World Heritage Sites, sourced live from Wikidata.
 - **Search** by site name, country, or keyword (accent-insensitive).
 - **Clustering** via Leaflet.markercluster for a clean world view.
 - **Popup cards** with images from Wikimedia Commons, country flags, and official UNESCO links.
-- **24-hour cache** in `localStorage` to avoid repeated 20–30s SPARQL queries.
+- **Precomputed dataset** (`data/sites.json`) refreshed nightly by GitHub Actions, with a live SPARQL fallback.
+- **24-hour cache** in `localStorage` to avoid repeated fetches.
 
 ## Running locally
 
@@ -24,7 +25,13 @@ Then open <http://localhost:8000>.
 
 ## Data source
 
-The app queries the [Wikidata Query Service](https://query.wikidata.org/) directly. The SPARQL query is defined in `scripts.js` as `UNESCO_SITES_QUERY`.
+The app tries `data/sites.json` first. That file is refreshed nightly by `.github/workflows/update-sites.yml`, which runs `node scripts/update-data.mjs`. If the static file is missing or stale, the app queries the [Wikidata Query Service](https://query.wikidata.org/) directly with the SPARQL query defined in `scripts.js` as `UNESCO_SITES_QUERY`.
+
+To refresh the dataset locally:
+
+```sh
+node scripts/update-data.mjs
+```
 
 ### Count caveat
 
@@ -33,11 +40,11 @@ Wikidata contains ~1,380 records for UNESCO World Heritage Sites, while the offi
 - Serial sites whose individual components are separate Wikidata items (e.g., the 21 components of the Historic Centre of Macau).
 - Extension IDs (`123bis`, `123ter`, `123quater`, `123rev`) and numeric sub-site suffixes (`430-001`) that are counted as separate sites.
 
-The app displays both the raw record count and the count of unique UNESCO IDs. When counting unique sites, the app strips `bis`, `ter`, `quater`, `rev`, and numeric sub-site suffixes so extensions and sub-sites collapse onto their parent. This brings the unique count to ~1,251, close to the official 1,223.
+The app displays both the raw record count and the count of unique UNESCO IDs. When counting unique sites, the app strips `bis`, `ter`, `quater`, `rev`, and numeric sub-site suffixes so extensions and sub-sites collapse onto their parent. This brings the unique count to ~1,256, close to the official 1,223.
 
 ## Limitations
 
-- **Cold load takes 20–30 seconds.** The first visit runs the SPARQL query; subsequent visits within 24 hours use the cache.
+- **Live fallback is still slow.** If `data/sites.json` is missing, the first visit runs the SPARQL query (~5s, down from ~15s after removing the per-item `EXISTS` checks). Subsequent visits within 24 hours use the cache.
 - **No server-side filtering.** All filtering happens client-side.
 - **Wikidata data quality varies.** Coordinates, images, and descriptions are as good as the underlying Wikidata items.
 
@@ -52,9 +59,12 @@ The app displays both the raw record count and the count of unique UNESCO IDs. W
 ## Project structure
 
 ```
-index.html    # Markup and CDN dependencies
-styles.css    # All styles
-scripts.js    # Data loading, filtering, map rendering
-favicon.svg   # App icon
-assets/       # Placeholder and fallback images
+index.html                     # Markup and CDN dependencies
+styles.css                     # All styles
+scripts.js                     # Data loading, filtering, map rendering
+scripts/update-data.mjs        # Refreshes data/sites.json from WDQS
+data/sites.json                # Precomputed SPARQL response (nightly)
+.github/workflows/update-sites.yml  # Daily refresh action
+favicon.svg                    # App icon
+assets/                        # Placeholder and fallback images
 ```

@@ -708,11 +708,9 @@ function updateControlsVisibility() {
 // The original DigitalOcean proxy was retired; querying WDQS directly keeps the app static and self-contained.
 const WIKIDATA_SPARQL_ENDPOINT = 'https://query.wikidata.org/sparql';
 const UNESCO_SITES_QUERY = `
-SELECT ?item ?itemLabel ?description ?country ?coordinate ?inscriptionYear ?unescoId ?officialUrl ?type ?image WHERE {
+SELECT ?item ?itemLabel ?country ?description ?coordinate ?inscriptionYear ?image ?criteria ?unescoId ?officialUrl WHERE {
   {
     SELECT ?item
-      (SAMPLE(?lEn) AS ?lbl_en)
-      (SAMPLE(?lAny) AS ?lbl_any)
       (SAMPLE(?cName) AS ?countryName)
       (SAMPLE(?dEn) AS ?description)
       (SAMPLE(?coordVal) AS ?coordinate)
@@ -720,14 +718,13 @@ SELECT ?item ?itemLabel ?description ?country ?coordinate ?inscriptionYear ?unes
       (SAMPLE(?url973) AS ?unescoURL_p973)
       (SAMPLE(?year) AS ?inscriptionYear)
       (SAMPLE(?img) AS ?image)
+      (GROUP_CONCAT(DISTINCT ?critLabel; separator="|") AS ?criteria)
     WHERE {
       ?item wdt:P1435 wd:Q9259 .
       FILTER NOT EXISTS {
         ?item p:P1435 ?st .
         ?st ps:P1435 wd:Q9259 ; pq:P582 ?end .
       }
-      OPTIONAL { ?item rdfs:label ?lEn FILTER(LANG(?lEn) = "en") }
-      OPTIONAL { ?item rdfs:label ?lAny }
       OPTIONAL { ?item wdt:P17 ?c . OPTIONAL { ?c rdfs:label ?cName FILTER(LANG(?cName) = "en") } }
       OPTIONAL { ?item schema:description ?dEn FILTER(LANG(?dEn) = "en") }
       OPTIONAL { ?item wdt:P625 ?coordVal }
@@ -735,30 +732,18 @@ SELECT ?item ?itemLabel ?description ?country ?coordinate ?inscriptionYear ?unes
       OPTIONAL { ?item wdt:P973 ?url973 . FILTER(CONTAINS(STR(?url973), "whc.unesco.org/en/list/")) }
       OPTIONAL { ?item p:P1435 ?st . ?st ps:P1435 wd:Q9259 ; pq:P585 ?date . BIND(YEAR(?date) AS ?year) }
       OPTIONAL { ?item wdt:P18 ?img }
+      OPTIONAL { ?item wdt:P2614 ?crit . ?crit rdfs:label ?critLabel . FILTER(LANG(?critLabel)="en") }
     }
     GROUP BY ?item
   }
-  BIND(COALESCE(?lbl_en, ?lbl_any) AS ?itemLabel)
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en, [AUTO_LANGUAGE]". }
   BIND(?countryName AS ?country)
   BIND(IF(BOUND(?whsId), CONCAT("https://whc.unesco.org/en/list/", STR(?whsId)), IF(BOUND(?unescoURL_p973), STR(?unescoURL_p973), "")) AS ?officialUrl)
   BIND(IF(BOUND(?whsId), STR(?whsId), "") AS ?unescoId)
-  BIND(
-    IF(
-      EXISTS { ?item wdt:P2614 ?critC . ?critC rdfs:label ?labelC . FILTER(LANG(?labelC)="en") . FILTER(STR(?labelC) IN ("(i)", "(ii)", "(iii)", "(iv)", "(v)", "(vi)")) } &&
-      EXISTS { ?item wdt:P2614 ?critN . ?critN rdfs:label ?labelN . FILTER(LANG(?labelN)="en") . FILTER(STR(?labelN) IN ("(vii)", "(viii)", "(ix)", "(x)")) },
-      "mixed",
-      IF(
-        EXISTS { ?item wdt:P2614 ?critN2 . ?critN2 rdfs:label ?labelN2 . FILTER(LANG(?labelN2)="en") . FILTER(STR(?labelN2) IN ("(vii)", "(viii)", "(ix)", "(x)")) },
-        "natural",
-        "cultural"
-      )
-    ) AS ?type
-  )
 }
-ORDER BY ?itemLabel
 `;
 
-const SITE_CACHE_KEY = 'wh-sites-v2';
+const SITE_CACHE_KEY = 'wh-sites-v3';
 const SITE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 function readSiteCache() {
@@ -791,6 +776,31 @@ async function loadSites() {
         return;
     }
 
+    // Prefer the precomputed static dataset when available. It is refreshed
+    // daily by .github/workflows/update-sites.yml and avoids hitting WDQS.
+    try {
+        const staticController = new AbortController();
+        const staticTimeout = setTimeout(() => staticController.abort(), 15000);
+        const staticResponse = await fetch('data/sites.json', {
+            cache: 'no-cache',
+            signal: staticController.signal
+        });
+        clearTimeout(staticTimeout);
+        if (staticResponse.ok) {
+            const data = await staticResponse.json();
+            const bindings = data.results?.bindings;
+            if (Array.isArray(bindings) && bindings.length > 0) {
+                console.log('Loaded precomputed UNESCO sites:', bindings.length);
+                const normalizedSites = normalizeBindings(bindings);
+                writeSiteCache(normalizedSites);
+                processSitesData(normalizedSites);
+                return;
+            }
+        }
+    } catch (error) {
+        console.warn('Precomputed data unavailable; falling back to live SPARQL.', error);
+    }
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
@@ -802,10 +812,13 @@ async function loadSites() {
             format: 'json'
         });
 
-        const response = await fetch(`${WIKIDATA_SPARQL_ENDPOINT}?${params.toString()}`, {
+        const response = await fetch(WIKIDATA_SPARQL_ENDPOINT, {
+            method: 'POST',
             headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
                 'Accept': 'application/sparql-results+json'
             },
+            body: params.toString(),
             signal: controller.signal
         });
 
@@ -1026,7 +1039,7 @@ function normalizeBindings(bindings) {
             unescoId: item.unescoId?.value ?? null,
             unescoUrl: item.officialUrl?.value ?? null,
             images: item.image?.value ? [extractCommonsFileName(item.image.value)].filter(Boolean) : [],
-            criteria: [],
+            criteria: item.criteria?.value ? item.criteria.value.split('|').filter(Boolean) : [],
             type: item.type?.value ?? null
         };
     });
@@ -1078,12 +1091,12 @@ function updateSliderBubble() {
 
     const year = state.selectedYear;
     const count = state.sites.filter(site =>
-        site.inscriptionYear === year &&
+        site.inscriptionYear <= year &&
         (state.selectedType === 'all' || site.type === state.selectedType) &&
         matchesActiveSearchTerms(site)
     ).length;
 
-    bubble.textContent = `${year} | ${count} ${count === 1 ? 'Site' : 'Sites'}`;
+    bubble.textContent = `Up to ${year} | ${count} ${count === 1 ? 'Site' : 'Sites'}`;
 
     const min = Number(slider.min);
     const max = Number(slider.max);
@@ -1489,7 +1502,15 @@ async function loadPopupImages(site, popupElement) {
         return;
     }
 
-    renderMediaLoader(mediaElement);
+    // Show the first P18 image immediately while the Commons gallery loads.
+    const firstFile = site.images[0];
+    if (firstFile) {
+        const immediateUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(firstFile)}?width=640`;
+        renderMediaSlides(mediaElement, [immediateUrl], site.name);
+    } else {
+        renderMediaLoader(mediaElement);
+    }
+
     try {
         const urls = await fetchCommonsThumbnails(site.images);
         const finalUrls = urls.length > 0 ? urls : [];
