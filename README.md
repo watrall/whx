@@ -41,13 +41,28 @@ Unit tests use Node's built-in test runner:
 npm test
 ```
 
-The tests cover UNESCO ID normalization, inscription-year parsing, type resolution, search normalization, URL safety, and binding normalization.
+The tests cover UNESCO ID normalization, inscription-year parsing, type resolution, search normalization, URL safety, binding normalization, colour contrast, and the UNESCO import parsing.
 
 ## Data source
 
 The app fetches `data/sites.json`, a precomputed SPARQL response. There is no live SPARQL fallback; if the file is missing or invalid, the app shows an error and a retry action.
 
-To refresh the dataset locally:
+### UNESCO data
+
+Wikidata supplies the sites, coordinates and images. UNESCO's own World Heritage Centre export supplies the **descriptions, every country, and inscription years**:
+
+- `data/unesco.json`: countries and years, loaded with the sites.
+- `data/unesco-text.json`: UNESCO's short description for each site, loaded the first time a detail card opens (about 0.75 MB).
+
+Descriptions are © UNESCO/World Heritage Centre, published under [CC BY-SA 3.0 IGO](https://creativecommons.org/licenses/by-sa/3.0/igo/). The card credits them and links the canonical UNESCO page. To refresh, download the English XML from the [WHC syndication page](https://whc.unesco.org/en/syndication/) and run:
+
+```bash
+node scripts/import-unesco.mjs path/to/heritage.xml
+```
+
+The source XML is not stored in the repo, and the import is manual. Automating it needs permission from the World Heritage Centre. Sites missing from the UNESCO file fall back to Wikidata's country and year, and Wikidata's description is shown only when it says something useful.
+
+To refresh the Wikidata dataset locally:
 
 ```sh
 npm run update-data
@@ -69,7 +84,7 @@ The app strips `bis`, `ter`, `quater`, `rev`, and numeric sub-site suffixes so e
 - **Static data only.** The app reads `data/sites.json`; refreshing the dataset requires the update workflow or a local script run.
 - **Client-side filtering.** All type, year, search, and viewport filtering happens in the browser.
 - **Daily commits grow the repo.** Each refresh commits ~1.2 MB. For high-traffic deployments, host `data/sites.json` on a CDN or use a GitHub Release instead of committing it.
-- **Wikidata data quality varies.** Coordinates, images, and descriptions are as good as the underlying Wikidata items. Some inscription years may be missing or inaccurate; for example, Wikidata records Serengeti's 1960 establishment date as its inscription year.
+- **Wikidata data quality varies.** Coordinates, images, and descriptions are as good as the underlying Wikidata items. Inscription years and countries come from the UNESCO file where available; for the few sites missing from it, years before 1978 are treated as missing and Serengeti is overridden to 1981 (Wikidata records its 1960 establishment date).
 - **Basemap tile usage.** The app uses OpenStreetMap standard tiles. Keep usage light and preserve the attribution; for higher traffic, use a tile provider with a proper plan.
 - **Image licensing varies.** Detail images come from Wikimedia Commons; reuse requires checking each file's license and attribution.
 
@@ -96,7 +111,10 @@ app/
     lib/                         # Data loading, types, utilities, hooks
   public/favicon.svg
 scripts/update-data.mjs          # Refreshes data/sites.json from WDQS
+scripts/import-unesco.mjs        # Imports UNESCO's XML export (manual)
 data/sites.json                  # Precomputed SPARQL response (nightly)
+data/unesco.json                 # UNESCO countries and years
+data/unesco-text.json            # UNESCO descriptions (CC BY-SA 3.0 IGO)
 tests/unit.test.mjs              # Unit tests for pure helpers
 .github/workflows/update-sites.yml  # Daily refresh action
 .github/workflows/test.yml       # CI test workflow
