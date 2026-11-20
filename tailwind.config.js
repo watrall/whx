@@ -33,7 +33,7 @@ export default {
       },
       fontFamily: {
         sans: [
-          'Rubik',
+          'Quicksand',
           'ui-sans-serif',
           'system-ui',
           '-apple-system',
