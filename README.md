@@ -44,6 +44,8 @@ All of the data is public. The app combines five sources, and a few things it wo
 | **Wikimedia Commons** | The photographs. Each one is requested at the size it is shown, and credited with a link to its Commons page, where the author and licence are given | Set per photo |
 | **OpenStreetMap** | The basemap tiles, softened so the markers stand out | ODbL |
 
+The museum glyph in the wordmark is by [juicy_fish](https://www.flaticon.com/free-icon/museum_6981458) on Flaticon, used under the Flaticon free licence with attribution in the About panel.
+
 The plain-language wording of the ten selection criteria is written in the app, shortened from UNESCO's published criteria.
 
 ### How the sources are combined

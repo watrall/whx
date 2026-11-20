@@ -856,6 +856,18 @@ export default function App() {
         CC BY-SA 3.0 IGO. Basemap © OpenStreetMap contributors. Boundaries and labels are illustrative. Not affiliated with UNESCO;
         verify details on the official site.
       </p>
+      <p className="mt-2 text-xs leading-relaxed text-muted">
+        Museum icon by{' '}
+        <a
+          href="https://www.flaticon.com/free-icon/museum_6981458"
+          target="_blank"
+          rel="noreferrer"
+          className="underline decoration-line underline-offset-2 hover:text-ink"
+        >
+          juicy_fish
+        </a>{' '}
+        on Flaticon.
+      </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <a
           href="https://www.wikidata.org/"
