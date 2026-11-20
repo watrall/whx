@@ -197,7 +197,7 @@ export function SiteDetail({
           )}
           {site.danger && (
             <span
-              className="inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1.5 text-sm font-semibold leading-none text-canvas"
+              className="inline-flex items-center gap-1.5 rounded-full bg-danger px-3 py-1.5 text-sm font-semibold leading-none text-canvas"
               title="Listed by UNESCO as World Heritage in Danger"
             >
               <TriangleAlert className="h-3.5 w-3.5" aria-hidden="true" />

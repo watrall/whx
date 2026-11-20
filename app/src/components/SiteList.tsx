@@ -104,7 +104,7 @@ export function SiteList({
                   </span>
                   {site.danger && (
                     <TriangleAlert
-                      className="h-3.5 w-3.5 shrink-0 text-ink"
+                      className="h-3.5 w-3.5 shrink-0 text-danger"
                       aria-label="In danger"
                     />
                   )}

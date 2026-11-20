@@ -8,6 +8,8 @@ interface FilterChipProps {
   active: boolean;
   onClick: () => void;
   variant?: 'desktop' | 'mobile';
+  /** "danger" fills with red when active and tints the icon red when off. */
+  tone?: 'ink' | 'danger';
   className?: string;
 }
 
@@ -23,14 +25,18 @@ export function FilterChip({
   active,
   onClick,
   variant = 'desktop',
+  tone: toneName = 'ink',
   className = '',
 }: FilterChipProps) {
   const base =
     variant === 'mobile'
       ? 'inline-flex h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-medium'
       : 'flex min-h-10 w-full items-center justify-between gap-2 rounded-xl border px-3 text-xs font-medium';
+  const danger = toneName === 'danger';
   const tone = active
-    ? 'border-ink bg-ink text-canvas'
+    ? danger
+      ? 'border-danger bg-danger text-canvas'
+      : 'border-ink bg-ink text-canvas'
     : 'border-line bg-surface text-muted hover:border-ink/30 hover:text-ink';
   return (
     <button
@@ -39,7 +45,7 @@ export function FilterChip({
       aria-pressed={active}
       className={`focus-ring transition ${base} ${tone} ${className}`}
     >
-      <span className="flex items-center gap-2">
+      <span className={`flex items-center gap-2 ${danger && !active ? '[&_svg]:text-danger' : ''}`}>
         {icon}
         {label}
       </span>

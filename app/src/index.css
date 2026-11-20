@@ -14,6 +14,11 @@
   --ink: 0.22 0.015 60;
   --ink-muted: 0.48 0.015 70;
 
+  /* Alert red for World Heritage in Danger. Hue 27 and lightness 0.50 keep it apart from
+     the terracotta Cultural colour (hue 42, lightness 0.56); the triangle icon is the
+     non-colour signal. Paper text on it is 6.2:1. */
+  --danger: 0.5 0.2 27;
+
   /* Site types. Hues sit 100-135 degrees apart; lightness steps differ so the
      three also separate by luminance for red-green colour blindness. Icons
      (monument, leaf, hybrid) still carry the non-colour signal.
@@ -188,7 +193,7 @@ input {
   width: 16px;
   height: 16px;
   border-radius: 999px;
-  background: oklch(var(--ink));
+  background: oklch(var(--danger));
   color: oklch(var(--paper-raised));
   border: 1.5px solid oklch(var(--paper-raised));
 }

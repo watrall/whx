@@ -740,6 +740,7 @@ export default function App() {
       active={extra.danger}
       onClick={handleToggleDanger}
       variant={isDesktop ? 'desktop' : 'mobile'}
+      tone="danger"
     />
   );
 

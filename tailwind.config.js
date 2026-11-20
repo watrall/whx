@@ -15,6 +15,7 @@ export default {
     extend: {
       colors: {
         ink: 'oklch(var(--ink) / <alpha-value>)',
+        danger: 'oklch(var(--danger) / <alpha-value>)',
         muted: 'oklch(var(--ink-muted) / <alpha-value>)',
         line: 'oklch(var(--rule) / <alpha-value>)',
         'line-strong': 'oklch(var(--rule-strong) / <alpha-value>)',

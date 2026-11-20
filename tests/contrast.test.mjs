@@ -39,6 +39,15 @@ function contrast(a, b) {
 
 const TYPES = ['cultural', 'natural', 'mixed'];
 
+test('danger red works as an icon on paper and as a fill under paper text', () => {
+  assert.ok(contrast(token('danger'), token('paper')) >= 4.5, 'danger on paper');
+  assert.ok(contrast(token('paper'), token('danger')) >= 4.5, 'paper text on danger');
+});
+
+test('danger red differs from the Cultural terracotta in luminance', () => {
+  assert.ok(contrast(token('danger'), token('type-cultural')) >= 1.25);
+});
+
 test('body and muted text meet WCAG AA on paper surfaces', () => {
   for (const surface of ['paper', 'paper-raised']) {
     assert.ok(contrast(token('ink'), token(surface)) >= 7, `ink on ${surface}`);
