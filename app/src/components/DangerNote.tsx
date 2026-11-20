@@ -10,7 +10,8 @@ const LINK = 'underline decoration-danger/40 underline-offset-2 hover:decoration
 /**
  * Says why a site is on the List of World Heritage in Danger. UNESCO's data gives
  * only the flag, so the reason and start year come from Wikipedia's list, credited
- * under its CC BY-SA licence. With no reason on record it still states the status.
+ * under its CC BY-SA licence. With no reason on record (recent additions often have none
+ * yet) it states the status and stops there.
  */
 export function DangerNote({ site }: { site: Site }) {
   const [data, setData] = useState<DangerData | null | undefined>(undefined);
@@ -60,16 +61,12 @@ export function DangerNote({ site }: { site: Site }) {
             </p>
           )}
         </>
-      ) : data === undefined ? (
+      ) : data === undefined && number ? (
         <div className="mt-2 space-y-1.5" aria-hidden="true">
           <div className="h-3 w-full animate-pulse rounded bg-danger/10" />
           <div className="h-3 w-2/3 animate-pulse rounded bg-danger/10" />
         </div>
-      ) : (
-        <p className="mt-1.5 text-sm leading-snug text-muted">
-          UNESCO publishes the threats and conservation status on the site&apos;s page.
-        </p>
-      )}
+      ) : null}
     </section>
   );
 }
