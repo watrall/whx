@@ -1,9 +1,18 @@
 import { useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
-import { Check, ChevronLeft, ChevronRight, ExternalLink, Link2, TriangleAlert, X } from 'lucide-react';
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  Link2,
+  Navigation,
+  TriangleAlert,
+  X,
+} from 'lucide-react';
 import type { Site } from '../lib/types.ts';
 import { parseCriteria } from '../lib/criteria.ts';
-import { TYPE_INK, TYPE_LABEL, TYPE_TINT, imageCreditUrl, siteMeta, unescoUrl } from '../lib/utils.ts';
+import { TYPE_INK, TYPE_LABEL, TYPE_TINT, directionsUrl, imageCreditUrl, siteMeta, unescoUrl } from '../lib/utils.ts';
 import { SiteDescription } from './SiteDescription.tsx';
 import { SiteImage } from './SiteImage.tsx';
 import { TypeIcon } from './TypeIcon.tsx';
@@ -187,6 +196,15 @@ export function SiteDetail({
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
           )}
+          <a
+            href={directionsUrl(site)}
+            target="_blank"
+            rel="noreferrer"
+            className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-medium text-ink transition hover:bg-canvas"
+          >
+            <Navigation className="h-3.5 w-3.5" aria-hidden="true" />
+            Directions
+          </a>
           <button
             type="button"
             onClick={copyLink}
@@ -195,15 +213,6 @@ export function SiteDetail({
             {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
             {copied ? 'Link copied' : 'Copy link'}
           </button>
-          <a
-            href={`https://www.wikidata.org/wiki/${site.id}`}
-            target="_blank"
-            rel="noreferrer"
-            className="focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-medium text-ink transition hover:bg-canvas"
-          >
-            Wikidata
-            <ExternalLink className="h-3.5 w-3.5" />
-          </a>
         </div>
 
         <SiteDescription site={site} />
@@ -254,6 +263,17 @@ export function SiteDetail({
           </section>
         )}
 
+        <p className="mt-5 text-xs text-muted">
+          Site data from{' '}
+          <a
+            href={`https://www.wikidata.org/wiki/${site.id}`}
+            target="_blank"
+            rel="noreferrer"
+            className="underline decoration-line-strong underline-offset-2 hover:text-ink"
+          >
+            Wikidata {site.id}
+          </a>
+        </p>
       </div>
 
       {position && onStep && (

@@ -68,11 +68,20 @@ export function imageCreditUrl(image: string | null): string | null {
   }
 }
 
+export const IS_APPLE =
+  typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent);
+
 /** Modifier key label for shortcuts: Command on Apple devices, Ctrl elsewhere. */
-export const MOD_KEY =
-  typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent)
-    ? '⌘'
-    : 'Ctrl ';
+export const MOD_KEY = IS_APPLE ? '⌘' : 'Ctrl ';
+
+/** Opens the device's own maps app or site with the site as the destination. */
+export function directionsUrl(site: Pick<Site, 'lat' | 'lon' | 'name'>, apple = IS_APPLE): string {
+  const point = `${site.lat},${site.lon}`;
+  if (apple) {
+    return `https://maps.apple.com/?daddr=${point}&q=${encodeURIComponent(site.name)}`;
+  }
+  return `https://www.google.com/maps/dir/?api=1&destination=${point}`;
+}
 
 export function formatNumber(value: number): string {
   return new Intl.NumberFormat('en-US').format(value);
