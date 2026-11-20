@@ -4,6 +4,7 @@ import {
   decodeHtmlEntities,
   decodeXml,
   htmlToParagraphs,
+  htmlToText,
   parseRows,
   splitStates,
 } from '../scripts/unesco-parse.mjs';
@@ -31,6 +32,11 @@ test('htmlToParagraphs decodes typographic entities and reports unknown ones', (
 
 test('decodeHtmlEntities leaves unknown entities in place', () => {
   assert.equal(decodeHtmlEntities('a &zzz; b'), 'a &zzz; b');
+});
+
+test('htmlToText strips italics from names', () => {
+  assert.equal(htmlToText('&lt;i&gt;Aflaj&lt;/i&gt; Irrigation Systems of Oman'), 'Aflaj Irrigation Systems of Oman');
+  assert.equal(htmlToText('&lt;I&gt;Sacri Monti&lt;/I&gt; of Piedmont'), 'Sacri Monti of Piedmont');
 });
 
 test('an empty description gives no paragraphs', () => {

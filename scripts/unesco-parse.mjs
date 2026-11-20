@@ -54,6 +54,11 @@ export function htmlToParagraphs(html, onUnknown) {
     .filter(Boolean);
 }
 
+/** Plain text from a short HTML fragment, such as a name with <i>italics</i>. */
+export function htmlToText(html, onUnknown) {
+  return htmlToParagraphs(html, onUnknown).join(' ');
+}
+
 /** Splits "Albania,Austria,Iran (Islamic Republic of)" into country names. */
 export function splitStates(value) {
   return decodeXml(value ?? '')
