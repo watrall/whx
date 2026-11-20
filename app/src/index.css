@@ -195,6 +195,7 @@ input {
   border: none !important;
 }
 .wh-cluster {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -213,10 +214,11 @@ input {
 }
 .wh-cluster__ring {
   position: absolute;
-  inset: -5px;
+  inset: -6px;
   border-radius: 999px;
-  border: 2px solid var(--ring-color);
-  opacity: 0.55;
+  /* Donut: the conic gradient is set inline, the mask hollows it to a 4px band. */
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), black calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), black calc(100% - 4px));
 }
 
 /* Marker tooltip */

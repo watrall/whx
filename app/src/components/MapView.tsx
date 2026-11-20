@@ -5,10 +5,10 @@ import type { Bounds, Site } from '../lib/types.ts';
 import {
   clusterIconHtml,
   clusterSize,
-  dominantType,
   escapeHtml,
   markerIconHtml,
   siteMeta,
+  typeCounts,
 } from '../lib/utils.ts';
 
 export interface MapViewHandle {
@@ -119,7 +119,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
         const types = markers.map((marker) => markerSites.current.get(marker)?.type ?? 'cultural');
         const size = clusterSize(count);
         return L.divIcon({
-          html: clusterIconHtml(count, dominantType(types)),
+          html: clusterIconHtml(count, typeCounts(types)),
           className: 'wh-cluster-wrapper',
           iconSize: [size, size],
           iconAnchor: [size / 2, size / 2],

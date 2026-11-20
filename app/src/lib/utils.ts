@@ -90,19 +90,29 @@ export function clusterSize(count: number): number {
   return 38;
 }
 
-export function clusterIconHtml(count: number, dominant: SiteType): string {
-  const size = clusterSize(count);
-  return `<div class="wh-cluster" style="width:${size}px;height:${size}px;font-size:${count >= 100 ? 14 : 12}px"><span class="wh-cluster__ring" style="--ring-color:${TYPE_COLOR[dominant]}"></span>${count}</div>`;
-}
-
-export function dominantType(types: SiteType[]): SiteType {
+export function typeCounts(types: SiteType[]): Record<SiteType, number> {
   const counts: Record<SiteType, number> = { cultural: 0, natural: 0, mixed: 0 };
   for (const type of types) counts[type] += 1;
-  let best: SiteType = 'cultural';
+  return counts;
+}
+
+/** Conic gradient with one arc per type, sized by share of the cluster. */
+export function clusterRingGradient(counts: Record<SiteType, number>): string {
+  const total = TYPE_ORDER.reduce((sum, type) => sum + counts[type], 0) || 1;
+  let cursor = 0;
+  const stops: string[] = [];
   for (const type of TYPE_ORDER) {
-    if (counts[type] > counts[best]) best = type;
+    if (counts[type] === 0) continue;
+    const next = cursor + (counts[type] / total) * 100;
+    stops.push(`${TYPE_COLOR[type]} ${cursor.toFixed(2)}% ${next.toFixed(2)}%`);
+    cursor = next;
   }
-  return best;
+  return `conic-gradient(${stops.join(', ')})`;
+}
+
+export function clusterIconHtml(count: number, counts: Record<SiteType, number>): string {
+  const size = clusterSize(count);
+  return `<div class="wh-cluster" style="width:${size}px;height:${size}px;font-size:${count >= 100 ? 14 : 12}px"><span class="wh-cluster__ring" style="background:${clusterRingGradient(counts)}"></span>${count}</div>`;
 }
 
 export function escapeHtml(value: string): string {
