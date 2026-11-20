@@ -14,6 +14,18 @@ export const TYPE_COLOR: Record<SiteType, string> = {
   mixed: 'oklch(var(--type-mixed))',
 };
 
+export const TYPE_TINT: Record<SiteType, string> = {
+  cultural: 'oklch(var(--type-cultural-tint))',
+  natural: 'oklch(var(--type-natural-tint))',
+  mixed: 'oklch(var(--type-mixed-tint))',
+};
+
+export const TYPE_INK: Record<SiteType, string> = {
+  cultural: 'oklch(var(--type-cultural-ink))',
+  natural: 'oklch(var(--type-natural-ink))',
+  mixed: 'oklch(var(--type-mixed-ink))',
+};
+
 export const TYPE_ICON: Record<SiteType, string> = {
   cultural: '<i class="fa-solid fa-torii-gate" aria-hidden="true"></i>',
   natural: '<i class="fa-solid fa-leaf" aria-hidden="true"></i>',

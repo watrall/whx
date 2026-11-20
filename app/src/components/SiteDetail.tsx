@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { ExternalLink, X } from 'lucide-react';
 import type { Site } from '../lib/types.ts';
-import { TYPE_COLOR, TYPE_LABEL, siteMeta } from '../lib/utils.ts';
+import { TYPE_INK, TYPE_LABEL, TYPE_TINT, siteMeta } from '../lib/utils.ts';
 import { SiteImage } from './SiteImage.tsx';
 import { TypeIcon } from './TypeIcon.tsx';
 
@@ -111,8 +111,8 @@ export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailPro
         <span
           className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[10px] font-semibold leading-none"
           style={{
-            backgroundColor: `color-mix(in oklch, ${TYPE_COLOR[site.type]} 8%, transparent)`,
-            color: TYPE_COLOR[site.type],
+            backgroundColor: TYPE_TINT[site.type],
+            color: TYPE_INK[site.type],
           }}
         >
           <TypeIcon type={site.type} className="h-3 w-3" />

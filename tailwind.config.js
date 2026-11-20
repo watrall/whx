@@ -12,8 +12,14 @@ export default {
         canvas: 'oklch(var(--paper) / <alpha-value>)',
         sunken: 'oklch(var(--paper-sunken) / <alpha-value>)',
         cultural: 'oklch(var(--type-cultural) / <alpha-value>)',
+        'cultural-tint': 'oklch(var(--type-cultural-tint) / <alpha-value>)',
+        'cultural-ink': 'oklch(var(--type-cultural-ink) / <alpha-value>)',
         natural: 'oklch(var(--type-natural) / <alpha-value>)',
+        'natural-tint': 'oklch(var(--type-natural-tint) / <alpha-value>)',
+        'natural-ink': 'oklch(var(--type-natural-ink) / <alpha-value>)',
         mixed: 'oklch(var(--type-mixed) / <alpha-value>)',
+        'mixed-tint': 'oklch(var(--type-mixed-tint) / <alpha-value>)',
+        'mixed-ink': 'oklch(var(--type-mixed-ink) / <alpha-value>)',
       },
       fontFamily: {
         sans: [
