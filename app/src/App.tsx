@@ -709,6 +709,7 @@ export default function App() {
               initialFocus={initialFocus}
               rippleYear={playing ? playYear : null}
             />
+            <Attribution className="absolute bottom-0 right-0 z-[500] rounded-tl-md bg-surface/90 px-2 py-1" />
             {playing && (
               <PlaybackReadout
                 year={playYear}
@@ -743,7 +744,6 @@ export default function App() {
               </div>
             )}
           </div>
-          <Attribution className="border-t border-line bg-surface px-4 py-2" />
           <Timeline
             sites={timelineSites}
             domain={domain}
@@ -776,7 +776,7 @@ export default function App() {
         onHover={(site) => setHighlightedId(site?.id ?? null)}
         onBoundsChange={setBounds}
         onMapClick={() => setSelectedSite(null)}
-        controlsBottomClass="bottom-[calc(152px+env(safe-area-inset-bottom)+16px)]"
+        controlsBottomClass="bottom-[calc(152px+env(safe-area-inset-bottom)+36px)]"
         initialFocus={initialFocus}
         rippleYear={playing ? playYear : null}
       />
@@ -888,7 +888,7 @@ export default function App() {
         />
       )}
 
-      <Attribution className="pointer-events-auto fixed left-2 z-[450] rounded bg-surface/85 px-1.5 py-1 bottom-[calc(152px+env(safe-area-inset-bottom)+4px)]" />
+      <Attribution className="pointer-events-auto fixed right-0 z-[450] rounded-tl-md bg-surface/90 px-2 py-1 bottom-[calc(152px+env(safe-area-inset-bottom))]" />
 
       {selectedSite && (
         <SiteDetail
