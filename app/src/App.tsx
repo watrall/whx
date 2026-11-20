@@ -17,6 +17,8 @@ import { CountryChip } from './components/CountryChip.tsx';
 import { CriteriaFilter } from './components/CriteriaFilter.tsx';
 import { DiscoverActions } from './components/DiscoverActions.tsx';
 import { ExportMenu } from './components/ExportMenu.tsx';
+import { ListScopeToggle } from './components/ListScopeToggle.tsx';
+import type { ListScope } from './components/ListScopeToggle.tsx';
 import { FiltersMenu } from './components/FiltersMenu.tsx';
 import { MapStrip } from './components/MapStrip.tsx';
 import { EmptyState } from './components/EmptyState.tsx';
@@ -117,6 +119,8 @@ export default function App() {
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const [sort, setSort] = useState<SortKey>('name');
+  // The list follows the map by default; "all" lists every match and leaves the map alone.
+  const [listScope, setListScope] = useState<ListScope>('view');
   // Where the visitor is, kept in memory only and only after they press Near me.
   const [origin, setOrigin] = useState<{ lat: number; lon: number } | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -336,11 +340,12 @@ export default function App() {
     return copy;
   }, [filtered, sort, origin]);
 
-  const sortedListSites = useMemo(
+  const sortedInView = useMemo(
     () => sortedFiltered.filter((site) => inBounds(site, bounds)),
     [sortedFiltered, bounds],
   );
-  const listCount = sortedListSites.length;
+  const listSites = listScope === 'all' ? sortedFiltered : sortedInView;
+  const listCount = listSites.length;
 
   const selectedIndex = useMemo(
     () => (selectedSite ? sortedFiltered.findIndex((site) => site.id === selectedSite.id) : -1),
@@ -555,6 +560,19 @@ export default function App() {
     </label>
   );
 
+  const listSummary =
+    listScope === 'view' ? (
+      <>
+        <span className="font-semibold text-ink">{formatNumber(listCount)}</span> in view of{' '}
+        {pluralize(filtered.length, 'site')} · {pluralize(countries, 'country', 'countries')}
+      </>
+    ) : (
+      <>
+        <span className="font-semibold text-ink">{formatNumber(filtered.length)}</span>{' '}
+        {filtered.length === 1 ? 'site' : 'sites'} · {pluralize(countries, 'country', 'countries')}
+      </>
+    );
+
   const listBody = loading ? (
     <SkeletonList />
   ) : error ? (
@@ -566,16 +584,18 @@ export default function App() {
       actionLabel="Reset filters"
       onAction={handleReset}
     />
-  ) : sortedListSites.length === 0 ? (
+  ) : listSites.length === 0 ? (
     <EmptyState
       title="No sites in this part of the map"
-      description="There are matches elsewhere. Zoom out to find them."
-      actionLabel="Show all results"
-      onAction={() => mapRef.current?.fitAll()}
+      description="There are matches elsewhere. Zoom out, or list all of them."
+      actionLabel="List all results"
+      onAction={() => setListScope('all')}
     />
   ) : (
     <SiteList
-      sites={sortedListSites}
+      key={listScope}
+      sites={listSites}
+      followHighlight={listScope === 'view'}
       selectedId={selectedSite?.id ?? null}
       highlightedId={highlightedId}
       onSelect={handleSelect}
@@ -926,19 +946,15 @@ export default function App() {
           </header>
 
           <div className="border-t border-line px-4 py-3">
+            <h2 className="sr-only">Sites</h2>
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
-                Sites in view
-              </h2>
+              <ListScopeToggle scope={listScope} onChange={setListScope} />
               <div className="flex shrink-0 items-center gap-2">
                 {sortSelect}
                 <ExportMenu count={sortedFiltered.length} onExport={handleExport} touch={false} />
               </div>
             </div>
-            <p className="mt-1 text-xs text-muted">
-              <span className="font-semibold text-ink">{formatNumber(listCount)}</span> in view of{' '}
-              {pluralize(filtered.length, 'site')} · {pluralize(countries, 'country', 'countries')}
-            </p>
+            <p className="mt-2 text-xs text-muted">{listSummary}</p>
           </div>
 
           <div className="min-h-0 flex-1 border-t border-line">{listBody}</div>
@@ -1144,17 +1160,16 @@ export default function App() {
             onNearMe={handleNearMe}
             notice={discoverNotice}
           />
-          <div className="flex items-center justify-between gap-2 border-t border-line px-4 py-2">
-            <h2 className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
-              Sites in view
-            </h2>
-            <div className="flex items-center gap-2">
-              <span className="text-xs tabular-nums text-muted">
-                {formatNumber(listCount)}
-              </span>
-              {sortSelect}
-              <ExportMenu count={sortedFiltered.length} onExport={handleExport} touch={!isDesktop} />
+          <div className="border-t border-line px-4 py-2">
+            <h2 className="sr-only">Sites</h2>
+            <div className="flex items-center justify-between gap-2">
+              <ListScopeToggle scope={listScope} onChange={setListScope} touch />
+              <div className="flex items-center gap-2">
+                {sortSelect}
+                <ExportMenu count={sortedFiltered.length} onExport={handleExport} touch />
+              </div>
             </div>
+            <p className="mt-1.5 text-xs text-muted">{listSummary}</p>
           </div>
           <div className="min-h-0 flex-1">{listBody}</div>
         </div>

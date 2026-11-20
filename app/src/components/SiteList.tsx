@@ -13,6 +13,8 @@ interface SiteListProps {
   onSelect: (site: Site) => void;
   onHover: (site: Site | null) => void;
   rowHeight?: number;
+  /** Scroll the list to the row of the site hovered on the map. Off for very long lists. */
+  followHighlight?: boolean;
   /** Extra text after the site's meta line, such as a distance. */
   extraMeta?: (site: Site) => string | null;
   emptyState?: ReactNode;
@@ -26,6 +28,7 @@ export function SiteList({
   onSelect,
   onHover,
   rowHeight = 72,
+  followHighlight = true,
   extraMeta,
   emptyState,
   className = '',
