@@ -1,0 +1,45 @@
+{
+  "name": "wikidata-world-heritage",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Interactive map of UNESCO World Heritage Sites sourced from Wikidata.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config app/vite.config.ts",
+    "build": "vite build --config app/vite.config.ts",
+    "preview": "vite preview --config app/vite.config.ts",
+    "test": "node --test tests/unit.test.mjs",
+    "update-data": "node scripts/update-data.mjs"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.3.1",
+    "@radix-ui/react-slot": "^1.1.1",
+    "@tanstack/react-virtual": "^3.14.26",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "leaflet": "^1.9.4",
+    "leaflet.markercluster": "^1.5.3",
+    "lucide-react": "^0.468.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tailwind-merge": "^2.6.2",
+    "vaul": "^1.1.2"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.22",
+    "@types/leaflet.markercluster": "^1.5.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.7.0",
+    "postcss": "^8.5.33",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.6"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
