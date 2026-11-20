@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { ExternalLink, X } from 'lucide-react';
 import type { Site } from '../lib/types.ts';
+import { parseCriteria } from '../lib/criteria.ts';
 import { TYPE_INK, TYPE_LABEL, TYPE_TINT, siteMeta } from '../lib/utils.ts';
 import { SiteImage } from './SiteImage.tsx';
 import { TypeIcon } from './TypeIcon.tsx';
@@ -13,6 +14,7 @@ interface SiteDetailProps {
 }
 
 export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailProps) {
+  const criteria = parseCriteria(site.criteria);
   const dragStartRef = useRef<number | null>(null);
   const dragYRef = useRef(0);
   const [dragY, setDragY] = useState(0);
@@ -134,10 +136,6 @@ export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailPro
             <dd className="mt-0.5 font-medium text-ink">{site.unescoId ?? '—'}</dd>
           </div>
           <div>
-            <dt className="text-muted">Criteria</dt>
-            <dd className="mt-0.5 font-medium text-ink">{site.criteria ?? '—'}</dd>
-          </div>
-          <div>
             <dt className="text-muted">Inscribed</dt>
             <dd className="mt-0.5 font-medium text-ink">{site.year ?? '—'}</dd>
           </div>
@@ -146,6 +144,35 @@ export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailPro
             <dd className="mt-0.5 font-medium text-ink">{site.country || '—'}</dd>
           </div>
         </dl>
+
+        {criteria.length > 0 && (
+          <section className="mt-5" aria-labelledby={`criteria-${site.id}`}>
+            <h3
+              id={`criteria-${site.id}`}
+              className="text-xs font-semibold uppercase tracking-[0.1em] text-muted"
+            >
+              Why it is listed
+            </h3>
+            <ul className="mt-2 space-y-2.5">
+              {criteria.map((criterion) => (
+                <li key={criterion.code} className="flex gap-3">
+                  <span
+                    className="mt-0.5 grid h-6 min-w-8 shrink-0 place-items-center rounded-md px-1.5 text-xs font-semibold tabular-nums"
+                    style={{ backgroundColor: TYPE_TINT[site.type], color: TYPE_INK[site.type] }}
+                  >
+                    {criterion.code}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium text-ink">{criterion.label}</span>
+                    <span className="block text-xs leading-snug text-muted">
+                      {criterion.description}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {site.officialUrl && (
