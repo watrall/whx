@@ -44,7 +44,7 @@ The app displays both the raw record count and the count of unique UNESCO IDs. W
 
 ## Limitations
 
-- **Live fallback is still slow.** If `data/sites.json` is missing, the first visit runs the SPARQL query (~5s, down from ~15s after removing the per-item `EXISTS` checks). Subsequent visits within 24 hours use the cache.
+- **Live fallback is still slow.** If `data/sites.json` is missing, the first visit runs the SPARQL query (~5s server-side, 15–20s in a browser). Subsequent visits within 24 hours use the cache.
 - **No server-side filtering.** All filtering happens client-side.
 - **Wikidata data quality varies.** Coordinates, images, and descriptions are as good as the underlying Wikidata items.
 
