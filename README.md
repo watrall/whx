@@ -60,6 +60,14 @@ Descriptions are © UNESCO/World Heritage Centre, published under [CC BY-SA 3.0 
 node scripts/import-unesco.mjs path/to/heritage.xml
 ```
 
+Why a site is on the List of World Heritage in Danger is not in UNESCO's export, so `data/danger.json` holds a short reason and the year it was listed, read from [Wikipedia's list](https://en.wikipedia.org/wiki/List_of_World_Heritage_in_Danger) (CC BY-SA 4.0, credited on the card):
+
+```bash
+node scripts/import-danger.mjs
+```
+
+It prints where Wikipedia and UNESCO's flag disagree. The app follows UNESCO's flag and uses Wikipedia only for the reason text.
+
 The source XML is not stored in the repo, and the import is manual. Automating it needs permission from the World Heritage Centre. Sites missing from the UNESCO file fall back to Wikidata's country and year, and Wikidata's description is shown only when it says something useful.
 
 To refresh the Wikidata dataset locally:
@@ -112,9 +120,11 @@ app/
   public/favicon.svg
 scripts/update-data.mjs          # Refreshes data/sites.json from WDQS
 scripts/import-unesco.mjs        # Imports UNESCO's XML export (manual)
+scripts/import-danger.mjs        # Imports danger-list reasons from Wikipedia (manual)
 data/sites.json                  # Precomputed SPARQL response (nightly)
 data/unesco.json                 # UNESCO countries and years
 data/unesco-text.json            # UNESCO descriptions (CC BY-SA 3.0 IGO)
+data/danger.json                 # Why sites are in danger (Wikipedia, CC BY-SA 4.0)
 tests/unit.test.mjs              # Unit tests for pure helpers
 .github/workflows/update-sites.yml  # Daily refresh action
 .github/workflows/test.yml       # CI test workflow
