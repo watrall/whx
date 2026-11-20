@@ -561,8 +561,9 @@ export default function App() {
         Wikidata. Browse by type, scrub the inscription timeline, and open a site for its story.
       </p>
       <p className="mt-3 text-sm leading-relaxed text-muted">
-        Data comes from Wikidata and the UNESCO World Heritage list. Basemap © OpenStreetMap
-        contributors. Boundaries and labels are illustrative. Not affiliated with UNESCO;
+        Sites, coordinates and images come from Wikidata. Descriptions, countries and
+        inscription years come from UNESCO/World Heritage Centre; descriptions are published under
+        CC BY-SA 3.0 IGO. Basemap © OpenStreetMap contributors. Boundaries and labels are illustrative. Not affiliated with UNESCO;
         verify details on the official site.
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
