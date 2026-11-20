@@ -50,7 +50,7 @@ export function MobileSheet({
     const height = sheetRef.current?.getBoundingClientRect().height ?? window.innerHeight * 0.92;
     return {
       peek: Math.max(0, height - (PEEK_CONTENT + safeBottomInset())),
-      mid: Math.max(0, height - window.innerHeight * 0.46),
+      mid: Math.max(0, height - window.innerHeight * 0.64),
       full: 0,
     };
   };
@@ -58,7 +58,7 @@ export function MobileSheet({
   const snapTransform = () => {
     if (dragY !== null) return `translateY(${dragY}px)`;
     if (snap === 'peek') return 'translateY(calc(92dvh - 152px - env(safe-area-inset-bottom, 0px)))';
-    if (snap === 'mid') return 'translateY(46dvh)';
+    if (snap === 'mid') return 'translateY(28dvh)';
     return 'translateY(0px)';
   };
 
