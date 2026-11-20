@@ -82,7 +82,7 @@ export function Modal({ open, onClose, title, children, className = '' }: ModalP
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="focus-ring -mr-1 -mt-1 grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition hover:bg-canvas hover:text-ink"
+            className="focus-ring -mr-2 -mt-2 grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted transition hover:bg-canvas hover:text-ink"
           >
             <X className="h-4 w-4" />
           </button>

@@ -2,8 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChevronDown,
   Info,
-  Pause,
-  Play,
   RotateCcw,
   Search,
   X,
@@ -445,7 +443,7 @@ export default function App() {
       <select
         value={sort}
         onChange={(event) => setSort(event.target.value as SortKey)}
-        className="focus-ring h-7 appearance-none rounded-md border border-line bg-surface pl-2 pr-6 text-xs font-medium text-ink"
+        className="focus-ring h-9 appearance-none rounded-md border border-line bg-surface pl-2.5 pr-7 text-xs font-medium text-ink"
       >
         <option value="name">Name</option>
         <option value="year">Year</option>
@@ -784,7 +782,7 @@ export default function App() {
               type="button"
               onClick={() => setQuery('')}
               aria-label="Clear search"
-              className="focus-ring absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full text-muted"
+              className="focus-ring absolute right-1 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full text-muted"
             >
               <X className="h-4 w-4" aria-hidden="true" />
             </button>

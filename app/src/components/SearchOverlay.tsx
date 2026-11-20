@@ -177,7 +177,7 @@ export function SearchOverlay({
                 inputRef.current?.focus();
               }}
               aria-label="Clear search"
-              className="focus-ring grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition hover:bg-canvas hover:text-ink"
+              className="focus-ring grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted transition hover:bg-canvas hover:text-ink"
             >
               <X className="h-4 w-4" />
             </button>

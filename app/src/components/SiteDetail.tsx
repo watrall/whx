@@ -141,7 +141,7 @@ export function SiteDetail({
           type="button"
           onClick={onClose}
           aria-label="Close site details"
-          className="focus-ring absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full border border-line bg-surface/90 text-ink shadow-card backdrop-blur transition hover:bg-surface active:scale-95"
+          className="focus-ring absolute right-2 top-2 grid h-11 w-11 place-items-center rounded-full border border-line bg-surface/90 text-ink shadow-card backdrop-blur transition hover:bg-surface active:scale-95"
         >
           <X className="h-4 w-4" />
         </button>
