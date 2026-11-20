@@ -3,6 +3,8 @@ export type SiteType = 'cultural' | 'natural' | 'mixed';
 export interface Site {
   id: string;
   name: string;
+  /** Wikidata's label when it differs from the official name, kept for search. */
+  altName: string;
   /** Primary country, used for sorting and short labels. */
   country: string;
   /** Every country the property spans, from UNESCO where available. */

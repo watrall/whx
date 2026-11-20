@@ -127,7 +127,7 @@ export function normalizeSearch(value: string): string {
 
 export function siteSearchText(site: Site): string {
   return normalizeSearch(
-    [site.name, site.countries.join(' '), site.countryAlias, site.description, site.criteria, site.unescoId]
+    [site.name, site.altName, site.countries.join(' '), site.countryAlias, site.description, site.criteria, site.unescoId]
       .filter(Boolean)
       .join(' '),
   );

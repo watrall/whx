@@ -2,7 +2,7 @@
  * Imports the official UNESCO World Heritage Centre XML export into two small
  * JSON files the app loads:
  *
- *   data/unesco.json       facts: every country, inscription year, in-danger flag
+ *   data/unesco.json       facts: official name, every country, year, in-danger flag
  *   data/unesco-text.json  UNESCO's short description for each site, as paragraphs
  *
  * Usage: node scripts/import-unesco.mjs path/to/heritage.xml
@@ -12,7 +12,7 @@
  * under CC BY-SA 3.0 IGO; see the attribution block written into the output.
  */
 import { readFile, writeFile } from 'node:fs/promises';
-import { htmlToParagraphs, parseRows, splitStates } from './unesco-parse.mjs';
+import { decodeXml, htmlToParagraphs, parseRows, splitStates } from './unesco-parse.mjs';
 
 const input = process.argv[2];
 if (!input) {
@@ -37,6 +37,7 @@ for (const row of rows) {
 
   const year = Number.parseInt(row.date_inscribed ?? '', 10);
   facts[id] = {
+    name: decodeXml(row.site ?? '').trim(),
     countries: splitStates(row.states),
     year: Number.isFinite(year) ? year : null,
     // On the List of World Heritage in Danger.

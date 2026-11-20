@@ -93,6 +93,7 @@ export function normalizeBindings(bindings: Binding[]): Site[] {
     sites.push({
       id: qid,
       name,
+      altName: '',
       country,
       countries: country ? [country] : [],
       countryAlias: '',

@@ -12,6 +12,7 @@ export interface UnescoAttribution {
 }
 
 interface UnescoFacts {
+  name: string;
   countries: string[];
   year: number | null;
   danger: boolean;
@@ -42,8 +43,14 @@ export async function loadUnescoFacts(signal?: AbortSignal): Promise<Record<stri
     const facts: Record<string, UnescoFacts> = {};
     for (const [id, value] of Object.entries(sites)) {
       if (typeof value !== 'object' || value === null) continue;
-      const record = value as { countries?: unknown; year?: unknown; danger?: unknown };
+      const record = value as {
+        name?: unknown;
+        countries?: unknown;
+        year?: unknown;
+        danger?: unknown;
+      };
       facts[id] = {
+        name: typeof record.name === 'string' ? record.name.trim() : '',
         countries: isStringArray(record.countries) ? record.countries : [],
         year: typeof record.year === 'number' ? record.year : null,
         danger: record.danger === true,
@@ -62,8 +69,12 @@ export function applyUnescoFacts(sites: Site[], facts: Record<string, UnescoFact
     const record = number ? facts[number] : undefined;
     if (!record) return site;
     const countries = record.countries.length > 0 ? record.countries : site.countries;
+    const official = record.name || site.name;
     return {
       ...site,
+      // UNESCO's name is the official title; Wikidata's stays searchable.
+      name: official,
+      altName: official !== site.name ? site.name : '',
       countries,
       country: countries[0] ?? site.country,
       // Wikidata's name stays searchable ("Turkey" still finds "Türkiye").
