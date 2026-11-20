@@ -92,6 +92,7 @@ export default function App() {
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const [sort, setSort] = useState<SortKey>('name');
   const [playing, setPlaying] = useState(false);
+  const [speed, setSpeed] = useState(1);
   const [searchOpen, setSearchOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [sheetSnap, setSheetSnap] = useState<SheetSnap>('peek');
@@ -258,9 +259,9 @@ export default function App() {
         const next = activeYears.find((year) => year > prev[1]);
         return [prev[0], Math.min(next ?? domain[1], domain[1])];
       });
-    }, 400);
+    }, 400 / speed);
     return () => window.clearTimeout(timer);
-  }, [playing, yearRange, domain, activeYears]);
+  }, [playing, yearRange, domain, activeYears, speed]);
 
   const sortedFiltered = useMemo(() => {
     const copy = [...filtered];
@@ -696,6 +697,8 @@ export default function App() {
             onChange={setYearRange}
             playing={playing}
             onTogglePlay={handlePlayToggle}
+            speed={speed}
+            onCycleSpeed={() => setSpeed((value) => (value === 1 ? 2 : value === 2 ? 4 : 1))}
             count={filtered.length}
           />
         </main>

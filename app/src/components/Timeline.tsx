@@ -16,6 +16,8 @@ interface TimelineProps {
   onChange: (range: YearRange) => void;
   playing: boolean;
   onTogglePlay: () => void;
+  speed?: number;
+  onCycleSpeed?: () => void;
   count: number;
   compact?: boolean;
   className?: string;
@@ -34,6 +36,8 @@ export function Timeline({
   onChange,
   playing,
   onTogglePlay,
+  speed = 1,
+  onCycleSpeed,
   count,
   compact = false,
   className = '',
@@ -381,6 +385,17 @@ export function Timeline({
                 {formatNumber(count)} sites
               </div>
             </div>
+            {onCycleSpeed && (
+              <button
+                type="button"
+                onClick={onCycleSpeed}
+                aria-label={`Playback speed ${speed}x. Change speed`}
+                title="Playback speed"
+                className="focus-ring grid h-9 min-w-9 place-items-center rounded-full px-2 text-xs font-semibold tabular-nums text-muted transition hover:bg-canvas hover:text-ink"
+              >
+                {speed}×
+              </button>
+            )}
             <button
               type="button"
               onClick={onTogglePlay}
