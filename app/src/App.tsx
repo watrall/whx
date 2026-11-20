@@ -244,13 +244,8 @@ export default function App() {
     [sites, types, matchesQuery],
   );
 
-  const listSites = useMemo(
-    () => filtered.filter((site) => inBounds(site, bounds)),
-    [filtered, bounds],
-  );
-
-  const sortedListSites = useMemo(() => {
-    const copy = [...listSites];
+  const sortedFiltered = useMemo(() => {
+    const copy = [...filtered];
     copy.sort((a, b) => {
       if (sort === 'year') return (a.year ?? 9999) - (b.year ?? 9999);
       if (sort === 'country') {
@@ -259,7 +254,20 @@ export default function App() {
       return a.name.localeCompare(b.name);
     });
     return copy;
-  }, [listSites, sort]);
+  }, [filtered, sort]);
+
+  const sortedListSites = useMemo(
+    () => sortedFiltered.filter((site) => inBounds(site, bounds)),
+    [sortedFiltered, bounds],
+  );
+  const listCount = sortedListSites.length;
+
+  const selectedIndex = useMemo(
+    () => (selectedSite ? sortedFiltered.findIndex((site) => site.id === selectedSite.id) : -1),
+    [selectedSite, sortedFiltered],
+  );
+  const detailPosition =
+    selectedIndex >= 0 ? { index: selectedIndex, total: sortedFiltered.length } : null;
 
   const fitKey = `${debouncedQuery}|${Array.from(types).sort().join(',')}`;
 
@@ -305,6 +313,14 @@ export default function App() {
       mapRef.current?.focusSite(site, { offset: isDesktop ? [210, 0] : [0, 120] });
     },
     [addRecent, query, isDesktop],
+  );
+
+  const handleStep = useCallback(
+    (delta: -1 | 1) => {
+      const next = sortedFiltered[selectedIndex + delta];
+      if (next) handleSelect(next);
+    },
+    [sortedFiltered, selectedIndex, handleSelect],
   );
 
   useEffect(() => {
@@ -355,11 +371,16 @@ export default function App() {
       }
       if (event.key === '?') {
         setAboutOpen(true);
+        return;
+      }
+      if (selectedSite && !interactive && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+        event.preventDefault();
+        handleStep(event.key === 'ArrowLeft' ? -1 : 1);
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [aboutOpen, searchOpen, handleToggleType, handlePlayToggle]);
+  }, [aboutOpen, searchOpen, selectedSite, handleStep, handleToggleType, handlePlayToggle]);
 
   useEffect(() => {
     if (!isDesktop) return;
@@ -585,7 +606,7 @@ export default function App() {
             </h2>
             <div className="flex items-center gap-2">
               <span className="text-xs tabular-nums text-muted">
-                {formatNumber(listSites.length)}
+                {formatNumber(listCount)}
               </span>
               {sortSelect}
             </div>
@@ -618,6 +639,8 @@ export default function App() {
               <SiteDetail
                 site={selectedSite}
                 variant="desktop"
+                position={detailPosition}
+                onStep={handleStep}
                 onClose={() => setSelectedSite(null)}
               />
             )}
@@ -764,7 +787,7 @@ export default function App() {
             </h2>
             <div className="flex items-center gap-2">
               <span className="text-xs tabular-nums text-muted">
-                {formatNumber(listSites.length)}
+                {formatNumber(listCount)}
               </span>
               {sortSelect}
             </div>
@@ -779,6 +802,8 @@ export default function App() {
         <SiteDetail
           site={selectedSite}
           variant="mobile"
+          position={detailPosition}
+          onStep={handleStep}
           onClose={() => setSelectedSite(null)}
         />
       )}

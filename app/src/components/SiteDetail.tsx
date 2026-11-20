@@ -1,19 +1,33 @@
 import { useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
-import { Check, ExternalLink, Link2, X } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, ExternalLink, Link2, X } from 'lucide-react';
 import type { Site } from '../lib/types.ts';
 import { parseCriteria } from '../lib/criteria.ts';
 import { TYPE_INK, TYPE_LABEL, TYPE_TINT, imageCreditUrl, siteMeta } from '../lib/utils.ts';
 import { SiteImage } from './SiteImage.tsx';
 import { TypeIcon } from './TypeIcon.tsx';
 
+/** Wikidata descriptions are lowercase fragments; start them like a sentence. */
+function sentenceCase(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 interface SiteDetailProps {
   site: Site;
   onClose: () => void;
   variant?: 'desktop' | 'mobile';
+  /** Position within the current results, to step through them. */
+  position?: { index: number; total: number } | null;
+  onStep?: (delta: -1 | 1) => void;
 }
 
-export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailProps) {
+export function SiteDetail({
+  site,
+  onClose,
+  variant = 'desktop',
+  position = null,
+  onStep,
+}: SiteDetailProps) {
   const criteria = parseCriteria(site.criteria);
   const creditUrl = imageCreditUrl(site.image);
   const [copied, setCopied] = useState(false);
@@ -151,7 +165,7 @@ export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailPro
         <p className="mt-1 text-xs text-muted">{siteMeta(site)}</p>
 
         {site.description && (
-          <p className="mt-3 text-sm leading-relaxed text-muted">{site.description}</p>
+          <p className="mt-3 text-sm leading-relaxed text-muted">{sentenceCase(site.description)}</p>
         )}
 
         <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-xs">
@@ -232,6 +246,35 @@ export function SiteDetail({ site, onClose, variant = 'desktop' }: SiteDetailPro
           </a>
         </div>
       </div>
+
+      {position && onStep && (
+        <nav
+          className="flex shrink-0 items-center justify-between gap-2 border-t border-line px-2 py-1.5"
+          aria-label="Step through results"
+        >
+          <button
+            type="button"
+            onClick={() => onStep(-1)}
+            disabled={position.index <= 0}
+            className="focus-ring inline-flex min-h-11 items-center gap-1 rounded-lg px-3 text-xs font-medium text-ink transition hover:bg-canvas disabled:text-muted/50 disabled:hover:bg-transparent"
+          >
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+            Previous
+          </button>
+          <span className="text-xs tabular-nums text-muted" aria-live="polite">
+            {position.index + 1} of {position.total}
+          </span>
+          <button
+            type="button"
+            onClick={() => onStep(1)}
+            disabled={position.index >= position.total - 1}
+            className="focus-ring inline-flex min-h-11 items-center gap-1 rounded-lg px-3 text-xs font-medium text-ink transition hover:bg-canvas disabled:text-muted/50 disabled:hover:bg-transparent"
+          >
+            Next
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </nav>
+      )}
     </div>
   );
 }
