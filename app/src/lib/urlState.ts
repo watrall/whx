@@ -6,6 +6,8 @@ export interface UrlState {
   types: SiteType[];
   years: YearRange | null;
   danger: boolean;
+  /** Site IDs from a shared list link. */
+  list: string[];
 }
 
 const TYPES: SiteType[] = ['cultural', 'natural', 'mixed'];
@@ -32,6 +34,10 @@ export function parseUrlState(hash: string): UrlState {
     types,
     years,
     danger: params.get('danger') === '1',
+    list: (params.get('list') ?? '')
+      .split(',')
+      .filter((id) => /^Q\d+$/.test(id))
+      .slice(0, 150),
   };
 }
 
@@ -43,6 +49,7 @@ export function buildUrlHash(state: {
   years: YearRange;
   domain: YearRange;
   danger: boolean;
+  list: ReadonlySet<string> | null;
 }): string {
   const params = new URLSearchParams();
   if (state.site) params.set('site', state.site);
@@ -54,6 +61,7 @@ export function buildUrlHash(state: {
     params.set('years', `${state.years[0]}-${state.years[1]}`);
   }
   if (state.danger) params.set('danger', '1');
+  if (state.list && state.list.size > 0) params.set('list', [...state.list].join(','));
   const text = params.toString();
   return text ? `#${text}` : '';
 }

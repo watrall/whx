@@ -122,7 +122,7 @@ export function TypeFilter({
           );
         })}
       </div>
-      {extras && <div className="mt-2">{extras}</div>}
+      {extras && <div className="mt-2 grid grid-cols-2 gap-2">{extras}</div>}
     </>
   );
 }

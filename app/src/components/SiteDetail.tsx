@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import {
+  Bookmark,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -29,6 +30,8 @@ interface SiteDetailProps {
   /** The closest other sites, nearest first. */
   nearby?: NearbySite[];
   onSelectNearby?: (site: Site) => void;
+  saved?: boolean;
+  onToggleSaved?: () => void;
 }
 
 export function SiteDetail({
@@ -39,6 +42,8 @@ export function SiteDetail({
   onStep,
   nearby = [],
   onSelectNearby,
+  saved = false,
+  onToggleSaved,
 }: SiteDetailProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -219,6 +224,21 @@ export function SiteDetail({
             <Navigation className="h-3.5 w-3.5" aria-hidden="true" />
             Directions
           </a>
+          {onToggleSaved && (
+            <button
+              type="button"
+              onClick={onToggleSaved}
+              aria-pressed={saved}
+              className={`focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition ${
+                saved
+                  ? 'border-ink bg-ink/5 text-ink'
+                  : 'border-line text-ink hover:bg-canvas'
+              }`}
+            >
+              <Bookmark className={`h-3.5 w-3.5 ${saved ? 'fill-current' : ''}`} aria-hidden="true" />
+              {saved ? 'Saved' : 'Save'}
+            </button>
+          )}
           <button
             type="button"
             onClick={copyLink}

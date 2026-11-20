@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Bookmark,
+  Check,
   ChevronDown,
   Info,
   RotateCcw,
   Search,
+  Share2,
   TriangleAlert,
   X,
 } from 'lucide-react';
@@ -11,6 +14,7 @@ import { Attribution } from './components/Attribution.tsx';
 import { DiscoverActions } from './components/DiscoverActions.tsx';
 import { EmptyState } from './components/EmptyState.tsx';
 import { FilterChip } from './components/FilterChip.tsx';
+import { SharedListBanner } from './components/SharedListBanner.tsx';
 import { Logo } from './components/Logo.tsx';
 import { MapView, type MapViewHandle } from './components/MapView.tsx';
 import { MobileSheet, type SheetSnap } from './components/MobileSheet.tsx';
@@ -26,8 +30,9 @@ import type { Bounds, Site, SiteType, YearRange } from './lib/types.ts';
 import { useDebouncedValue } from './lib/useDebouncedValue.ts';
 import { useMediaQuery } from './lib/useMediaQuery.ts';
 import { useRecentSearches } from './lib/useRecentSearches.ts';
+import { useSavedSites } from './lib/useSavedSites.ts';
 import { nearestSites } from './lib/geo.ts';
-import { NO_EXTRA, hasExtraFilters, matchesExtra } from './lib/filters.ts';
+import { NO_EXTRA, hasExtraFilters, matchesExtra, shareListUrl } from './lib/filters.ts';
 import type { ExtraFilters } from './lib/filters.ts';
 import { buildUrlHash, parseUrlState } from './lib/urlState.ts';
 import {
@@ -95,7 +100,9 @@ export default function App() {
   const [extra, setExtra] = useState<ExtraFilters>({
     ...NO_EXTRA,
     danger: initialUrl.current.danger,
+    listIds: initialUrl.current.list.length > 0 ? new Set(initialUrl.current.list) : null,
   });
+  const [shareCopied, setShareCopied] = useState(false);
   const [yearRange, setYearRange] = useState<YearRange>(FALLBACK_DOMAIN);
   const [domain, setDomain] = useState<YearRange>(FALLBACK_DOMAIN);
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
@@ -118,6 +125,7 @@ export default function App() {
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const debouncedQuery = useDebouncedValue(query, 350);
   const { recent, addRecent, clearRecent } = useRecentSearches();
+  const { saved, toggle: toggleSaved, addMany: saveMany } = useSavedSites();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -169,6 +177,7 @@ export default function App() {
       years: yearRange,
       domain,
       danger: extra.danger,
+      list: extra.listIds,
     });
     const next = `${window.location.pathname}${window.location.search}${hash}`;
     window.history.replaceState(null, '', next);
@@ -220,19 +229,19 @@ export default function App() {
           (types.size === 0 || types.has(site.type)) &&
           matchesYear(site) &&
           matchesQuery(site) &&
-          matchesExtra(site, extra),
+          matchesExtra(site, extra, saved),
       ),
-    [sites, types, matchesYear, matchesQuery, extra],
+    [sites, types, matchesYear, matchesQuery, extra, saved],
   );
 
   const typeCounts = useMemo(() => {
     const counts: Record<SiteType, number> = { cultural: 0, natural: 0, mixed: 0 };
     for (const site of sites) {
-      if (!matchesYear(site) || !matchesQuery(site) || !matchesExtra(site, extra)) continue;
+      if (!matchesYear(site) || !matchesQuery(site) || !matchesExtra(site, extra, saved)) continue;
       counts[site.type] += 1;
     }
     return counts;
-  }, [sites, matchesYear, matchesQuery, extra]);
+  }, [sites, matchesYear, matchesQuery, extra, saved]);
 
   // Danger count ignores the danger filter itself, so the chip shows what turning it on would give.
   const dangerCount = useMemo(
@@ -242,9 +251,10 @@ export default function App() {
           site.danger &&
           (types.size === 0 || types.has(site.type)) &&
           matchesYear(site) &&
-          matchesQuery(site),
+          matchesQuery(site) &&
+          matchesExtra(site, { ...extra, danger: false }, saved),
       ).length,
-    [sites, types, matchesYear, matchesQuery],
+    [sites, types, matchesYear, matchesQuery, extra, saved],
   );
 
   const isFiltered =
@@ -268,9 +278,9 @@ export default function App() {
         (site) =>
           (types.size === 0 || types.has(site.type)) &&
           matchesQuery(site) &&
-          matchesExtra(site, extra),
+          matchesExtra(site, extra, saved),
       ),
-    [sites, types, matchesQuery, extra],
+    [sites, types, matchesQuery, extra, saved],
   );
 
   // Years that have at least one matching site. Playback jumps between these
@@ -326,7 +336,13 @@ export default function App() {
   const detailPosition =
     selectedIndex >= 0 ? { index: selectedIndex, total: sortedFiltered.length } : null;
 
-  const fitKey = `${debouncedQuery}|${Array.from(types).sort().join(',')}`;
+  const fitKey = [
+    debouncedQuery,
+    Array.from(types).sort().join(','),
+    extra.danger,
+    extra.savedOnly,
+    extra.listIds?.size ?? '',
+  ].join('|');
 
   // Changing a filter refits the map to the results, so a card left open would
   // sit over a view that no longer matches it. Close it.
@@ -580,6 +596,53 @@ export default function App() {
     setExtra((prev) => ({ ...prev, danger: !prev.danger }));
   }, []);
 
+  const handleToggleSavedOnly = useCallback(() => {
+    setSelectedSite(null);
+    setExtra((prev) => ({ ...prev, savedOnly: !prev.savedOnly }));
+  }, []);
+
+  const handleShareSaved = useCallback(async () => {
+    const url = shareListUrl(saved, `${window.location.origin}${window.location.pathname}`);
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      window.setTimeout(() => setShareCopied(false), 1800);
+    } catch {
+      setShareCopied(false);
+    }
+  }, [saved]);
+
+  const sharedUnsaved = extra.listIds ? [...extra.listIds].filter((id) => !saved.has(id)).length : 0;
+  const sharedBanner = extra.listIds ? (
+    <SharedListBanner
+      count={extra.listIds.size}
+      unsaved={sharedUnsaved}
+      onSaveAll={() => extra.listIds && saveMany(extra.listIds)}
+      onShowAll={() => {
+        setSelectedSite(null);
+        setExtra((prev) => ({ ...prev, listIds: null }));
+      }}
+    />
+  ) : null;
+
+  const shareButtonFor = (touch: boolean) =>
+    extra.savedOnly && saved.size > 0 ? (
+      <button
+        type="button"
+        onClick={handleShareSaved}
+        className={`focus-ring inline-flex items-center gap-1 rounded-md font-medium text-ink transition hover:underline ${
+          touch ? 'min-h-11 px-2 text-sm' : 'min-h-8 text-xs'
+        }`}
+      >
+        {shareCopied ? (
+          <Check className="h-3.5 w-3.5" aria-hidden="true" />
+        ) : (
+          <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
+        )}
+        {shareCopied ? 'Link copied' : 'Share list'}
+      </button>
+    ) : null;
+
   const dangerChip = (
     <FilterChip
       label="In danger"
@@ -587,6 +650,17 @@ export default function App() {
       count={dangerCount}
       active={extra.danger}
       onClick={handleToggleDanger}
+      variant={isDesktop ? 'desktop' : 'mobile'}
+    />
+  );
+
+  const savedChip = (
+    <FilterChip
+      label="Saved"
+      icon={<Bookmark className={isDesktop ? 'h-3.5 w-3.5' : 'h-4 w-4'} aria-hidden="true" />}
+      count={saved.size}
+      active={extra.savedOnly}
+      onClick={handleToggleSavedOnly}
       variant={isDesktop ? 'desktop' : 'mobile'}
     />
   );
@@ -599,7 +673,12 @@ export default function App() {
       onToggle={handleToggleType}
       onClear={handleClearTypes}
       variant={isDesktop ? 'desktop' : 'mobile'}
-      extras={dangerChip}
+      extras={
+        <>
+          {dangerChip}
+          {savedChip}
+        </>
+      }
     />
   );
 
@@ -722,17 +801,21 @@ export default function App() {
                 <span className="font-semibold text-ink">{formatNumber(filtered.length)}</span>{' '}
                 {filtered.length === 1 ? 'site' : 'sites'} · {pluralize(countries, 'country', 'countries')}
               </p>
-              {isFiltered && (
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="focus-ring inline-flex items-center gap-1 rounded-md text-xs font-medium text-muted transition hover:text-ink"
-                >
-                  <RotateCcw className="h-3 w-3" aria-hidden="true" />
-                  Reset
-                </button>
-              )}
+              <div className="flex items-center gap-3">
+                {shareButtonFor(false)}
+                {isFiltered && (
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="focus-ring inline-flex items-center gap-1 rounded-md text-xs font-medium text-muted transition hover:text-ink"
+                  >
+                    <RotateCcw className="h-3 w-3" aria-hidden="true" />
+                    Reset
+                  </button>
+                )}
+              </div>
             </div>
+            {sharedBanner && <div className="mt-3">{sharedBanner}</div>}
             <div className="mt-3">{typeFilter}</div>
           </div>
 
@@ -788,6 +871,8 @@ export default function App() {
                 onStep={handleStep}
                 nearby={nearby}
                 onSelectNearby={handleSelect}
+                saved={saved.has(selectedSite.id)}
+                onToggleSaved={() => toggleSaved(selectedSite.id)}
                 onClose={() => setSelectedSite(null)}
               />
             )}
@@ -883,6 +968,7 @@ export default function App() {
               <p className="mt-0.5 text-xs text-muted">{formatRange(yearRange)}</p>
             </div>
             <div className="flex items-center gap-1">
+              {shareButtonFor(true)}
               {isFiltered && (
                 <button
                   type="button"
@@ -921,6 +1007,7 @@ export default function App() {
         }
       >
         <div className="flex min-h-0 flex-1 flex-col">
+          {sharedBanner && <div className="px-4 pt-2">{sharedBanner}</div>}
           <DiscoverActions
             className="px-4 pb-1 pt-2"
             onSurprise={() => {
@@ -963,6 +1050,8 @@ export default function App() {
           onStep={handleStep}
           nearby={nearby}
           onSelectNearby={handleSelect}
+          saved={saved.has(selectedSite.id)}
+          onToggleSaved={() => toggleSaved(selectedSite.id)}
           onClose={() => setSelectedSite(null)}
         />
       )}
