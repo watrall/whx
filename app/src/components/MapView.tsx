@@ -13,6 +13,7 @@ import {
 } from '../lib/utils.ts';
 
 export interface MapViewHandle {
+  flyToPoint: (lat: number, lon: number, zoom?: number) => void;
   focusSite: (site: Site, options?: { offset?: [number, number] }) => void;
   fitAll: () => void;
 }
@@ -332,6 +333,9 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
         point.x += offsetX;
         point.y += offsetY;
         map.flyTo(map.unproject(point, zoom), zoom, { duration: 0.7 });
+      },
+      flyToPoint: (lat, lon, zoom = 6) => {
+        mapRef.current?.flyTo([lat, lon], zoom, { duration: 1.1 });
       },
       fitAll: () => {
         const map = mapRef.current;

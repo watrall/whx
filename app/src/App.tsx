@@ -9,6 +9,7 @@ import {
   X,
 } from 'lucide-react';
 import { Attribution } from './components/Attribution.tsx';
+import { DiscoverActions } from './components/DiscoverActions.tsx';
 import { EmptyState } from './components/EmptyState.tsx';
 import { Logo } from './components/Logo.tsx';
 import { MapView, type MapViewHandle } from './components/MapView.tsx';
@@ -93,6 +94,7 @@ export default function App() {
   const [sort, setSort] = useState<SortKey>('name');
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
+  const [discoverNotice, setDiscoverNotice] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [sheetSnap, setSheetSnap] = useState<SheetSnap>('peek');
@@ -333,6 +335,31 @@ export default function App() {
     },
     [addRecent, query, isDesktop],
   );
+
+  const handleSurprise = useCallback(() => {
+    // Prefer sites with a photo, so the first impression is a picture.
+    const withImage = filtered.filter((site) => site.image);
+    const pool = withImage.length > 0 ? withImage : filtered;
+    if (pool.length === 0) return;
+    handleSelect(pool[Math.floor(Math.random() * pool.length)]);
+  }, [filtered, handleSelect]);
+
+  const handleNearMe = useCallback(() => {
+    if (!('geolocation' in navigator)) {
+      setDiscoverNotice('Location is not available in this browser.');
+      return;
+    }
+    setDiscoverNotice('Finding you…');
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setDiscoverNotice(null);
+        setSelectedSite(null);
+        mapRef.current?.flyToPoint(position.coords.latitude, position.coords.longitude, 6);
+      },
+      () => setDiscoverNotice('Could not get your location. Check browser permissions.'),
+      { timeout: 8000, maximumAge: 300000 },
+    );
+  }, []);
 
   const handleStep = useCallback(
     (delta: -1 | 1) => {
@@ -601,6 +628,13 @@ export default function App() {
 
           <div className="px-4 pb-3">{searchField}</div>
 
+          <DiscoverActions
+            className="px-4 pb-1"
+            onSurprise={handleSurprise}
+            onNearMe={handleNearMe}
+            notice={discoverNotice}
+          />
+
           <div className="px-4 pb-3">
             <div className="flex items-baseline justify-between gap-2">
               <p className="text-xs text-muted">
@@ -811,6 +845,15 @@ export default function App() {
         }
       >
         <div className="flex min-h-0 flex-1 flex-col">
+          <DiscoverActions
+            className="px-4 pb-1 pt-2"
+            onSurprise={() => {
+              handleSurprise();
+              setSheetSnap('peek');
+            }}
+            onNearMe={handleNearMe}
+            notice={discoverNotice}
+          />
           <div className="flex items-center justify-between gap-2 border-t border-line px-4 py-2">
             <h2 className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
               Sites in view
