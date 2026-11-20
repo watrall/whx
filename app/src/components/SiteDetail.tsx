@@ -181,23 +181,23 @@ export function SiteDetail({
       <div ref={scrollRef} className="scroll-thin min-h-0 overflow-y-auto overscroll-contain p-4">
         <div className="flex flex-wrap items-center gap-1.5">
           <span
-            className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-semibold leading-none"
+            className="inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-xs font-semibold leading-none"
             style={{
               backgroundColor: TYPE_TINT[site.type],
               color: TYPE_INK[site.type],
             }}
           >
-            <TypeIcon type={site.type} className="h-3 w-3" />
+            <TypeIcon type={site.type} className="h-3.5 w-3.5" />
             {TYPE_LABEL[site.type]}
           </span>
           {newFromYear !== undefined && site.year !== null && site.year >= newFromYear && (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink px-2 py-1 text-xs font-semibold leading-none text-ink">
+            <span className="inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-xs font-semibold leading-none border border-ink text-ink">
               New in {site.year}
             </span>
           )}
           {site.danger && (
             <span
-              className="inline-flex items-center gap-1.5 rounded-full bg-danger px-3 py-1.5 text-sm font-semibold leading-none text-canvas"
+              className="inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-xs font-semibold leading-none bg-danger text-canvas"
               title="Listed by UNESCO as World Heritage in Danger"
             >
               <TriangleAlert className="h-3.5 w-3.5" aria-hidden="true" />
