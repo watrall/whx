@@ -21,6 +21,22 @@ export interface MapViewHandle {
   fitAll: () => void;
 }
 
+export type ControlSize = 'sm' | 'md';
+
+/** Shared by the zoom stack and any extra buttons so every control matches. */
+export const MAP_CONTROL = {
+  sm: {
+    stack: 'gap-1.5',
+    button: 'h-8 w-8 rounded-lg',
+    icon: 'h-3.5 w-3.5',
+  },
+  md: {
+    stack: 'gap-2',
+    button: 'h-10 w-10 rounded-xl',
+    icon: 'h-4 w-4',
+  },
+} as const;
+
 interface MapViewProps {
   sites: Site[];
   selectedSite: Site | null;
@@ -38,6 +54,8 @@ interface MapViewProps {
   rippleYear?: number | null;
   /** Extra buttons added to the end of the map control stack (such as locate). */
   extraControls?: ReactNode;
+  /** "sm" is the compact desktop stack; "md" keeps touch-sized buttons for phones. */
+  controlSize?: ControlSize;
   className?: string;
 }
 
@@ -65,6 +83,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     initialFocus = null,
     rippleYear = null,
     extraControls,
+    controlSize = 'md',
     className = '',
   },
   ref,
@@ -363,14 +382,16 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
   return (
     <div className={`relative h-full w-full ${className}`}>
       <div ref={containerRef} className="absolute inset-0" aria-label="Map of World Heritage sites" />
-      <div className={`absolute z-[500] flex flex-col gap-2 ${controlsSideClass} ${controlsBottomClass}`}>
+      <div
+        className={`absolute z-[500] flex flex-col ${MAP_CONTROL[controlSize].stack} ${controlsSideClass} ${controlsBottomClass}`}
+      >
         <button
           type="button"
           onClick={() => mapRef.current?.zoomIn()}
           aria-label="Zoom in"
-          className="focus-ring grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95"
+          className={`focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL[controlSize].button}`}
         >
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <svg viewBox="0 0 24 24" className={MAP_CONTROL[controlSize].icon} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
         </button>
@@ -378,9 +399,9 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
           type="button"
           onClick={() => mapRef.current?.zoomOut()}
           aria-label="Zoom out"
-          className="focus-ring grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95"
+          className={`focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL[controlSize].button}`}
         >
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <svg viewBox="0 0 24 24" className={MAP_CONTROL[controlSize].icon} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M5 12h14" />
           </svg>
         </button>
@@ -394,9 +415,9 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
             if (bounds.isValid()) map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
           }}
           aria-label="Fit all sites"
-          className="focus-ring grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95"
+          className={`focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL[controlSize].button}`}
         >
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg viewBox="0 0 24 24" className={MAP_CONTROL[controlSize].icon} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" />
           </svg>
         </button>

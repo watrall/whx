@@ -23,7 +23,7 @@ import { EmptyState } from './components/EmptyState.tsx';
 import { FilterChip } from './components/FilterChip.tsx';
 import { SharedListBanner, SharedListChip } from './components/SharedListBanner.tsx';
 import { Logo } from './components/Logo.tsx';
-import { MapView, type MapViewHandle } from './components/MapView.tsx';
+import { MAP_CONTROL, MapView, type MapViewHandle } from './components/MapView.tsx';
 import { MobileSheet, type SheetSnap } from './components/MobileSheet.tsx';
 import { Modal } from './components/Modal.tsx';
 import { PlaybackReadout } from './components/PlaybackReadout.tsx';
@@ -805,22 +805,22 @@ export default function App() {
         onClick={handleNearMe}
         aria-label="Near me"
         title="Near me"
-        className="focus-ring grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95"
+        className={`focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL.sm.button}`}
       >
-        <LocateFixed className="h-4 w-4" aria-hidden="true" />
+        <LocateFixed className={MAP_CONTROL.sm.icon} aria-hidden="true" />
       </button>
       <button
         type="button"
         onClick={handleSurprise}
         aria-label="Surprise me"
         title="Surprise me"
-        className="focus-ring grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95"
+        className={`focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL.sm.button}`}
       >
-        <Shuffle className="h-4 w-4" aria-hidden="true" />
+        <Shuffle className={MAP_CONTROL.sm.icon} aria-hidden="true" />
       </button>
       <p
         role="status"
-        className="absolute bottom-0 left-12 w-max max-w-[240px] rounded-lg border border-line bg-surface px-3 py-2 text-xs text-muted shadow-card empty:hidden"
+        className="absolute bottom-0 left-10 w-max max-w-[240px] rounded-lg border border-line bg-surface px-3 py-2 text-xs text-muted shadow-card empty:hidden"
       >
         {discoverNotice ?? ''}
       </p>
@@ -975,8 +975,9 @@ export default function App() {
               onHover={(site) => setHighlightedId(site?.id ?? null)}
               onBoundsChange={setBounds}
               onMapClick={() => setSelectedSite(null)}
-              controlsBottomClass="bottom-28"
+              controlsBottomClass="bottom-4"
               controlsSideClass="left-4"
+              controlSize="sm"
               extraControls={mapActionControls}
               initialFocus={initialFocus}
               rippleYear={playing ? playYear : null}
