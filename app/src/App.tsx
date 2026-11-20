@@ -758,7 +758,8 @@ export default function App() {
   }
 
   return (
-    <div className="relative h-dvh overflow-hidden bg-canvas text-ink">
+    <main className="relative h-dvh overflow-hidden bg-canvas text-ink">
+      <h1 className="sr-only">World Heritage Explorer</h1>
       <MapView
         ref={mapRef}
         sites={filtered}
@@ -913,6 +914,6 @@ export default function App() {
 
       {searchOverlay}
       {aboutModal}
-    </div>
+    </main>
   );
 }

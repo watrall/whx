@@ -389,7 +389,7 @@ export function Timeline({
               <button
                 type="button"
                 onClick={onCycleSpeed}
-                aria-label={`Playback speed ${speed}x. Change speed`}
+                aria-label={`${speed}× playback speed, change`}
                 title="Playback speed"
                 className="focus-ring grid h-9 min-w-9 place-items-center rounded-full px-2 text-xs font-semibold tabular-nums text-muted transition hover:bg-canvas hover:text-ink"
               >

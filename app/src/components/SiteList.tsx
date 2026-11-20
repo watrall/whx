@@ -68,7 +68,6 @@ export function SiteList({
               onFocus={() => onHover(site)}
               onBlur={() => onHover(null)}
               aria-current={selected ? 'true' : undefined}
-              aria-label={`${site.name}, ${siteMeta(site)}`}
               className={`focus-ring absolute left-0 top-0 flex w-full items-center gap-3 border-b border-line/60 px-4 text-left transition-colors ${
                 selected
                   ? 'bg-sunken'

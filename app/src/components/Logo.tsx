@@ -15,9 +15,9 @@ export function Logo({ className = '' }: { className?: string }) {
     <div className={`flex items-center gap-2.5 ${className}`}>
       <LogoMark className="h-8 w-8 shrink-0" />
       <span className="leading-none">
-        <span className="block font-serif text-xl font-medium tracking-tight text-ink">
+        <h1 className="font-serif text-xl font-medium leading-none tracking-tight text-ink">
           World Heritage
-        </span>
+        </h1>
         <span className="mt-1 block text-xs font-medium uppercase tracking-[0.18em] text-muted">
           Explorer
         </span>
