@@ -8,6 +8,7 @@ export default {
       sm: ['0.8125rem', { lineHeight: '1.25rem' }],
       base: ['0.9375rem', { lineHeight: '1.4rem' }],
       lg: ['1.125rem', { lineHeight: '1.5rem' }],
+      title: ['1.25rem', { lineHeight: '1.5rem' }],
       xl: ['1.375rem', { lineHeight: '1.75rem' }],
       '2xl': ['1.75rem', { lineHeight: '2rem' }],
       '4xl': ['3rem', { lineHeight: '1' }],
