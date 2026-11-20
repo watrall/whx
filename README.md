@@ -4,7 +4,7 @@ A map-first explorer for UNESCO World Heritage Sites, sourced from Wikidata. Bro
 
 ## Features
 
-- **1,265 unique sites** across 181 countries, plotted from Wikidata's `P1435` (heritage designation) and `P757` (UNESCO ID) properties.
+- **1,265 unique sites** across 173 countries, plotted from Wikidata's `P1435` (heritage designation) and `P757` (UNESCO ID) properties.
 - **Clustered map** with hover sync between markers and the site list.
 - **Type filters** for cultural, natural, and mixed sites.
 - **Inscription timeline** with drag handles and playback.
