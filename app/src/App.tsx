@@ -46,7 +46,6 @@ import { NO_EXTRA, hasExtraFilters, matchesExtra, shareListUrl } from './lib/fil
 import type { ExtraFilters } from './lib/filters.ts';
 import { buildUrlHash, parseUrlState } from './lib/urlState.ts';
 import {
-  TYPE_ORDER,
   countryCount,
   formatNumber,
   formatRange,
@@ -691,14 +690,13 @@ export default function App() {
     />
   ) : null;
 
-  const shareButtonFor = (touch: boolean) =>
+  // Phones only: on desktop the strip carries this button.
+  const sheetShareButton =
     extra.savedOnly && saved.size > 0 ? (
       <button
         type="button"
         onClick={handleShareSaved}
-        className={`focus-ring inline-flex items-center gap-1 rounded-md font-medium text-ink transition hover:underline ${
-          touch ? 'min-h-11 px-2 text-sm' : 'min-h-8 text-xs'
-        }`}
+        className="focus-ring inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-sm font-medium text-ink transition hover:underline"
       >
         {shareCopied ? (
           <Check className="h-3.5 w-3.5" aria-hidden="true" />

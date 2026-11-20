@@ -7,7 +7,7 @@ import type {
 } from 'react';
 import { Pause, Play } from 'lucide-react';
 import type { Site, SiteType, YearRange } from '../lib/types.ts';
-import { TYPE_COLOR, TYPE_ORDER, formatNumber, formatRange, pluralize } from '../lib/utils.ts';
+import { TYPE_COLOR, TYPE_ORDER, formatRange, pluralize } from '../lib/utils.ts';
 
 interface TimelineProps {
   sites: Site[];

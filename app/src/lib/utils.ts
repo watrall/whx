@@ -189,10 +189,6 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-export function siteTooltipHtml(site: Site): string {
-  return `<div class="wh-tooltip__title">${escapeHtml(site.name)}</div><div class="wh-tooltip__meta">${escapeHtml(siteMeta(site))}</div>`;
-}
-
 export function inBounds(site: Site, bounds: Bounds | null): boolean {
   if (!bounds) return true;
   const [[south, west], [north, east]] = bounds;
