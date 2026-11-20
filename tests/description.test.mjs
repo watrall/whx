@@ -38,3 +38,25 @@ test('directions link to the right maps app for the platform', () => {
   assert.equal(directionsUrl(site, false), 'https://www.google.com/maps/dir/?api=1&destination=41.9,12.45');
   assert.equal(directionsUrl(site, true), 'https://maps.apple.com/?daddr=41.9,12.45&q=Vatican%20City');
 });
+
+import { distanceKm, formatDistance, nearestSites } from '../app/src/lib/geo.ts';
+
+test('distanceKm matches a known city pair', () => {
+  // Paris to London is about 344 km.
+  const km = distanceKm({ lat: 48.8566, lon: 2.3522 }, { lat: 51.5074, lon: -0.1278 });
+  assert.ok(km > 340 && km < 348, `got ${km}`);
+  assert.equal(distanceKm({ lat: 10, lon: 10 }, { lat: 10, lon: 10 }), 0);
+});
+
+test('nearestSites excludes the origin and sorts by distance', () => {
+  const mk = (id, lat, lon) => ({ id, lat, lon });
+  const out = nearestSites(mk('a', 0, 0), [mk('a', 0, 0), mk('far', 0, 50), mk('near', 0, 1), mk('mid', 0, 10)], 2);
+  assert.deepEqual(out.map((x) => x.site.id), ['near', 'mid']);
+});
+
+test('formatDistance picks sensible precision and units', () => {
+  assert.equal(formatDistance(0.4, false), '<1 km');
+  assert.equal(formatDistance(4.26, false), '4.3 km');
+  assert.equal(formatDistance(1234, false), '1,234 km');
+  assert.equal(formatDistance(100, true), '62 mi');
+});

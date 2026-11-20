@@ -26,6 +26,7 @@ import type { Bounds, Site, SiteType, YearRange } from './lib/types.ts';
 import { useDebouncedValue } from './lib/useDebouncedValue.ts';
 import { useMediaQuery } from './lib/useMediaQuery.ts';
 import { useRecentSearches } from './lib/useRecentSearches.ts';
+import { nearestSites } from './lib/geo.ts';
 import { NO_EXTRA, hasExtraFilters, matchesExtra } from './lib/filters.ts';
 import type { ExtraFilters } from './lib/filters.ts';
 import { buildUrlHash, parseUrlState } from './lib/urlState.ts';
@@ -316,6 +317,11 @@ export default function App() {
   const selectedIndex = useMemo(
     () => (selectedSite ? sortedFiltered.findIndex((site) => site.id === selectedSite.id) : -1),
     [selectedSite, sortedFiltered],
+  );
+  // Nearby uses the current results, so every suggestion has a marker on the map.
+  const nearby = useMemo(
+    () => (selectedSite ? nearestSites(selectedSite, filtered, 3) : []),
+    [selectedSite, filtered],
   );
   const detailPosition =
     selectedIndex >= 0 ? { index: selectedIndex, total: sortedFiltered.length } : null;
@@ -780,6 +786,8 @@ export default function App() {
                 variant="desktop"
                 position={detailPosition}
                 onStep={handleStep}
+                nearby={nearby}
+                onSelectNearby={handleSelect}
                 onClose={() => setSelectedSite(null)}
               />
             )}
@@ -953,6 +961,8 @@ export default function App() {
           variant="mobile"
           position={detailPosition}
           onStep={handleStep}
+          nearby={nearby}
+          onSelectNearby={handleSelect}
           onClose={() => setSelectedSite(null)}
         />
       )}

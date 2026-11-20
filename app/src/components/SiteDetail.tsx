@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import {
   Check,
@@ -11,10 +11,12 @@ import {
   X,
 } from 'lucide-react';
 import type { Site } from '../lib/types.ts';
+import { formatDistance } from '../lib/geo.ts';
+import type { NearbySite } from '../lib/geo.ts';
 import { parseCriteria } from '../lib/criteria.ts';
 import { TYPE_INK, TYPE_LABEL, TYPE_TINT, directionsUrl, imageCreditUrl, siteMeta, unescoUrl } from '../lib/utils.ts';
 import { SiteDescription } from './SiteDescription.tsx';
-import { SiteImage } from './SiteImage.tsx';
+import { SiteImage, SiteThumb } from './SiteImage.tsx';
 import { TypeIcon } from './TypeIcon.tsx';
 
 interface SiteDetailProps {
@@ -24,6 +26,9 @@ interface SiteDetailProps {
   /** Position within the current results, to step through them. */
   position?: { index: number; total: number } | null;
   onStep?: (delta: -1 | 1) => void;
+  /** The closest other sites, nearest first. */
+  nearby?: NearbySite[];
+  onSelectNearby?: (site: Site) => void;
 }
 
 export function SiteDetail({
@@ -32,7 +37,16 @@ export function SiteDetail({
   variant = 'desktop',
   position = null,
   onStep,
+  nearby = [],
+  onSelectNearby,
 }: SiteDetailProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Stepping or picking a nearby site swaps the content in place; start at the top.
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [site.id]);
+
   const criteria = parseCriteria(site.criteria);
   const creditUrl = imageCreditUrl(site.image);
   const officialUrl = unescoUrl(site);
@@ -153,7 +167,7 @@ export function SiteDetail({
         </button>
       </div>
 
-      <div className="scroll-thin min-h-0 overflow-y-auto overscroll-contain p-4">
+      <div ref={scrollRef} className="scroll-thin min-h-0 overflow-y-auto overscroll-contain p-4">
         <div className="flex flex-wrap items-center gap-1.5">
           <span
             className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-semibold leading-none"
@@ -257,6 +271,38 @@ export function SiteDetail({
                       {criterion.description}
                     </span>
                   </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {nearby.length > 0 && onSelectNearby && (
+          <section className="mt-5" aria-labelledby={`nearby-${site.id}`}>
+            <h3
+              id={`nearby-${site.id}`}
+              className="text-xs font-semibold uppercase tracking-[0.1em] text-muted"
+            >
+              Nearby
+            </h3>
+            <ul className="mt-2 space-y-1">
+              {nearby.map(({ site: other, km }) => (
+                <li key={other.id}>
+                  <button
+                    type="button"
+                    onClick={() => onSelectNearby(other)}
+                    className="focus-ring -mx-2 flex min-h-12 w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-1.5 text-left transition hover:bg-canvas"
+                  >
+                    <SiteThumb site={other} size="sm" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium leading-tight text-ink">
+                        {other.name}
+                      </span>
+                      <span className="mt-0.5 block truncate text-xs text-muted">
+                        {formatDistance(km)} away · {TYPE_LABEL[other.type]}
+                      </span>
+                    </span>
+                  </button>
                 </li>
               ))}
             </ul>
