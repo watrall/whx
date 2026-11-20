@@ -223,6 +223,11 @@ export default function App() {
     return counts;
   }, [sites, matchesYear, matchesQuery]);
 
+  const isFiltered =
+    query.trim() !== '' ||
+    types.size > 0 ||
+    yearRange[0] !== domain[0] ||
+    yearRange[1] !== domain[1];
   const playYear = yearRange[1];
   const addedInYear = useMemo(
     () => (playing ? filtered.filter((site) => site.year === playYear).length : 0),
@@ -641,14 +646,16 @@ export default function App() {
                 <span className="font-semibold text-ink">{formatNumber(filtered.length)}</span>{' '}
                 sites · {formatNumber(countries)} countries
               </p>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="focus-ring inline-flex items-center gap-1 rounded-md text-xs font-medium text-muted transition hover:text-ink"
-              >
-                <RotateCcw className="h-3 w-3" aria-hidden="true" />
-                Reset
-              </button>
+              {isFiltered && (
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="focus-ring inline-flex items-center gap-1 rounded-md text-xs font-medium text-muted transition hover:text-ink"
+                >
+                  <RotateCcw className="h-3 w-3" aria-hidden="true" />
+                  Reset
+                </button>
+              )}
             </div>
             <div className="mt-3">{typeFilter}</div>
           </div>
@@ -797,33 +804,23 @@ export default function App() {
               <p className="mt-0.5 text-xs text-muted">{formatRange(yearRange)}</p>
             </div>
             <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={handlePlayToggle}
-                aria-label={playing ? 'Pause timeline' : 'Play timeline'}
-                className="focus-ring grid h-8 w-8 place-items-center rounded-lg border border-line bg-surface text-ink transition hover:bg-canvas"
-              >
-                {playing ? (
-                  <Pause className="h-3.5 w-3.5" aria-hidden="true" />
-                ) : (
-                  <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                aria-label="Reset filters"
-                className="focus-ring grid h-8 w-8 place-items-center rounded-lg border border-line bg-surface text-muted transition hover:bg-canvas hover:text-ink"
-              >
-                <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-              </button>
+              {isFiltered && (
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="focus-ring inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-ink transition hover:bg-canvas"
+                >
+                  <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                  Reset
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setAboutOpen(true)}
                 aria-label="About this project"
-                className="focus-ring grid h-8 w-8 place-items-center rounded-lg border border-line bg-surface text-muted transition hover:bg-canvas hover:text-ink"
+                className="focus-ring grid h-11 w-11 place-items-center rounded-lg text-muted transition hover:bg-canvas hover:text-ink"
               >
-                <Info className="h-3.5 w-3.5" aria-hidden="true" />
+                <Info className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
           </div>
