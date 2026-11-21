@@ -8,6 +8,7 @@ import type {
 } from 'react';
 import { Pause, Play } from 'lucide-react';
 import type { Site, SiteType, YearRange } from '../lib/types.ts';
+import { rangeAfterYearClick } from '../lib/timeline.ts';
 import { TYPE_COLOR, TYPE_ORDER, formatRange, pluralize } from '../lib/utils.ts';
 
 interface TimelineProps {
@@ -28,10 +29,10 @@ interface TimelineProps {
 
 type Handle = 'start' | 'end';
 
-function clamp(value: number, min: number, max: number): number {
 /** Share of each year's slot that its bar fills; the rest is the gap between bars. */
 const BAR_FILL = 0.84;
 
+function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
@@ -203,19 +204,13 @@ export function Timeline({
     event.stopPropagation();
   };
 
+  // A click on a year's bar filters to that year alone; a second click on it clears the filter.
   const onChartClick = (event: ReactMouseEvent<HTMLDivElement>) => {
     const rect = chartRef.current?.getBoundingClientRect();
     if (!rect) return;
     const year = yearFromClientX(event.clientX, rect);
-    const startDistance = Math.abs(year - value[0]);
-    const endDistance = Math.abs(year - value[1]);
-    if (startDistance <= endDistance) {
-      const nextStart = Math.min(year, value[1]);
-      if (nextStart !== value[0]) onChange([nextStart, value[1]]);
-    } else {
-      const nextEnd = Math.max(year, value[0]);
-      if (nextEnd !== value[1]) onChange([value[0], nextEnd]);
-    }
+    const next = rangeAfterYearClick(year, value, domain, yearCounts.has(year));
+    if (next[0] !== value[0] || next[1] !== value[1]) onChange(next);
   };
 
   const onChartDoubleClick = () => {
@@ -312,7 +307,7 @@ export function Timeline({
         </span>
         <div
           ref={chartRef}
-          className={`relative flex-1 ${compact ? 'h-9' : 'h-12'}`}
+          className={`relative flex-1 ${compact ? 'h-9' : 'h-12'} ${hoverTotal > 0 ? 'cursor-pointer' : ''}`}
           onClick={onChartClick}
           onDoubleClick={onChartDoubleClick}
           onPointerMove={onChartPointerMove}
@@ -348,6 +343,12 @@ export function Timeline({
             className="pointer-events-none absolute inset-y-0 border-x border-ink/20 bg-ink/[0.04]"
             style={{ left: `${startPct}%`, width: `${Math.max(endPct - startPct, 0)}%` }}
           />
+          {hoverYear !== null && hoverTotal > 0 && !compact && (
+            <div
+              className="pointer-events-none absolute inset-y-0 rounded-sm bg-ink/[0.06]"
+              style={{ left: `${((hoverYear - domain[0]) / years) * 100}%`, width: `${100 / years}%` }}
+            />
+          )}
           {handleStart}
           {handleEnd}
           {hoverYear !== null && !compact && (
