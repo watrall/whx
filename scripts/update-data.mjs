@@ -13,7 +13,7 @@ import { writePhotos } from './build-photos.mjs';
 const ENDPOINT = 'https://query.wikidata.org/sparql';
 const SOURCE = 'scripts.js';
 const OUTPUT = 'data/sites.json';
-const USER_AGENT = 'WikidataWorldHeritageExplorer/1.0 (data update; https://github.com/watrall/wikidata-world-heritage)';
+const USER_AGENT = 'WHX/1.0 (data update; https://github.com/watrall/whx)';
 const REQUEST_TIMEOUT_MS = 60000;
 
 async function main() {

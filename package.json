@@ -1,5 +1,5 @@
 {
-  "name": "wikidata-world-heritage",
+  "name": "whx",
   "version": "2.0.0",
   "private": true,
   "description": "Interactive map of UNESCO World Heritage Sites.",

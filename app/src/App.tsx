@@ -869,7 +869,7 @@ export default function App() {
           UNESCO
         </a>
         <a
-          href="https://github.com/watrall/wikidata-world-heritage"
+          href="https://github.com/watrall/whx"
           target="_blank"
           rel="noreferrer"
           className="focus-ring inline-flex h-8 items-center rounded-lg border border-line bg-surface px-3 text-xs font-medium text-ink transition hover:bg-canvas"
