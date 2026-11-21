@@ -17,6 +17,8 @@ interface TimelineProps {
   onChange: (range: YearRange) => void;
   playing: boolean;
   onTogglePlay: () => void;
+  /** Gives the play button a faint pulse while the first-visit hint points at it. */
+  nudgePlay?: boolean;
   speed?: number;
   onCycleSpeed?: () => void;
   count: number;
@@ -37,6 +39,7 @@ export function Timeline({
   onChange,
   playing,
   onTogglePlay,
+  nudgePlay = false,
   speed = 1,
   onCycleSpeed,
   count,
@@ -293,7 +296,7 @@ export function Timeline({
             type="button"
             onClick={onTogglePlay}
             aria-label={playing ? 'Pause timeline' : 'Play timeline'}
-            className="focus-ring grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-surface text-ink active:scale-95"
+            className={`focus-ring grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-surface text-ink active:scale-95 ${nudgePlay && !playing ? 'wh-nudge' : ''}`}
           >
             {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
           </button>
@@ -399,7 +402,7 @@ export function Timeline({
               type="button"
               onClick={onTogglePlay}
               aria-label={playing ? 'Pause timeline' : 'Play timeline'}
-              className="group relative focus-ring grid h-9 w-9 place-items-center rounded-full border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95"
+              className={`group relative focus-ring grid h-9 w-9 place-items-center rounded-full border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${nudgePlay && !playing ? 'wh-nudge' : ''}`}
             >
               {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
               <MapTooltip placement="aboveEnd">{playing ? 'Pause (Space)' : 'Play (Space)'}</MapTooltip>

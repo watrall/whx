@@ -1071,6 +1071,7 @@ export default function App() {
             onChange={setYearRange}
             playing={playing}
             onTogglePlay={handlePlayToggle}
+            nudgePlay={showHint}
             speed={speed}
             onCycleSpeed={() => setSpeed((value) => (value === 1 ? 2 : value === 2 ? 4 : 1))}
             count={filtered.length}
@@ -1173,6 +1174,7 @@ export default function App() {
               onChange={setYearRange}
               playing={playing}
               onTogglePlay={handlePlayToggle}
+              nudgePlay={showHint}
               count={filtered.length}
               compact
             />

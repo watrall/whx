@@ -308,6 +308,20 @@ img[data-preview='atlas'] {
   }
 }
 
+/* First-visit hint: a faint ring that pulses three times from the play button. */
+.wh-nudge {
+  animation: wh-nudge 2.4s var(--ease-out) 0.4s 3;
+}
+@keyframes wh-nudge {
+  0% {
+    box-shadow: 0 0 0 0 oklch(var(--ink) / 0.28);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 9px oklch(var(--ink) / 0);
+  }
+}
+
 /* Map style picker: each style slides out from the layers tile and back. */
 .wh-fan {
   animation: wh-fan 160ms var(--ease-out) both;

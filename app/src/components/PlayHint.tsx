@@ -16,7 +16,7 @@ export function PlayHint({ onDismiss, placement }: PlayHintProps) {
   return (
     <div
       role="note"
-      className={`animate-fade-up z-[700] w-64 rounded-xl border border-line bg-surface p-3 shadow-float ${
+      className={`animate-fade-up z-[700] w-64 rounded-xl border border-line-strong bg-surface p-3 shadow-float ${
         desktop
           ? 'absolute bottom-[124px] right-4'
           : 'fixed bottom-[calc(152px+env(safe-area-inset-bottom)+40px)] left-4'
