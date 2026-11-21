@@ -28,6 +28,7 @@ import { Logo } from './components/Logo.tsx';
 import { MAP_CONTROL, MapView, type MapViewHandle } from './components/MapView.tsx';
 import { MobileSheet, type SheetSnap } from './components/MobileSheet.tsx';
 import { Modal } from './components/Modal.tsx';
+import { PlayHint } from './components/PlayHint.tsx';
 import { PlaybackReadout } from './components/PlaybackReadout.tsx';
 import { SearchOverlay } from './components/SearchOverlay.tsx';
 import { SiteDetail } from './components/SiteDetail.tsx';
@@ -117,6 +118,24 @@ export default function App() {
     country: initialUrl.current.country,
   });
   const [shareCopied, setShareCopied] = useState(false);
+
+  // A one-time nudge toward the play button, shown a moment after the map is ready.
+  const [hintReady, setHintReady] = useState(false);
+  const [hintSeen, setHintSeen] = useState(() => {
+    try {
+      return window.localStorage.getItem('wh-play-hint') === '1';
+    } catch {
+      return false;
+    }
+  });
+  const dismissHint = useCallback(() => {
+    setHintSeen(true);
+    try {
+      window.localStorage.setItem('wh-play-hint', '1');
+    } catch {
+      // Private mode: the hint simply shows again next visit.
+    }
+  }, []);
   const [yearRange, setYearRange] = useState<YearRange>(FALLBACK_DOMAIN);
   const [domain, setDomain] = useState<YearRange>(FALLBACK_DOMAIN);
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
@@ -407,12 +426,25 @@ export default function App() {
     }
     // Playback is a global story: clear the detail card, tuck the sheet away and
     // frame every site that will appear, not just the ones drawn at this instant.
+    dismissHint();
     setSelectedSite(null);
     setHighlightedId(null);
     setSheetSnap('peek');
     mapRef.current?.fitSites(timelineSites);
     setPlaying(true);
-  }, [playing, yearRange, domain, timelineSites]);
+  }, [playing, yearRange, domain, timelineSites, dismissHint]);
+
+  useEffect(() => {
+    if (loading || hintSeen) return;
+    const show = window.setTimeout(() => setHintReady(true), 2500);
+    const hide = window.setTimeout(() => setHintReady(false), 16000);
+    return () => {
+      window.clearTimeout(show);
+      window.clearTimeout(hide);
+    };
+  }, [loading, hintSeen]);
+
+  const showHint = hintReady && !hintSeen && !playing && !selectedSite && !searchOpen && !aboutOpen;
 
   const handleReset = useCallback(() => {
     setQuery('');
@@ -1084,6 +1116,7 @@ export default function App() {
               </div>
             )}
           </div>
+          {showHint && <PlayHint placement="desktop" onDismiss={dismissHint} />}
           <Timeline
             sites={timelineSites}
             domain={domain}
@@ -1230,6 +1263,8 @@ export default function App() {
           className="fixed left-1/2 top-[calc(env(safe-area-inset-top)+80px)] z-[450] -translate-x-1/2"
         />
       )}
+
+      {showHint && <PlayHint placement="mobile" onDismiss={dismissHint} />}
 
       <Attribution className="pointer-events-auto fixed right-0 z-[450] rounded-tl-md bg-surface/90 px-2 py-1 bottom-[calc(152px+env(safe-area-inset-bottom))]" />
 
