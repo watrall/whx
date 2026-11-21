@@ -104,6 +104,7 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
 }
 
 const PLAY_HINT_KEY = 'wh-play-hint';
+const BASE_TITLE = document.title;
 
 export default function App() {
   // Read the hash once so a shared link restores the view it was copied from.
@@ -220,6 +221,11 @@ export default function App() {
     const next = `${window.location.pathname}${window.location.search}${hash}`;
     window.history.replaceState(null, '', next);
   }, [loading, selectedSite, debouncedQuery, types, yearRange, domain, extra]);
+
+  // The tab, history and bookmarks name the open site.
+  useEffect(() => {
+    document.title = selectedSite ? `${selectedSite.name} · WHX` : BASE_TITLE;
+  }, [selectedSite]);
 
   useEffect(() => {
     const onVisibility = () => {
