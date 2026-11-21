@@ -365,7 +365,11 @@ export default function App() {
 
   useEffect(() => {
     if (loading || hintSeen) return;
-    const show = window.setTimeout(() => setHintReady(true), 2500);
+    const show = window.setTimeout(() => {
+      setHintReady(true);
+      // Remember it as soon as it appears, so it is only ever shown on a first visit.
+      writeStored(PLAY_HINT_KEY, '1');
+    }, 2500);
     const hide = window.setTimeout(() => setHintReady(false), 16000);
     return () => {
       window.clearTimeout(show);
