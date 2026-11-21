@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { ListFilter } from 'lucide-react';
 
@@ -12,6 +12,26 @@ interface FiltersMenuProps {
 export function FiltersMenu({ activeCount, children }: FiltersMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  // Horizontal nudge that keeps the panel inside the viewport.
+  const [shift, setShift] = useState(0);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    const place = () => {
+      const panel = panelRef.current;
+      const root = rootRef.current;
+      if (!panel || !root) return;
+      const margin = 8;
+      const left = root.getBoundingClientRect().left;
+      const width = panel.offsetWidth;
+      const maxLeft = window.innerWidth - margin - width;
+      setShift(Math.max(margin, Math.min(left, maxLeft)) - left);
+    };
+    place();
+    window.addEventListener('resize', place);
+    return () => window.removeEventListener('resize', place);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -50,7 +70,11 @@ export function FiltersMenu({ activeCount, children }: FiltersMenuProps) {
         {active && <span className="tabular-nums text-canvas/70">{activeCount}</span>}
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-30 mt-1 w-[320px] space-y-2 rounded-xl border border-line bg-surface p-2 shadow-float">
+        <div
+          ref={panelRef}
+          style={{ left: shift }}
+          className="absolute top-full z-30 mt-1 w-[320px] max-w-[calc(100vw-1rem)] space-y-2 rounded-xl border border-line bg-surface p-2 shadow-float"
+        >
           {children}
         </div>
       )}
