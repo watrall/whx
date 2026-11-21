@@ -1,3 +1,4 @@
+import { MapTooltip } from './MapTooltip.tsx';
 import { useMemo, useRef, useState } from 'react';
 import type {
   KeyboardEvent as ReactKeyboardEvent,
@@ -242,7 +243,6 @@ export function Timeline({
       aria-valuemax={domain[1]}
       aria-valuenow={value[0]}
       aria-valuetext={`${value[0]}`}
-      title="Start year"
       className="focus-ring absolute top-0 bottom-0 z-10 w-11 -translate-x-1/2 cursor-ew-resize touch-none"
       style={{ left: `${startPct}%` }}
       onKeyDown={(event) => onHandleKeyDown('start', event)}
@@ -267,7 +267,6 @@ export function Timeline({
       aria-valuemax={domain[1]}
       aria-valuenow={value[1]}
       aria-valuetext={`${value[1]}`}
-      title="End year"
       className="focus-ring absolute top-0 bottom-0 z-10 w-11 -translate-x-1/2 cursor-ew-resize touch-none"
       style={{ left: `${endPct}%` }}
       onKeyDown={(event) => onHandleKeyDown('end', event)}
@@ -390,20 +389,20 @@ export function Timeline({
                 type="button"
                 onClick={onCycleSpeed}
                 aria-label={`${speed}× playback speed, change`}
-                title="Playback speed"
-                className="focus-ring grid h-9 min-w-9 place-items-center rounded-full px-2 text-xs font-semibold tabular-nums text-muted transition hover:bg-canvas hover:text-ink"
+                className="group relative focus-ring grid h-9 min-w-9 place-items-center rounded-full px-2 text-xs font-semibold tabular-nums text-muted transition hover:bg-canvas hover:text-ink"
               >
                 {speed}×
+                <MapTooltip>Playback speed</MapTooltip>
               </button>
             )}
             <button
               type="button"
               onClick={onTogglePlay}
               aria-label={playing ? 'Pause timeline' : 'Play timeline'}
-              title={playing ? 'Pause timeline (Space)' : 'Play timeline (Space)'}
-              className="focus-ring grid h-9 w-9 place-items-center rounded-full border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95"
+              className="group relative focus-ring grid h-9 w-9 place-items-center rounded-full border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95"
             >
               {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
+              <MapTooltip placement="aboveEnd">{playing ? 'Pause (Space)' : 'Play (Space)'}</MapTooltip>
             </button>
           </div>
         )}
