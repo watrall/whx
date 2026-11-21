@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { ListFilter } from 'lucide-react';
+import { useDismiss } from '../lib/useDismiss.ts';
 
 interface FiltersMenuProps {
   /** How many of the folded filters are on. */
@@ -33,24 +34,8 @@ export function FiltersMenu({ activeCount, children }: FiltersMenuProps) {
     return () => window.removeEventListener('resize', place);
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.stopPropagation();
-        setOpen(false);
-      }
-    };
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('keydown', onKeyDown, true);
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('keydown', onKeyDown, true);
-    };
-  }, [open]);
+  const close = useCallback(() => setOpen(false), []);
+  useDismiss(open, rootRef, close);
 
   const active = activeCount > 0;
   return (
