@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Site } from '../lib/types.ts';
 import { TYPE_COLOR } from '../lib/utils.ts';
 import { TypeIcon } from './TypeIcon.tsx';
@@ -33,9 +33,13 @@ export function SiteImage({
   className = '',
 }: SiteImageProps) {
   const [failed, setFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const imageRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     setFailed(false);
+    // A cached image can finish before the load handler is attached.
+    setLoaded(Boolean(imageRef.current?.complete && imageRef.current.naturalWidth > 0));
   }, [site.image]);
 
   if (!site.image || failed) {
@@ -53,13 +57,15 @@ export function SiteImage({
 
   return (
     <img
+      ref={imageRef}
       src={withWidth(site.image, width ?? 900)}
       alt={alt}
       loading={loading}
       decoding="async"
       referrerPolicy="no-referrer"
+      onLoad={() => setLoaded(true)}
       onError={() => setFailed(true)}
-      className={`object-cover ${className}`}
+      className={`object-cover transition-opacity duration-200 ${loaded ? 'opacity-100' : 'opacity-0'} ${className}`}
     />
   );
 }
