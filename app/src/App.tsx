@@ -363,17 +363,29 @@ export default function App() {
     setPlaying(true);
   }, [playing, yearRange, domain, timelineSites, dismissHint]);
 
+  // The hint appears a moment after the page is in front of the visitor, and only once ever.
+  // Waiting for a visible page matters: a tab opened in the background would otherwise use up
+  // the hint before anyone saw it.
   useEffect(() => {
     if (loading || hintSeen) return;
-    const show = window.setTimeout(() => {
-      setHintReady(true);
-      // Remember it as soon as it appears, so it is only ever shown on a first visit.
-      writeStored(PLAY_HINT_KEY, '1');
-    }, 2500);
-    const hide = window.setTimeout(() => setHintReady(false), 16000);
+    let show: number | undefined;
+    let hide: number | undefined;
+    const arm = () => {
+      window.clearTimeout(show);
+      if (document.visibilityState !== 'visible' || hide !== undefined) return;
+      show = window.setTimeout(() => {
+        setHintReady(true);
+        // Remember it as soon as it appears, so it is only ever shown on a first visit.
+        writeStored(PLAY_HINT_KEY, '1');
+        hide = window.setTimeout(() => setHintReady(false), 30000);
+      }, 2500);
+    };
+    arm();
+    document.addEventListener('visibilitychange', arm);
     return () => {
       window.clearTimeout(show);
       window.clearTimeout(hide);
+      document.removeEventListener('visibilitychange', arm);
     };
   }, [loading, hintSeen]);
 
