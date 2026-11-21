@@ -843,14 +843,14 @@ export default function App() {
   const aboutModal = (
     <Modal open={aboutOpen} onClose={() => setAboutOpen(false)} title="About World Heritage Explorer">
       <p className="text-sm leading-relaxed text-muted">
-        An independent, map-first explorer for UNESCO World Heritage Sites, built from Wikidata and
-        the World Heritage Centre's own data. Filter by type, criterion or danger, scrub the
-        inscription timeline, and open a site for its story.
+        An independent, map-first explorer for UNESCO World Heritage Sites. Filter by type,
+        criterion or danger, scrub the inscription timeline, and open a site for its story.
       </p>
       <p className="mt-3 text-sm leading-relaxed text-muted">
-        Sites, coordinates and images come from Wikidata. Descriptions, countries and
-        inscription years come from UNESCO/World Heritage Centre; descriptions are published under
-        CC BY-SA 3.0 IGO. Basemap © OpenStreetMap contributors. Boundaries and labels are illustrative. Not affiliated with UNESCO;
+        The sites, countries, years, criteria, coordinates and descriptions come from UNESCO's
+        World Heritage Centre; the descriptions are published under CC BY-SA 3.0 IGO. Photos and
+        the Wikidata links come from Wikidata and Wikimedia Commons. Map tiles are © OpenStreetMap
+        contributors (Atlas), CARTO (Streets) and Esri (Satellite). Not affiliated with UNESCO;
         verify details on the official site.
       </p>
       <p className="mt-2 text-xs leading-relaxed text-muted">
@@ -971,7 +971,7 @@ export default function App() {
           <div className="min-h-0 flex-1 border-t border-line">{listBody}</div>
 
           <footer className="flex items-center justify-between gap-2 border-t border-line px-4 py-2.5">
-            <p className="text-xs text-muted">Data: Wikidata · UNESCO</p>
+            <p className="text-xs text-muted">Data: UNESCO · Wikidata</p>
           </footer>
         </aside>
 
@@ -1036,7 +1036,7 @@ export default function App() {
             )}
             {loading && (
               <div className="pointer-events-none absolute left-4 top-[4.5rem] z-[500] rounded-full border border-line bg-surface/95 px-3 py-1.5 text-xs font-medium text-muted shadow-card backdrop-blur">
-                Loading sites from Wikidata…
+                Loading sites…
               </div>
             )}
             {error && (

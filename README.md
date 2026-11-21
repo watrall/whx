@@ -9,6 +9,7 @@ An independent, map-first explorer for UNESCO World Heritage Sites. It puts ever
 - Search by site name or country, including everyday names: "Turkey" finds "Türkiye".
 - Filters that combine: type, In danger, Saved, selection criterion, and country. The counts on each filter update live to show what turning it on would give.
 - An inscription timeline: drag the handles to a range of years, or press play to watch the List grow year by year, with a ripple on each new site.
+- Three map styles with previews: Atlas, Streets and Satellite.
 - Near me flies the map to where you are. Surprise me opens a random site, preferring ones with a photo.
 
 **Learn about a site**
@@ -33,7 +34,7 @@ An independent, map-first explorer for UNESCO World Heritage Sites. It puts ever
 
 ## Data
 
-All of the data is public. Unfortunately, there isn't a single, reliable API-based data source for the complete site information.  As such, the app combines five sources, and a few things it works out itself.
+All of the data is public. Unfortunately, there isn't a single, reliable API-based data source for the complete site information. As such, the app combines seven sources, and a few things it works out itself.
 
 ### Where it comes from
 
@@ -43,7 +44,9 @@ All of the data is public. Unfortunately, there isn't a single, reliable API-bas
 | **Wikidata** | For each site, a photograph and a link to its Wikidata item | CC0 |
 | **Wikipedia**, "List of World Heritage in Danger" | A short reason, and the year listed, for sites that UNESCO flags as in danger | CC BY-SA 4.0 |
 | **Wikimedia Commons** | The photographs themselves. Each one is requested at the size it is shown, and credited with a link to its Commons page, where the author and licence are given | Set per photo |
-| **OpenStreetMap** | The basemap tiles, softened so the markers stand out | ODbL |
+| **OpenStreetMap** | The Atlas map style: basemap tiles, softened so the markers stand out | ODbL |
+| **CARTO** | The Streets map style (Voyager tiles), when a free CARTO key is set | CARTO Basemaps terms; free for non-commercial use |
+| **Esri** | The Satellite map style (World Imagery tiles), when a free ArcGIS key is set | Esri terms; free account |
 
 The museum glyph in the wordmark is by [juicy_fish](https://www.flaticon.com/free-icon/museum_6981458) on Flaticon, used under the Flaticon free licence with attribution in the About panel.
 
