@@ -29,6 +29,9 @@ interface TimelineProps {
 type Handle = 'start' | 'end';
 
 function clamp(value: number, min: number, max: number): number {
+/** Share of each year's slot that its bar fills; the rest is the gap between bars. */
+const BAR_FILL = 0.84;
+
   return Math.min(Math.max(value, min), max);
 }
 
@@ -89,8 +92,9 @@ export function Timeline({
     const culturalHeight = (counts.cultural / total) * totalHeight;
     const naturalHeight = (counts.natural / total) * totalHeight;
     const mixedHeight = (counts.mixed / total) * totalHeight;
-    const x = index * barWidth;
-    const width = Math.max(barWidth - 0.6, 0.4);
+    const x = index * barWidth + (barWidth * (1 - BAR_FILL)) / 2;
+    // A slim gap on each side of the bar keeps neighbouring years apart.
+    const width = barWidth * BAR_FILL;
     let y = 48;
     if (culturalHeight > 0) {
       y -= culturalHeight;
