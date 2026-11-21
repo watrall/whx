@@ -12,6 +12,7 @@ import {
   TriangleAlert,
   X,
 } from 'lucide-react';
+import { MapTooltip } from './components/MapTooltip.tsx';
 import { Attribution } from './components/Attribution.tsx';
 import { CountryChip } from './components/CountryChip.tsx';
 import { CriteriaFilter } from './components/CriteriaFilter.tsx';
@@ -807,19 +808,19 @@ export default function App() {
         type="button"
         onClick={handleNearMe}
         aria-label="Near me"
-        title="Near me"
-        className={`focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL.sm.button}`}
+        className={`group relative focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL.sm.button}`}
       >
         <LocateFixed className={MAP_CONTROL.sm.icon} aria-hidden="true" />
+        <MapTooltip placement="right">Near me</MapTooltip>
       </button>
       <button
         type="button"
         onClick={handleSurprise}
         aria-label="Surprise me"
-        title="Surprise me"
-        className={`focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL.sm.button}`}
+        className={`group relative focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL.sm.button}`}
       >
         <Shuffle className={MAP_CONTROL.sm.icon} aria-hidden="true" />
+        <MapTooltip placement="right">Surprise me</MapTooltip>
       </button>
       <p
         role="status"

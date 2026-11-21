@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import { BasemapPicker } from './BasemapPicker.tsx';
+import { MapTooltip } from './MapTooltip.tsx';
 import type { Basemap, BasemapId } from '../lib/basemaps.ts';
 import type { Bounds, Site, SiteType } from '../lib/types.ts';
 import {
@@ -484,6 +485,8 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     [],
   );
 
+  const tooltipSide = controlsSideClass.startsWith('left') ? 'right' : 'left';
+
   return (
     <div className={`relative h-full w-full ${className}`}>
       <div ref={containerRef} data-basemap={basemap.id} className="absolute inset-0" aria-label="Map of World Heritage sites" />
@@ -494,21 +497,23 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
           type="button"
           onClick={() => mapRef.current?.zoomIn()}
           aria-label="Zoom in"
-          className={`focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL[controlSize].button}`}
+          className={`group relative focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL[controlSize].button}`}
         >
           <svg viewBox="0 0 24 24" className={MAP_CONTROL[controlSize].icon} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
+          <MapTooltip placement={tooltipSide}>Zoom in</MapTooltip>
         </button>
         <button
           type="button"
           onClick={() => mapRef.current?.zoomOut()}
           aria-label="Zoom out"
-          className={`focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL[controlSize].button}`}
+          className={`group relative focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL[controlSize].button}`}
         >
           <svg viewBox="0 0 24 24" className={MAP_CONTROL[controlSize].icon} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M5 12h14" />
           </svg>
+          <MapTooltip placement={tooltipSide}>Zoom out</MapTooltip>
         </button>
         <button
           type="button"
@@ -520,11 +525,12 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
             if (bounds.isValid()) map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
           }}
           aria-label="Fit all sites"
-          className={`focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL[controlSize].button}`}
+          className={`group relative focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL[controlSize].button}`}
         >
           <svg viewBox="0 0 24 24" className={MAP_CONTROL[controlSize].icon} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" />
           </svg>
+          <MapTooltip placement={tooltipSide}>Fit all sites</MapTooltip>
         </button>
         {extraControls}
         {basemaps.length > 1 && (
