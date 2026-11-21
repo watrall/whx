@@ -106,6 +106,16 @@ export function normalizeSearch(value: string): string {
     .trim();
 }
 
+/**
+ * Whether a search word is found in a site's search text. Longer words match anywhere, so
+ * "cath" finds "Cathedral". Words of one or two letters and numbers must match a whole word,
+ * so "uk" does not match Ukraine and "158" does not match site 1158.
+ */
+export function tokenMatches(text: string, token: string): boolean {
+  if (token.length <= 2 || /^\d+$/.test(token)) return ` ${text} `.includes(` ${token} `);
+  return text.includes(token);
+}
+
 export function siteSearchText(site: Site): string {
   return normalizeSearch(
     [site.name, site.countries.join(' '), countryAliases(site.countries), site.id]

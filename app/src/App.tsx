@@ -54,6 +54,7 @@ import {
   normalizeSearch,
   pluralize,
   siteSearchText,
+  tokenMatches,
 } from './lib/utils.ts';
 
 type SortKey = 'name' | 'year' | 'country' | 'distance';
@@ -227,7 +228,7 @@ export default function App() {
     (site: Site) => {
       if (tokens.length === 0) return true;
       const text = searchIndex.get(site.id) ?? '';
-      return tokens.every((token) => text.includes(token));
+      return tokens.every((token) => tokenMatches(text, token));
     },
     [searchIndex, tokens],
   );

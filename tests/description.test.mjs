@@ -59,3 +59,24 @@ test('nearbyOrNearest falls back to the nearest sites when none are close', () =
   assert.equal(out.mode, 'nearest');
   assert.deepEqual(out.items.map((x) => x.site.id), ['x', 'y', 'z']);
 });
+
+import { siteSearchText, tokenMatches } from '../app/src/lib/utils.ts';
+
+test('long search words match anywhere in the text', () => {
+  assert.equal(tokenMatches('historic cathedral of aachen', 'cath'), true);
+  assert.equal(tokenMatches('historic cathedral of aachen', 'xyz'), false);
+});
+
+test('short and numeric search words must match a whole word', () => {
+  assert.equal(tokenMatches('ukraine kyiv', 'uk'), false);
+  assert.equal(tokenMatches('united kingdom uk', 'uk'), true);
+  assert.equal(tokenMatches('site 1158 something', '158'), false);
+  assert.equal(tokenMatches('site 158 something', '158'), true);
+});
+
+test('the search text includes everyday country names and the UNESCO number', () => {
+  const text = siteSearchText({ id: '1', name: 'Hattusha', countries: ['Türkiye'] });
+  assert.match(text, /turkey/);
+  assert.match(text, /turkiye/);
+  assert.match(text, /\b1\b/);
+});
