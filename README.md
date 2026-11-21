@@ -6,7 +6,7 @@ An independent, map-first explorer for UNESCO World Heritage Sites. It puts ever
 
 **Explore the map**
 - Every site on one map, with pins by type (cultural, natural, mixed) and clusters whose coloured ring shows what mix of types they contain.
-- Search by site name or country.
+- Search by site name or country, including everyday names: "Turkey" finds "Türkiye".
 - Filters that combine: type, In danger, Saved, selection criterion, and country. The counts on each filter update live to show what turning it on would give.
 - An inscription timeline: drag the handles to a range of years, or press play to watch the List grow year by year, with a ripple on each new site.
 - Near me flies the map to where you are. Surprise me opens a random site, preferring ones with a photo.
@@ -15,6 +15,7 @@ An independent, map-first explorer for UNESCO World Heritage Sites. It puts ever
 - UNESCO's own description, with credit.
 - The selection criteria in plain language, for example "Ideas and beliefs" instead of "(vi)".
 - Every country a transboundary site spans, each one a filter.
+- Serial sites show every one of their places on the map: the Carpathian beech forests appear as all 93 parts across 18 countries, not as a single pin.
 - For sites on the List of World Heritage in Danger: a red flag, the year they were listed, and a short reason.
 - A photo with its credit, and a "New" badge on recent inscriptions.
 - The nearest sites, with distances. Where nothing is within a day trip, it says "Nearest sites" instead.
@@ -38,10 +39,10 @@ All of the data is public. The app combines five sources, and a few things it wo
 
 | Source | What the app takes from it | Licence |
 |---|---|---|
-| **Wikidata** | The list of World Heritage Sites, each with its UNESCO ID, coordinates, photo, selection criteria, a one-line description, and a country and year as fallbacks | CC0 |
-| **UNESCO World Heritage Centre**, XML export | The official site name, every country, the year of inscription, whether the site is in danger, and UNESCO's short description of the site | Descriptions: CC BY-SA 3.0 IGO |
+| **UNESCO World Heritage Centre**, XML export | The list of sites itself: each site's official name, every country, year of inscription, category, selection criteria, whether it is in danger, UNESCO's short description, and the coordinates of every place that makes up the property | Descriptions: CC BY-SA 3.0 IGO |
+| **Wikidata** | For each site, a photograph and a link to its Wikidata item | CC0 |
 | **Wikipedia**, "List of World Heritage in Danger" | A short reason, and the year listed, for sites that UNESCO flags as in danger | CC BY-SA 4.0 |
-| **Wikimedia Commons** | The photographs. Each one is requested at the size it is shown, and credited with a link to its Commons page, where the author and licence are given | Set per photo |
+| **Wikimedia Commons** | The photographs themselves. Each one is requested at the size it is shown, and credited with a link to its Commons page, where the author and licence are given | Set per photo |
 | **OpenStreetMap** | The basemap tiles, softened so the markers stand out | ODbL |
 
 The museum glyph in the wordmark is by [juicy_fish](https://www.flaticon.com/free-icon/museum_6981458) on Flaticon, used under the Flaticon free licence with attribution in the About panel.
@@ -50,10 +51,12 @@ The plain-language wording of the ten selection criteria is written in the app, 
 
 ### How the sources are combined
 
-1. **Wikidata supplies the sites.** Entries that are extensions or revisions of the same property (UNESCO IDs ending in bis, ter, rev and similar) are folded into one by their UNESCO ID, and anything without a name or coordinates is dropped. Coordinates are Wikidata's, so each site is a single point on the map.
-2. **UNESCO's export is joined on the UNESCO number.** It overrides Wikidata's name, countries and year of inscription, and supplies the danger flag. Wikidata's name stays searchable, so either spelling finds the site, and Wikidata's country name stays searchable too, so "Turkey" finds "Türkiye". A site missing from UNESCO's file keeps Wikidata's values, with years before 1978 (the first inscriptions) treated as unknown.
-3. **Type comes from the criteria.** A site meeting any of criteria (i) to (vi) is cultural, any of (vii) to (x) is natural, and both is mixed.
-4. **The description is UNESCO's.** Where UNESCO has none, Wikidata's one-liner is shown only if it says something, so boilerplate like "World Heritage site in Iran and Azerbaijan" is hidden.
-5. **"In danger" follows UNESCO's flag.** Wikipedia's list adds the reason and start year only for sites UNESCO flags, matched by UNESCO number or name. Where the two sources disagree about which sites are in danger, UNESCO's flag wins and the Wikipedia entry is ignored. A few recent additions have no reason in either source yet, so they show the status and year only.
-6. **Links are built from the UNESCO number.** The "View on UNESCO" link always points to the canonical page for the property, even when Wikidata holds an extension ID.
-7. **Some figures are worked out by the app itself.** These are the nearest sites and their distances, the live filter counts, the "New" badge (the latest two inscription years), the cluster rings, and the CSV and GeoJSON exports, which contain facts and links but not UNESCO's description text.
+1. **UNESCO's export is the list.** Every site comes from it, all 1,273 of them, so the app's counts match UNESCO's own: for example 13 sites in Peru, 62 in Italy, and 54 in danger.
+2. **Each site gets one pin.** Most sites have a single coordinate. A serial site has one for every place in it, and its pin is the place nearest the middle of them all. Opening a serial site draws every place and frames them together. Three sites have no coordinates in UNESCO's file: two take Wikidata's, and the First World War memorial sites use an approximate point in the middle of the Western Front.
+3. **Type comes from UNESCO's category**, and the selection criteria are shown in plain language.
+4. **Photographs come from Wikidata.** Each Wikidata item is matched to a UNESCO site by its UNESCO number. Where Wikidata also holds items for the individual parts of a serial site, the photo of the property itself is preferred. About 4% of sites have no photograph in Wikidata and show their type icon instead.
+5. **The description is UNESCO's.** Nothing is borrowed from Wikidata or Wikipedia for the description, and a site with none shows none.
+6. **"In danger" follows UNESCO's flag.** Wikipedia's list adds the reason and start year only for sites UNESCO flags, matched by UNESCO number or name. Where the two sources disagree about which sites are in danger, UNESCO's flag wins and the Wikipedia entry is ignored. A few recent additions have no reason in either source yet, so they show the status and year only.
+7. **Links are built from the UNESCO number.** The "View on UNESCO" link points to the property's page, and the Wikidata link goes to the item matched to it.
+8. **Search understands everyday country names.** UNESCO uses formal names ("Türkiye", "Russian Federation"), so a short list of everyday names is kept alongside them.
+9. **Some figures are worked out by the app itself.** These are the nearest sites and their distances, the live filter counts, the "New" badge (the latest two inscription years), the cluster rings, and the CSV and GeoJSON exports, which contain facts and links but not UNESCO's description text.
