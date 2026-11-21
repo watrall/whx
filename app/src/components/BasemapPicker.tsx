@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Basemap, BasemapId } from '../lib/basemaps.ts';
 import { thumbnailUrl } from '../lib/basemaps.ts';
 import { useDismiss } from '../lib/useDismiss.ts';
@@ -7,80 +7,101 @@ interface BasemapPickerProps {
   basemaps: Basemap[];
   value: BasemapId;
   onChange: (id: BasemapId) => void;
-  /** On phones the picker folds down to the current style, so it does not cover the map. */
-  collapsible: boolean;
-  className?: string;
+  /** Sizes the tile to match the other map controls. */
+  tileClass: string;
+  /** Anchors the row of styles to the tile, growing away from the edge of the map. */
+  popClass: string;
 }
 
-function Preview({ basemap, className }: { basemap: Basemap; className: string }) {
+function Tooltip({ children }: { children: string }) {
+  return (
+    <span
+      role="tooltip"
+      className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-md bg-ink px-2 py-1 text-xs font-medium text-canvas opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+    >
+      {children}
+    </span>
+  );
+}
+
+function Preview({ basemap }: { basemap: Basemap }) {
   return (
     <img
       src={thumbnailUrl(basemap)}
       alt=""
       draggable={false}
       data-preview={basemap.id}
-      className={`bg-canvas object-cover ${className}`}
+      className="h-full w-full rounded-[inherit] bg-canvas object-cover"
     />
   );
 }
 
-/** Map-style previews that sit on the map beside the controls, as in Google Maps and Mapbox. */
-export function BasemapPicker({ basemaps, value, onChange, collapsible, className = '' }: BasemapPickerProps) {
-  const [expanded, setExpanded] = useState(false);
+/**
+ * A small map-style tile for the control stack. It shows the style you would switch to;
+ * pressing it fans out every style, each named on hover.
+ */
+export function BasemapPicker({ basemaps, value, onChange, tileClass, popClass }: BasemapPickerProps) {
+  const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const fold = useCallback(() => setExpanded(false), []);
-  useDismiss(collapsible && expanded, rootRef, fold);
+  const tileRef = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
+  const close = useCallback(() => setOpen(false), []);
+  useDismiss(open, rootRef, close);
 
-  const current = basemaps.find((basemap) => basemap.id === value) ?? basemaps[0];
+  // The tile hides while the styles are showing, so hand focus back to it when they fold away.
+  useEffect(() => {
+    if (wasOpen.current && !open) tileRef.current?.focus();
+    wasOpen.current = open;
+  }, [open]);
 
-  if (collapsible && !expanded) {
-    return (
-      <div ref={rootRef} className={`absolute z-[500] ${className}`}>
-        <button
-          type="button"
-          onClick={() => setExpanded(true)}
-          aria-label={`Map style: ${current.label}. Change`}
-          aria-expanded={false}
-          className="focus-ring block overflow-hidden rounded-xl border-2 border-surface shadow-card active:scale-95"
-        >
-          <Preview basemap={current} className="h-11 w-11" />
-        </button>
-      </div>
-    );
-  }
+  // Show the last style that is not the current one, so Atlas offers Satellite.
+  const offered = [...basemaps].reverse().find((basemap) => basemap.id !== value) ?? basemaps[0];
+  const frame = `group relative block border border-line shadow-card transition active:scale-95 focus-ring ${tileClass}`;
 
   return (
-    <div ref={rootRef} className={`absolute z-[500] ${className}`}>
-      <div
-        role="radiogroup"
+    <div ref={rootRef} className="relative">
+      <button
+        ref={tileRef}
+        type="button"
+        onClick={() => setOpen(true)}
         aria-label="Map style"
-        className="flex gap-1 rounded-xl border border-line bg-surface p-1 shadow-card"
+        aria-expanded={open}
+        tabIndex={open ? -1 : 0}
+        className={`${frame} ${open ? 'invisible' : ''}`}
       >
-        {basemaps.map((basemap) => {
-          const selected = basemap.id === value;
-          return (
-            <button
-              key={basemap.id}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              onClick={() => {
-                onChange(basemap.id);
-                setExpanded(false);
-              }}
-              className="focus-ring group flex w-14 flex-col items-center gap-1 rounded-lg p-0.5 text-xs"
-            >
-              <Preview
-                basemap={basemap}
-                className={`h-12 w-12 rounded-md border-2 transition ${
-                  selected ? 'border-ink' : 'border-transparent group-hover:border-line'
-                }`}
-              />
-              <span className={selected ? 'font-semibold text-ink' : 'text-muted'}>{basemap.label}</span>
-            </button>
-          );
-        })}
-      </div>
+        <Preview basemap={offered} />
+        {!open && <Tooltip>Layers</Tooltip>}
+      </button>
+      {open && (
+        <div
+          role="radiogroup"
+          aria-label="Map style"
+          className={`absolute bottom-0 flex gap-1.5 ${popClass}`}
+        >
+          {basemaps.map((basemap) => {
+            const selected = basemap.id === value;
+            return (
+              <div key={basemap.id} className="relative">
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  aria-label={basemap.label}
+                  autoFocus={selected}
+                  onClick={() => {
+                    onChange(basemap.id);
+                    close();
+                  }}
+                  className={`${frame} ${selected ? 'ring-2 ring-ink' : ''}`}
+                >
+                  <Preview basemap={basemap} />
+                  <Tooltip>{basemap.label}</Tooltip>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

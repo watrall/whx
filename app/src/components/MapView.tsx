@@ -487,15 +487,6 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
   return (
     <div className={`relative h-full w-full ${className}`}>
       <div ref={containerRef} data-basemap={basemap.id} className="absolute inset-0" aria-label="Map of World Heritage sites" />
-      {basemaps.length > 1 && (
-        <BasemapPicker
-          basemaps={basemaps}
-          value={basemap.id}
-          onChange={onBasemapChange}
-          collapsible={controlSize === 'md'}
-          className={`${controlsBottomClass} ${controlsSideClass.startsWith('left') ? 'left-14' : 'right-16'}`}
-        />
-      )}
       <div
         className={`absolute z-[500] flex flex-col ${MAP_CONTROL[controlSize].stack} ${controlsSideClass} ${controlsBottomClass}`}
       >
@@ -536,6 +527,15 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
           </svg>
         </button>
         {extraControls}
+        {basemaps.length > 1 && (
+          <BasemapPicker
+            basemaps={basemaps}
+            value={basemap.id}
+            onChange={onBasemapChange}
+            tileClass={MAP_CONTROL[controlSize].button}
+            popClass={controlsSideClass.startsWith('left') ? 'left-0' : 'right-0'}
+          />
+        )}
       </div>
     </div>
   );
