@@ -15,11 +15,9 @@ const DATA_FILES = [
   'danger.json',
   'photos.json',
 ];
-const base = process.env.VITE_BASE || '/wikidata-world-heritage/';
 
-export default defineConfig(({ command }) => ({
+export default defineConfig({
   root: __dirname,
-  base: command === 'build' ? base : '/',
   plugins: [
     react(),
     {
@@ -50,4 +48,4 @@ export default defineConfig(({ command }) => ({
     outDir: 'dist',
     emptyOutDir: true,
   },
-}));
+});
