@@ -16,7 +16,15 @@ import type { Site } from '../lib/types.ts';
 import { formatDistance } from '../lib/geo.ts';
 import type { NearbySite } from '../lib/geo.ts';
 import { criteriaFromCodes } from '../lib/criteria.ts';
-import { TYPE_INK, TYPE_LABEL, TYPE_TINT, directionsUrl, imageCreditUrl, unescoUrl } from '../lib/utils.ts';
+import {
+  TYPE_INK,
+  TYPE_LABEL,
+  TYPE_TINT,
+  directionsUrl,
+  formatNumber,
+  imageCreditUrl,
+  unescoUrl,
+} from '../lib/utils.ts';
 import { DangerNote } from './DangerNote.tsx';
 import { SiteDescription } from './SiteDescription.tsx';
 import { SiteImage, SiteThumb } from './SiteImage.tsx';
@@ -401,7 +409,7 @@ export function SiteDetail({
             Previous
           </button>
           <span className="text-xs tabular-nums text-muted" aria-live="polite">
-            {position.index + 1} of {position.total}
+            {formatNumber(position.index + 1)} of {formatNumber(position.total)}
           </span>
           <button
             type="button"
