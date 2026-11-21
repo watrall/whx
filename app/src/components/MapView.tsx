@@ -533,7 +533,8 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
             value={basemap.id}
             onChange={onBasemapChange}
             tileClass={MAP_CONTROL[controlSize].button}
-            popClass={controlsSideClass.startsWith('left') ? 'left-0' : 'right-0'}
+            iconClass={MAP_CONTROL[controlSize].icon}
+            side={controlsSideClass.startsWith('left') ? 'left' : 'right'}
           />
         )}
       </div>

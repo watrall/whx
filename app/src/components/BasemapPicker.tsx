@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
+import { Layers } from 'lucide-react';
 import type { Basemap, BasemapId } from '../lib/basemaps.ts';
 import { thumbnailUrl } from '../lib/basemaps.ts';
 import { useDismiss } from '../lib/useDismiss.ts';
+
+/** How long the fold-away animation runs before the row is removed. Keep in step with .wh-fold in index.css. */
+const FOLD_MS = 140;
 
 interface BasemapPickerProps {
   basemaps: Basemap[];
@@ -9,8 +14,9 @@ interface BasemapPickerProps {
   onChange: (id: BasemapId) => void;
   /** Sizes the tile to match the other map controls. */
   tileClass: string;
-  /** Anchors the row of styles to the tile, growing away from the edge of the map. */
-  popClass: string;
+  iconClass: string;
+  /** Which end of the row sits on the tile: the row grows away from the map's edge. */
+  side: 'left' | 'right';
 }
 
 function Tooltip({ children }: { children: string }) {
@@ -24,38 +30,36 @@ function Tooltip({ children }: { children: string }) {
   );
 }
 
-function Preview({ basemap }: { basemap: Basemap }) {
-  return (
-    <img
-      src={thumbnailUrl(basemap)}
-      alt=""
-      draggable={false}
-      data-preview={basemap.id}
-      className="h-full w-full rounded-[inherit] bg-canvas object-cover"
-    />
-  );
-}
-
 /**
- * A small map-style tile for the control stack. It shows the style you would switch to;
- * pressing it fans out every style, each named on hover.
+ * One fixed layers tile in the control stack. Pressing it rolls out a preview of each map
+ * style; choosing one switches the map and folds the row back into the tile.
  */
-export function BasemapPicker({ basemaps, value, onChange, tileClass, popClass }: BasemapPickerProps) {
+export function BasemapPicker({ basemaps, value, onChange, tileClass, iconClass, side }: BasemapPickerProps) {
   const [open, setOpen] = useState(false);
+  // The row stays mounted a moment after closing so it can animate away.
+  const [shown, setShown] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const tileRef = useRef<HTMLButtonElement>(null);
-  const wasOpen = useRef(false);
+  const wasShown = useRef(false);
+
   const close = useCallback(() => setOpen(false), []);
   useDismiss(open, rootRef, close);
 
-  // The tile hides while the styles are showing, so hand focus back to it when they fold away.
   useEffect(() => {
-    if (wasOpen.current && !open) tileRef.current?.focus();
-    wasOpen.current = open;
+    if (open) {
+      setShown(true);
+      return;
+    }
+    const timer = window.setTimeout(() => setShown(false), FOLD_MS);
+    return () => window.clearTimeout(timer);
   }, [open]);
 
-  // Show the last style that is not the current one, so Atlas offers Satellite.
-  const offered = [...basemaps].reverse().find((basemap) => basemap.id !== value) ?? basemaps[0];
+  // The tile hides while the styles are showing, so hand focus back to it when they have folded away.
+  useEffect(() => {
+    if (wasShown.current && !shown) tileRef.current?.focus();
+    wasShown.current = shown;
+  }, [shown]);
+
   const frame = `group relative block border border-line shadow-card transition active:scale-95 focus-ring ${tileClass}`;
 
   return (
@@ -66,22 +70,29 @@ export function BasemapPicker({ basemaps, value, onChange, tileClass, popClass }
         onClick={() => setOpen(true)}
         aria-label="Map style"
         aria-expanded={open}
-        tabIndex={open ? -1 : 0}
-        className={`${frame} ${open ? 'invisible' : ''}`}
+        tabIndex={shown ? -1 : 0}
+        className={`${frame} grid place-items-center bg-surface text-ink hover:bg-canvas ${shown ? 'invisible' : ''}`}
       >
-        <Preview basemap={offered} />
-        {!open && <Tooltip>Layers</Tooltip>}
+        <Layers className={iconClass} aria-hidden="true" />
+        <Tooltip>Layers</Tooltip>
       </button>
-      {open && (
+      {shown && (
         <div
           role="radiogroup"
           aria-label="Map style"
-          className={`absolute bottom-0 flex gap-1.5 ${popClass}`}
+          className={`absolute bottom-0 flex gap-1.5 ${side === 'left' ? 'left-0' : 'right-0'}`}
         >
-          {basemaps.map((basemap) => {
+          {basemaps.map((basemap, index) => {
             const selected = basemap.id === value;
+            // How many places along the row this style travels from the tile, and in which direction.
+            const hops = side === 'left' ? index : basemaps.length - 1 - index;
+            const fan = {
+              '--hops': hops,
+              '--dir': side === 'left' ? -1 : 1,
+              animationDelay: `${(open ? hops : 0) * 35}ms`,
+            } as CSSProperties;
             return (
-              <div key={basemap.id} className="relative">
+              <div key={basemap.id} className={`relative ${open ? 'wh-fan' : 'wh-fold'}`} style={fan}>
                 <button
                   type="button"
                   role="radio"
@@ -94,7 +105,13 @@ export function BasemapPicker({ basemaps, value, onChange, tileClass, popClass }
                   }}
                   className={`${frame} ${selected ? 'ring-2 ring-ink' : ''}`}
                 >
-                  <Preview basemap={basemap} />
+                  <img
+                    src={thumbnailUrl(basemap)}
+                    alt=""
+                    draggable={false}
+                    data-preview={basemap.id}
+                    className="h-full w-full rounded-[inherit] bg-canvas object-cover"
+                  />
                   <Tooltip>{basemap.label}</Tooltip>
                 </button>
               </div>
