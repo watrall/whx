@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Download } from 'lucide-react';
+import { Check, Download } from 'lucide-react';
 import { pluralize } from '../lib/utils.ts';
 
 interface ExportMenuProps {
@@ -11,6 +11,7 @@ interface ExportMenuProps {
 /** Downloads the current results. Descriptions are left out: they are UNESCO's text under CC BY-SA. */
 export function ExportMenu({ count, onExport, touch = false }: ExportMenuProps) {
   const [open, setOpen] = useState(false);
+  const [done, setDone] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,9 +33,17 @@ export function ExportMenu({ count, onExport, touch = false }: ExportMenuProps) 
     };
   }, [open]);
 
+  // The button shows a check for a moment, so it is clear the download started.
+  useEffect(() => {
+    if (!done) return;
+    const timer = window.setTimeout(() => setDone(false), 2000);
+    return () => window.clearTimeout(timer);
+  }, [done]);
+
   const choose = (format: 'csv' | 'geojson') => {
     onExport(format);
     setOpen(false);
+    setDone(true);
   };
 
   const item =
@@ -48,13 +57,20 @@ export function ExportMenu({ count, onExport, touch = false }: ExportMenuProps) 
         aria-expanded={open}
         aria-haspopup="true"
         aria-label="Export these results"
-        title="Export these results"
+        title={done ? 'Download started' : 'Export these results'}
         className={`focus-ring grid place-items-center rounded-md border border-line bg-surface text-muted transition hover:text-ink ${
           touch ? 'h-11 w-11' : 'h-9 w-9'
         }`}
       >
-        <Download className="h-4 w-4" aria-hidden="true" />
+        {done ? (
+          <Check className="h-4 w-4 text-ink" aria-hidden="true" />
+        ) : (
+          <Download className="h-4 w-4" aria-hidden="true" />
+        )}
       </button>
+      <span role="status" className="sr-only">
+        {done ? 'Download started' : ''}
+      </span>
       {open && (
         <div
           role="menu"
