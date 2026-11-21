@@ -1,12 +1,13 @@
 import { useCallback, useState } from 'react';
+import { readStored, removeStored, writeStored } from './storage.ts';
 
 const STORAGE_KEY = 'wh-recent-searches';
 const MAX_RECENT = 6;
 
 function readRecent(): string[] {
+  const raw = readStored(STORAGE_KEY);
+  if (!raw) return [];
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     return parsed.filter((value): value is string => typeof value === 'string').slice(0, MAX_RECENT);
@@ -26,22 +27,14 @@ export function useRecentSearches() {
         0,
         MAX_RECENT,
       );
-      try {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        // Storage can be unavailable in private contexts; keep the in-memory list.
-      }
+      writeStored(STORAGE_KEY, JSON.stringify(next));
       return next;
     });
   }, []);
 
   const clearRecent = useCallback(() => {
     setRecent([]);
-    try {
-      window.localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // Ignore storage failures.
-    }
+    removeStored(STORAGE_KEY);
   }, []);
 
   return { recent, addRecent, clearRecent };

@@ -1,14 +1,15 @@
 import { useCallback, useState } from 'react';
 import { canonicalIds } from './ids.ts';
+import { readStored, writeStored } from './storage.ts';
 import type { Site } from './types.ts';
 
 const STORAGE_KEY = 'wh-saved-sites';
 const MAX_SAVED = 150; // keeps a shared link comfortably under URL length limits
 
 function readSaved(): Set<string> {
+  const raw = readStored(STORAGE_KEY);
+  if (!raw) return new Set();
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return new Set();
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return new Set();
     return new Set(
@@ -20,11 +21,7 @@ function readSaved(): Set<string> {
 }
 
 function writeSaved(saved: Set<string>) {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify([...saved]));
-  } catch {
-    // Private mode or full storage: saves last for this visit only.
-  }
+  writeStored(STORAGE_KEY, JSON.stringify([...saved]));
 }
 
 /** Sites the visitor has starred, kept in this browser only. */

@@ -2,3 +2,7 @@
 node_modules/
 dist/
 app/dist/
+
+# Local working notes
+project-notes.md
+design-notes.md
