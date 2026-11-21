@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { csvCell, toCsv, toGeoJson } from '../app/src/lib/export.ts';
 
 const site = {
-  id: 'Q1',
+  id: '158',
+  qid: 'Q1',
   name: 'Old Town, "Core" Zone',
   countries: ['Italy', 'France'],
   year: 1990,
@@ -12,8 +13,6 @@ const site = {
   danger: true,
   lat: 41.9,
   lon: 12.5,
-  unescoId: '158',
-  officialUrl: null,
 };
 
 test('csvCell quotes commas, quotes and newlines', () => {

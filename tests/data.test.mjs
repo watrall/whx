@@ -1,59 +1,94 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { FIRST_INSCRIPTION_YEAR, resolveYear } from '../app/src/lib/data.ts';
+import { buildSites } from '../app/src/lib/data.ts';
+import { canonicalIds, findSite } from '../app/src/lib/ids.ts';
+import { countryAliases } from '../app/src/lib/countryAliases.ts';
 
-test('years before the first inscriptions are treated as missing', () => {
-  assert.equal(resolveYear('Q1', '1960'), null);
-  assert.equal(resolveYear('Q1', String(FIRST_INSCRIPTION_YEAR - 1)), null);
-});
-
-test('valid years pass through', () => {
-  assert.equal(resolveYear('Q1', '1978'), 1978);
-  assert.equal(resolveYear('Q1', '2019'), 2019);
-});
-
-test('missing or malformed years stay null', () => {
-  assert.equal(resolveYear('Q1', undefined), null);
-  assert.equal(resolveYear('Q1', 'abc'), null);
-});
-
-test('Serengeti is corrected to 1981 whatever Wikidata says', () => {
-  assert.equal(resolveYear('Q11812902', '1960'), 1981);
-  assert.equal(resolveYear('Q11812902', undefined), 1981);
-});
-
-import { applyUnescoFacts, unescoNumber } from '../app/src/lib/unesco.ts';
-
-const baseSite = {
-  id: 'Q1',
-  name: 'banks of the Seine',
-  altName: '',
-  country: 'France',
-  countries: ['France'],
-  countryAlias: '',
-  year: 1960,
-  danger: false,
-  unescoId: '600bis',
+const unesco = {
+  sites: {
+    20: {
+      name: 'Ancient City of Damascus',
+      countries: ['Syrian Arab Republic'],
+      year: 1979,
+      type: 'cultural',
+      criteria: ['i', 'ii', 'iii', 'iv', 'vi'],
+      danger: true,
+      lat: 33.5108,
+      lon: 36.3097,
+    },
+    1133: {
+      name: 'Ancient and Primeval Beech Forests',
+      countries: ['Albania', 'Austria'],
+      year: 2007,
+      type: 'natural',
+      criteria: ['ix'],
+      danger: false,
+      lat: 45.5,
+      lon: 14.7,
+      parts: 93,
+    },
+  },
+};
+const photos = {
+  photos: {
+    20: { qid: 'Q3678596', image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Damascus.jpg' },
+  },
 };
 
-test('UNESCO facts replace name, countries, year and danger, keeping Wikidata aliases', () => {
-  const [site] = applyUnescoFacts([baseSite], {
-    600: { name: 'Paris, Banks of the Seine', countries: ['France'], year: 1991, danger: true },
-  });
-  assert.equal(site.name, 'Paris, Banks of the Seine');
-  assert.equal(site.altName, 'banks of the Seine');
-  assert.equal(site.year, 1991);
-  assert.equal(site.danger, true);
+test('buildSites reads UNESCO records and joins the Wikidata photo by UNESCO number', () => {
+  const sites = buildSites(unesco, photos);
+  assert.equal(sites.length, 2);
+  const damascus = sites.find((site) => site.id === '20');
+  assert.equal(damascus.name, 'Ancient City of Damascus');
+  assert.equal(damascus.qid, 'Q3678596');
+  assert.match(damascus.image, /Damascus\.jpg$/);
+  assert.equal(damascus.danger, true);
+  assert.equal(damascus.country, 'Syrian Arab Republic');
+  assert.deepEqual(damascus.criteriaCodes, ['i', 'ii', 'iii', 'iv', 'vi']);
+  assert.equal(damascus.parts, 1);
 });
 
-test('sites missing from the UNESCO file are left untouched', () => {
-  const [site] = applyUnescoFacts([{ ...baseSite, unescoId: '999999' }], {});
-  assert.equal(site.name, 'banks of the Seine');
-  assert.equal(site.year, 1960);
+test('serial sites keep their part count, and sites without a photo have none', () => {
+  const beech = buildSites(unesco, photos).find((site) => site.id === '1133');
+  assert.equal(beech.parts, 93);
+  assert.equal(beech.image, null);
+  assert.equal(beech.qid, null);
+  assert.deepEqual(beech.countries, ['Albania', 'Austria']);
 });
 
-test('unescoNumber strips extension suffixes', () => {
-  assert.equal(unescoNumber('710bis'), '710');
-  assert.equal(unescoNumber('1133quinquies'), '1133');
-  assert.equal(unescoNumber(null), null);
+test('buildSites works without the photo list', () => {
+  assert.equal(buildSites(unesco, null).length, 2);
+});
+
+test('buildSites skips records that are malformed', () => {
+  const bad = {
+    sites: {
+      1: { name: '', type: 'cultural', lat: 1, lon: 1 },
+      2: { name: 'No coordinates', type: 'cultural' },
+      3: { name: 'Off the globe', type: 'cultural', lat: 91, lon: 0 },
+      4: { name: 'Unknown type', type: 'ancient', lat: 1, lon: 1 },
+      abc: { name: 'Bad id', type: 'cultural', lat: 1, lon: 1 },
+      5: { name: 'Fine', type: 'mixed', lat: 1, lon: 1, countries: ['X'], criteria: [], year: 2000 },
+    },
+  };
+  assert.deepEqual(buildSites(bad, null).map((site) => site.id), ['5']);
+});
+
+test('buildSites rejects data in the wrong shape', () => {
+  assert.throws(() => buildSites({}, null));
+  assert.throws(() => buildSites(null, null));
+});
+
+test('old Wikidata IDs from links and saves map to UNESCO numbers', () => {
+  const sites = buildSites(unesco, photos);
+  assert.deepEqual([...canonicalIds(['Q3678596', '1133', 'Q999'], sites)].sort(), ['1133', '20']);
+  assert.equal(findSite('Q3678596', sites).id, '20');
+  assert.equal(findSite('1133', sites).id, '1133');
+  assert.equal(findSite(null, sites), undefined);
+});
+
+test('country aliases add the names visitors search with', () => {
+  assert.match(countryAliases(['Türkiye']), /Turkey/);
+  assert.match(countryAliases(['Russian Federation', 'Türkiye']), /Russia/);
+  assert.equal(countryAliases(['Peru']), '');
 });

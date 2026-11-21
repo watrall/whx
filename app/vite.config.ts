@@ -6,9 +6,15 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, '..');
-// Static JSON served from /data. sites.json is Wikidata; the unesco files come from
-// scripts/import-unesco.mjs.
-const DATA_FILES = ['sites.json', 'unesco.json', 'unesco-text.json', 'danger.json'];
+// Static JSON served from /data: the site list and the lazily loaded descriptions, serial-site
+// parts and danger notes, all built by scripts/import-*.mjs, plus the Wikidata photo list.
+const DATA_FILES = [
+  'unesco.json',
+  'unesco-text.json',
+  'unesco-parts.json',
+  'danger.json',
+  'photos.json',
+];
 const base = process.env.VITE_BASE || '/wikidata-world-heritage/';
 
 export default defineConfig(({ command }) => ({
