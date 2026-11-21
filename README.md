@@ -33,7 +33,7 @@ An independent, map-first explorer for UNESCO World Heritage Sites. It puts ever
 
 ## Data
 
-All of the data is public. The app combines five sources, and a few things it works out itself.
+All of the data is public. Unfortunately, there isn't a single, reliable API-based data source for the complete site information.  As such, the app combines five sources, and a few things it works out itself.
 
 ### Where it comes from
 
