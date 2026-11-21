@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { ReactNode } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster';
-import type { Bounds, Site } from '../lib/types.ts';
+import type { Bounds, Site, SiteType } from '../lib/types.ts';
 import {
   clusterIconHtml,
   clusterSize,
@@ -13,7 +13,15 @@ import {
   typeCounts,
 } from '../lib/utils.ts';
 
+export interface PartsPadding {
+  /** Pixels on the right and bottom to keep clear, for the detail card. */
+  right: number;
+  bottom: number;
+}
+
 export interface MapViewHandle {
+  /** Fits the view to the parts of a serial site, leaving room for the detail card. */
+  fitParts: (points: [number, number][], padding: PartsPadding) => void;
   flyToPoint: (lat: number, lon: number, zoom?: number) => void;
   /** Fit the view to these sites, regardless of what is currently drawn. */
   fitSites: (sites: Site[]) => void;
@@ -54,6 +62,9 @@ interface MapViewProps {
   rippleYear?: number | null;
   /** Extra buttons added to the end of the map control stack (such as locate). */
   extraControls?: ReactNode;
+  /** The places that make up the selected serial site, drawn as small dots. */
+  parts?: [number, number][] | null;
+  partsType?: SiteType;
   /** "sm" is the compact desktop stack; "md" keeps touch-sized buttons for phones. */
   controlSize?: ControlSize;
   className?: string;
@@ -114,6 +125,8 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     initialFocus = null,
     rippleYear = null,
     extraControls,
+    parts = null,
+    partsType = 'cultural',
     controlSize = 'md',
     className = '',
   },
@@ -198,6 +211,9 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     });
     cluster.addTo(map);
     rippleLayerRef.current = L.layerGroup().addTo(map);
+    // A pane above the pins and clusters, so a serial site's parts are never hidden under them.
+    map.createPane('parts').style.zIndex = '650';
+    partsLayerRef.current = L.layerGroup().addTo(map);
 
     const emitBounds = () => {
       const bounds = map.getBounds();
@@ -223,6 +239,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       map.off('zoomend', emitBounds);
       map.remove();
       rippleLayerRef.current = null;
+      partsLayerRef.current = null;
       mapRef.current = null;
       clusterRef.current = null;
       markerRefs.current.clear();
@@ -379,6 +396,24 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     }
   }, [rippleYear]);
 
+  // The parts of a selected serial site, outside the cluster group so they never merge.
+  const partsLayerRef = useRef<L.LayerGroup | null>(null);
+  useEffect(() => {
+    const layer = partsLayerRef.current;
+    if (!layer) return;
+    layer.clearLayers();
+    if (!parts) return;
+    const icon = L.divIcon({
+      className: 'wh-part-wrapper',
+      html: `<span class="wh-part wh-part--${partsType}"></span>`,
+      iconSize: [12, 12],
+      iconAnchor: [6, 6],
+    });
+    for (const [lat, lon] of parts) {
+      L.marker([lat, lon], { icon, pane: 'parts', interactive: false, keyboard: false }).addTo(layer);
+    }
+  }, [parts, partsType]);
+
   useImperativeHandle(
     ref,
     () => ({
@@ -400,6 +435,15 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
         if (!map || target.length === 0) return;
         const bounds = L.latLngBounds(target.map((site) => [site.lat, site.lon] as [number, number]));
         map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
+      },
+      fitParts: (points, padding) => {
+        const map = mapRef.current;
+        if (!map || points.length === 0) return;
+        map.fitBounds(L.latLngBounds(points), {
+          paddingTopLeft: [40, 80],
+          paddingBottomRight: [padding.right, padding.bottom],
+          maxZoom: 9,
+        });
       },
       fitAll: () => {
         const map = mapRef.current;

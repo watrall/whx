@@ -43,6 +43,8 @@ import { useSavedSites } from './lib/useSavedSites.ts';
 import { downloadText, toCsv, toGeoJson } from './lib/export.ts';
 import { distanceKm, formatDistance, nearbyOrNearest } from './lib/geo.ts';
 import { canonicalIds, findSite } from './lib/ids.ts';
+import { loadParts } from './lib/unesco.ts';
+import type { PartPoint } from './lib/unesco.ts';
 import { NO_EXTRA, hasExtraFilters, matchesExtra, shareListUrl } from './lib/filters.ts';
 import type { ExtraFilters } from './lib/filters.ts';
 import { buildUrlHash, parseUrlState } from './lib/urlState.ts';
@@ -433,10 +435,40 @@ export default function App() {
       setSearchOpen(false);
       setHighlightedId(null);
       if (!isDesktop) setSheetSnap('peek');
-      mapRef.current?.focusSite(site, { offset: isDesktop ? [210, 0] : [0, 120] });
+      // A serial site is framed by its parts once they load (see the effect below).
+      if (site.parts <= 1) {
+        mapRef.current?.focusSite(site, { offset: isDesktop ? [210, 0] : [0, 120] });
+      }
     },
     [addRecent, query, isDesktop],
   );
+
+  // Opening a serial site draws every one of its places and frames them all, leaving room for
+  // the detail card. If the parts cannot be loaded it falls back to centring on the pin.
+  const [partPoints, setPartPoints] = useState<PartPoint[] | null>(null);
+  useEffect(() => {
+    setPartPoints(null);
+    if (!selectedSite || selectedSite.parts <= 1) return;
+    let cancelled = false;
+    loadParts().then((all) => {
+      if (cancelled) return;
+      const points = all?.[selectedSite.id];
+      if (points && points.length > 1) {
+        setPartPoints(points);
+        mapRef.current?.fitParts(
+          points,
+          isDesktop
+            ? { right: 460, bottom: 48 }
+            : { right: 24, bottom: Math.round(window.innerHeight * 0.62) },
+        );
+      } else {
+        mapRef.current?.focusSite(selectedSite, { offset: isDesktop ? [210, 0] : [0, 120] });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedSite, isDesktop]);
 
   const handleSurprise = useCallback(() => {
     // Prefer sites with a photo, so the first impression is a picture.
@@ -1007,6 +1039,8 @@ export default function App() {
               extraControls={mapActionControls}
               initialFocus={initialFocus}
               rippleYear={playing ? playYear : null}
+              parts={partPoints}
+              partsType={selectedSite?.type}
             />
             <Attribution className="absolute bottom-0 right-0 z-[500] rounded-tl-md bg-surface/90 px-2 py-1" />
             {playing && (
@@ -1085,6 +1119,8 @@ export default function App() {
         controlsBottomClass="bottom-[calc(152px+env(safe-area-inset-bottom)+36px)]"
         initialFocus={initialFocus}
         rippleYear={playing ? playYear : null}
+        parts={partPoints}
+        partsType={selectedSite?.type}
       />
 
       <div className="pointer-events-none fixed inset-x-0 top-0 z-[400] bg-gradient-to-b from-canvas/90 to-transparent px-4 pb-6 pt-[calc(env(safe-area-inset-top)+12px)]">

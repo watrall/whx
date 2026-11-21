@@ -255,6 +255,30 @@ input {
   mask: radial-gradient(farthest-side, transparent calc(100% - 4px), black calc(100% - 4px));
 }
 
+/* The places that make up a selected serial site. */
+.wh-part-wrapper {
+  background: transparent !important;
+  border: none !important;
+  pointer-events: none;
+}
+.wh-part {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 2px solid oklch(var(--paper-raised));
+  box-shadow: 0 1px 3px oklch(var(--ink) / 0.35);
+}
+.wh-part--cultural {
+  background: oklch(var(--type-cultural));
+}
+.wh-part--natural {
+  background: oklch(var(--type-natural));
+}
+.wh-part--mixed {
+  background: oklch(var(--type-mixed));
+}
+
 /* Playback ripple: one expanding ring per newly inscribed site. */
 .wh-ripple-wrapper {
   background: transparent !important;

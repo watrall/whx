@@ -7,6 +7,7 @@ import {
   ChevronRight,
   ExternalLink,
   Link2,
+  MapPin,
   Navigation,
   TriangleAlert,
   X,
@@ -246,6 +247,13 @@ export function SiteDetail({
         </p>
 
         <DangerNote site={site} />
+
+        {site.parts > 1 && (
+          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted">
+            <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            Made up of {site.parts} places, all shown on the map
+          </p>
+        )}
 
         <p className="sr-only" role="status">
           {copied ? 'Link copied to clipboard' : ''}
