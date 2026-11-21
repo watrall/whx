@@ -108,7 +108,8 @@ input {
 .leaflet-container a {
   color: oklch(var(--ink));
 }
-.leaflet-tile-pane {
+[data-basemap='atlas'] .leaflet-tile-pane,
+img[data-preview='atlas'] {
   /* Mute default OSM: drop most saturation, soften contrast, lift the whites. */
   filter: grayscale(0.8) contrast(0.88) brightness(1.06) sepia(0.06);
 }

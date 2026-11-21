@@ -2,6 +2,8 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { ReactNode } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster';
+import { BasemapPicker } from './BasemapPicker.tsx';
+import type { Basemap, BasemapId } from '../lib/basemaps.ts';
 import type { Bounds, Site, SiteType } from '../lib/types.ts';
 import {
   clusterIconHtml,
@@ -67,6 +69,12 @@ interface MapViewProps {
   partsType?: SiteType;
   /** "sm" is the compact desktop stack; "md" keeps touch-sized buttons for phones. */
   controlSize?: ControlSize;
+  /** The map styles on offer and the one showing. The switcher appears when there is a choice. */
+  basemaps: Basemap[];
+  basemap: Basemap;
+  onBasemapChange: (id: BasemapId) => void;
+  /** Called when a style's tiles all fail to load, for example because its key expired. */
+  onBasemapFailed?: (id: BasemapId) => void;
   className?: string;
 }
 
@@ -128,11 +136,17 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     parts = null,
     partsType = 'cultural',
     controlSize = 'md',
+    basemaps,
+    basemap,
+    onBasemapChange,
+    onBasemapFailed,
     className = '',
   },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const onBasemapFailedRef = useRef(onBasemapFailed);
+  onBasemapFailedRef.current = onBasemapFailed;
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<L.MarkerClusterGroup | null>(null);
   const markerRefs = useRef<Map<string, L.Marker>>(new Map());
@@ -183,13 +197,6 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       maxZoom: 18,
       preferCanvas: true,
     }).setView([20, 0], 2);
-
-    // OSM tiles, muted in CSS (.leaflet-tile-pane) so the type colours carry the map.
-    // CARTO Positron now requires an API key, so it is not used.
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
 
     const cluster = L.markerClusterGroup({
       maxClusterRadius: 48,
@@ -249,6 +256,27 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       hasFitRef.current = false;
     };
   }, []);
+
+  // The tile layer is swapped, not rebuilt, so markers and view stay put when the style changes.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const layer = L.tileLayer(basemap.url, { maxZoom: map.getMaxZoom(), maxNativeZoom: basemap.maxNativeZoom });
+    // A style whose first few tiles all fail has no usable key or no network; give up on it.
+    let loaded = 0;
+    let failed = 0;
+    layer.on('tileload', () => {
+      loaded += 1;
+    });
+    layer.on('tileerror', () => {
+      failed += 1;
+      if (loaded === 0 && failed === 4) onBasemapFailedRef.current?.(basemap.id);
+    });
+    layer.addTo(map);
+    return () => {
+      layer.remove();
+    };
+  }, [basemap]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -458,7 +486,16 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
 
   return (
     <div className={`relative h-full w-full ${className}`}>
-      <div ref={containerRef} className="absolute inset-0" aria-label="Map of World Heritage sites" />
+      <div ref={containerRef} data-basemap={basemap.id} className="absolute inset-0" aria-label="Map of World Heritage sites" />
+      {basemaps.length > 1 && (
+        <BasemapPicker
+          basemaps={basemaps}
+          value={basemap.id}
+          onChange={onBasemapChange}
+          collapsible={controlSize === 'md'}
+          className={`${controlsBottomClass} ${controlsSideClass.startsWith('left') ? 'left-14' : 'right-16'}`}
+        />
+      )}
       <div
         className={`absolute z-[500] flex flex-col ${MAP_CONTROL[controlSize].stack} ${controlsSideClass} ${controlsBottomClass}`}
       >

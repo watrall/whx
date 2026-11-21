@@ -19,6 +19,9 @@ import { DiscoverActions } from './components/DiscoverActions.tsx';
 import { ExportMenu } from './components/ExportMenu.tsx';
 import { ListScopeToggle } from './components/ListScopeToggle.tsx';
 import type { ListScope } from './components/ListScopeToggle.tsx';
+import { BASEMAPS } from './lib/basemaps.ts';
+import type { BasemapId } from './lib/basemaps.ts';
+import { useBasemap } from './lib/useBasemap.ts';
 import { useSiteFilters } from './lib/useSiteFilters.ts';
 import { readStored, writeStored } from './lib/storage.ts';
 import { FiltersMenu } from './components/FiltersMenu.tsx';
@@ -152,6 +155,7 @@ export default function App() {
   const searchRef = useRef<HTMLInputElement>(null);
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const debouncedQuery = useDebouncedValue(query, 350);
+  const { basemap, choose: chooseBasemap, fallBack: fallBackBasemap } = useBasemap(BASEMAPS);
   const { recent, addRecent, clearRecent } = useRecentSearches();
   const { saved, toggle: toggleSaved, addMany: saveMany, migrate: migrateSaved } = useSavedSites();
 
@@ -826,6 +830,16 @@ export default function App() {
     </>
   );
 
+  const handleBasemapFailed = useCallback(
+    (id: BasemapId) => {
+      if (id === BASEMAPS[0].id) return;
+      fallBackBasemap();
+      setDiscoverNotice('That map style is not available right now. Showing Atlas.');
+      window.setTimeout(() => setDiscoverNotice(null), 6000);
+    },
+    [fallBackBasemap],
+  );
+
   const aboutModal = (
     <Modal open={aboutOpen} onClose={() => setAboutOpen(false)} title="About World Heritage Explorer">
       <p className="text-sm leading-relaxed text-muted">
@@ -991,8 +1005,12 @@ export default function App() {
               rippleYear={playing ? playYear : null}
               parts={partPoints}
               partsType={selectedSite?.type}
+              basemaps={BASEMAPS}
+              basemap={basemap}
+              onBasemapChange={chooseBasemap}
+              onBasemapFailed={handleBasemapFailed}
             />
-            <Attribution className="absolute bottom-0 right-0 z-[500] rounded-tl-md bg-surface/90 px-2 py-1" />
+            <Attribution credits={basemap.credits} className="absolute bottom-0 right-0 z-[500] rounded-tl-md bg-surface/90 px-2 py-1" />
             {playing && (
               <PlaybackReadout
                 year={playYear}
@@ -1072,6 +1090,10 @@ export default function App() {
         rippleYear={playing ? playYear : null}
         parts={partPoints}
         partsType={selectedSite?.type}
+        basemaps={BASEMAPS}
+        basemap={basemap}
+        onBasemapChange={chooseBasemap}
+              onBasemapFailed={handleBasemapFailed}
       />
 
       <div className="pointer-events-none fixed inset-x-0 top-0 z-[400] bg-gradient-to-b from-canvas/90 to-transparent px-4 pb-6 pt-[calc(env(safe-area-inset-top)+12px)]">
@@ -1184,7 +1206,7 @@ export default function App() {
 
       {showHint && <PlayHint placement="mobile" onDismiss={dismissHint} />}
 
-      <Attribution className="pointer-events-auto fixed right-0 z-[450] rounded-tl-md bg-surface/90 px-2 py-1 bottom-[calc(152px+env(safe-area-inset-bottom))]" />
+      <Attribution credits={basemap.credits} className="pointer-events-auto fixed right-0 z-[450] rounded-tl-md bg-surface/90 px-2 py-1 bottom-[calc(152px+env(safe-area-inset-bottom))]" />
 
       {selectedSite && (
         <SiteDetail
