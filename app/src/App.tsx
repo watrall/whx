@@ -34,6 +34,8 @@ import { Logo } from './components/Logo.tsx';
 import { MAP_CONTROL, MapView, type MapViewHandle } from './components/MapView.tsx';
 import { MobileSheet, type SheetSnap } from './components/MobileSheet.tsx';
 import { Modal } from './components/Modal.tsx';
+import { playbackHold, playbackPool } from './lib/timeline.ts';
+import { WorldHeritageGuide, WorldHeritageIntro } from './components/WorldHeritageIntro.tsx';
 import { PlayHint } from './components/PlayHint.tsx';
 import { PlaybackReadout } from './components/PlaybackReadout.tsx';
 import { SearchOverlay } from './components/SearchOverlay.tsx';
@@ -104,6 +106,7 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
 }
 
 const PLAY_HINT_KEY = 'wh-play-hint';
+const INTRO_KEY = 'wh-intro-seen';
 const BASE_TITLE = document.title;
 
 export default function App() {
@@ -146,6 +149,16 @@ export default function App() {
   const [discoverNotice, setDiscoverNotice] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  // The explanation of what World Heritage is; the About dialog holds the project's own details.
+  const [guideOpen, setGuideOpen] = useState(false);
+  // A short "what is World Heritage?" card, shown on a first visit until the visitor opts out.
+  const [introOpen, setIntroOpen] = useState(() => readStored(INTRO_KEY) !== '1');
+  // The card waits for the data, and a failed load never shows it, so only count it while visible.
+  const introVisible = introOpen && !loading && !error;
+  const closeIntro = useCallback((remember: boolean) => {
+    if (remember) writeStored(INTRO_KEY, '1');
+    setIntroOpen(false);
+  }, []);
   const [sheetSnap, setSheetSnap] = useState<SheetSnap>('peek');
   const [bounds, setBounds] = useState<Bounds | null>(null);
   const [initialFocus, setInitialFocus] = useState<{
@@ -250,6 +263,18 @@ export default function App() {
     [playing, filtered, playYear],
   );
 
+  // What the map draws while playing. The pool is fixed for the run (it only depends on where
+  // playback started), so the map keeps one cluster layout while the year advances.
+  const playbackStart = yearRange[0];
+  const playbackEntries = useMemo(
+    () => (playing ? playbackPool(timelineSites, playbackStart, domain) : null),
+    [playing, timelineSites, playbackStart, domain],
+  );
+  const playback = useMemo(
+    () => (playbackEntries ? { entries: playbackEntries, year: playYear, speed } : null),
+    [playbackEntries, playYear, speed],
+  );
+
   const typeTotal = typeCounts.cultural + typeCounts.natural + typeCounts.mixed;
   const countries = countryCount(filtered);
 
@@ -273,9 +298,9 @@ export default function App() {
         const next = activeYears.find((year) => year > prev[1]);
         return [prev[0], Math.min(next ?? domain[1], domain[1])];
       });
-    }, 400 / speed);
+    }, playbackHold(addedInYear) / speed);
     return () => window.clearTimeout(timer);
-  }, [playing, yearRange, domain, activeYears, speed]);
+  }, [playing, yearRange, domain, activeYears, speed, addedInYear]);
 
   const sortedFiltered = useMemo(() => {
     const copy = [...filtered];
@@ -367,7 +392,7 @@ export default function App() {
   // Waiting for a visible page matters: a tab opened in the background would otherwise use up
   // the hint before anyone saw it.
   useEffect(() => {
-    if (loading || hintSeen) return;
+    if (loading || hintSeen || introVisible) return;
     let show: number | undefined;
     let hide: number | undefined;
     const arm = () => {
@@ -387,9 +412,9 @@ export default function App() {
       window.clearTimeout(hide);
       document.removeEventListener('visibilitychange', arm);
     };
-  }, [loading, hintSeen]);
+  }, [loading, hintSeen, introVisible]);
 
-  const showHint = hintReady && !hintSeen && !playing && !selectedSite && !searchOpen && !aboutOpen;
+  const showHint = hintReady && !hintSeen && !playing && !selectedSite && !searchOpen && !aboutOpen && !guideOpen && !introVisible;
 
   const handleReset = useCallback(() => {
     setQuery('');
@@ -508,12 +533,13 @@ export default function App() {
       if (event.key === 'Escape') {
         setSearchOpen(false);
         setAboutOpen(false);
+        setGuideOpen(false);
         setSelectedSite(null);
         setSheetSnap('peek');
         return;
       }
 
-      if (aboutOpen || searchOpen) return;
+      if (aboutOpen || guideOpen || searchOpen || introVisible) return;
       if (typing) return;
 
       if (event.key === '/') {
@@ -551,7 +577,7 @@ export default function App() {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [aboutOpen, searchOpen, selectedSite, isDesktop, handleStep, handleToggleType, handlePlayToggle]);
+  }, [aboutOpen, guideOpen, searchOpen, introVisible, selectedSite, isDesktop, handleStep, handleToggleType, handlePlayToggle]);
 
   const sortSelect = (
     <label className="relative inline-flex items-center">
@@ -863,8 +889,36 @@ export default function App() {
     [fallBackBasemap],
   );
 
+  // The intro waits for the data, so it never covers a map that has nothing on it yet.
+  const introModal = (
+    <WorldHeritageIntro
+      open={introVisible}
+      onClose={closeIntro}
+      onReadMore={(remember) => {
+        closeIntro(remember);
+        setGuideOpen(true);
+      }}
+    />
+  );
+
+  const guideModal = (
+    <Modal
+      open={guideOpen}
+      onClose={() => setGuideOpen(false)}
+      title="What is World Heritage?"
+      width="lg"
+    >
+      <WorldHeritageGuide
+        onAbout={() => {
+          setGuideOpen(false);
+          setAboutOpen(true);
+        }}
+      />
+    </Modal>
+  );
+
   const aboutModal = (
-    <Modal open={aboutOpen} onClose={() => setAboutOpen(false)} title="About World Heritage Explorer">
+    <Modal open={aboutOpen} onClose={() => setAboutOpen(false)} title="About World Heritage Explorer" width="lg">
       <p className="text-sm leading-relaxed text-muted">
         An independent, map-first explorer for UNESCO World Heritage Sites. Filter by type,
         criterion or danger, scrub the inscription timeline, and open a site for its story.
@@ -970,11 +1024,12 @@ export default function App() {
             <div className="flex items-center gap-1">
               <button
                 type="button"
-                onClick={() => setAboutOpen(true)}
-                aria-label="About this project"
-                className="focus-ring grid h-8 w-8 shrink-0 place-items-center rounded-lg text-muted transition hover:bg-canvas hover:text-ink"
+                onClick={() => setGuideOpen(true)}
+                aria-label="What is World Heritage?"
+                className="group relative focus-ring grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink transition hover:bg-canvas"
               >
-                <Info className="h-4 w-4" aria-hidden="true" />
+                <Info className="h-[18px] w-[18px]" aria-hidden="true" />
+                <MapTooltip placement="belowEnd">What is World Heritage?</MapTooltip>
               </button>
             </div>
           </header>
@@ -995,6 +1050,13 @@ export default function App() {
 
           <footer className="flex items-center justify-between gap-2 border-t border-line px-4 py-2.5">
             <p className="text-xs text-muted">Data: UNESCO · Wikidata</p>
+            <button
+              type="button"
+              onClick={() => setAboutOpen(true)}
+              className="focus-ring rounded text-xs text-muted underline decoration-line underline-offset-2 hover:text-ink"
+            >
+              About this project
+            </button>
           </footer>
         </aside>
 
@@ -1025,7 +1087,7 @@ export default function App() {
               controlSize="sm"
               extraControls={mapActionControls}
               initialFocus={initialFocus}
-              rippleYear={playing ? playYear : null}
+              playback={playback}
               parts={partPoints}
               partsType={selectedSite?.type}
               basemaps={BASEMAPS}
@@ -1092,6 +1154,8 @@ export default function App() {
 
         {searchOverlay}
         {aboutModal}
+        {guideModal}
+        {introModal}
       </div>
     );
   }
@@ -1111,7 +1175,7 @@ export default function App() {
         onMapClick={() => setSelectedSite(null)}
         controlsBottomClass="bottom-[calc(152px+env(safe-area-inset-bottom)+36px)]"
         initialFocus={initialFocus}
-        rippleYear={playing ? playYear : null}
+        playback={playback}
         parts={partPoints}
         partsType={selectedSite?.type}
         basemaps={BASEMAPS}
@@ -1168,10 +1232,17 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setAboutOpen(true)}
-                aria-label="About this project"
-                className="focus-ring grid h-11 w-11 place-items-center rounded-lg text-muted transition hover:bg-canvas hover:text-ink"
+                className="focus-ring inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-muted transition hover:bg-canvas hover:text-ink"
               >
-                <Info className="h-4 w-4" aria-hidden="true" />
+                About
+              </button>
+              <button
+                type="button"
+                onClick={() => setGuideOpen(true)}
+                aria-label="What is World Heritage?"
+                className="focus-ring grid h-11 w-11 place-items-center rounded-lg text-ink transition hover:bg-canvas"
+              >
+                <Info className="h-[18px] w-[18px]" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -1270,6 +1341,8 @@ export default function App() {
 
       {searchOverlay}
       {aboutModal}
+      {guideModal}
+      {introModal}
     </main>
   );
 }

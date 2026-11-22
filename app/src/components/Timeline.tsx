@@ -169,12 +169,22 @@ export function Timeline({
   const onHandlePointerDown = (handle: Handle, event: ReactPointerEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    dragRef.current = handle;
+    // When the handles sit a year apart their hit areas overlap and the later one covers the
+    // other, so the handle under the pointer is not always the one meant. Take the nearest.
+    const rect = chartRef.current?.getBoundingClientRect();
+    let chosen = handle;
+    if (rect) {
+      const startX = rect.left + (startPct / 100) * rect.width;
+      const endX = rect.left + (endPct / 100) * rect.width;
+      chosen = Math.abs(event.clientX - startX) <= Math.abs(event.clientX - endX) ? 'start' : 'end';
+    }
+    dragRef.current = chosen;
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
-  const onHandlePointerMove = (handle: Handle, event: ReactPointerEvent<HTMLDivElement>) => {
-    if (dragRef.current !== handle) return;
+  const onHandlePointerMove = (_handle: Handle, event: ReactPointerEvent<HTMLDivElement>) => {
+    const handle = dragRef.current;
+    if (!handle) return;
     const rect = chartRef.current?.getBoundingClientRect();
     if (!rect) return;
     const year = yearFromClientX(event.clientX, rect);
@@ -187,8 +197,8 @@ export function Timeline({
     }
   };
 
-  const onHandlePointerUp = (handle: Handle, event: ReactPointerEvent<HTMLDivElement>) => {
-    if (dragRef.current === handle) dragRef.current = null;
+  const onHandlePointerUp = (_handle: Handle, event: ReactPointerEvent<HTMLDivElement>) => {
+    dragRef.current = null;
     event.stopPropagation();
   };
 
@@ -386,9 +396,10 @@ export function Timeline({
         </span>
         {!compact && (
           <div className="ml-1 flex shrink-0 items-center gap-2">
-            <div className="text-right">
-              <div className="text-xs leading-none text-muted">{formatRange(value)}</div>
-              <div className="mt-1 text-xs font-semibold leading-none text-ink">
+            {/* Fixed width: text that changes length while dragging must not resize the chart. */}
+            <div className="w-28 text-right tabular-nums">
+              <div className="whitespace-nowrap text-xs leading-none text-muted">{formatRange(value)}</div>
+              <div className="mt-1 whitespace-nowrap text-xs font-semibold leading-none text-ink">
                 {pluralize(count, 'site')}
               </div>
             </div>

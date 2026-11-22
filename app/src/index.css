@@ -280,31 +280,35 @@ img[data-preview='atlas'] {
   background: oklch(var(--type-mixed));
 }
 
-/* Playback ripple: one expanding ring per newly inscribed site. */
-.wh-ripple-wrapper {
-  background: transparent !important;
-  border: none !important;
-  pointer-events: none;
+/* Playback: the reference cluster group is never seen, and what appears eases in. */
+.wh-ref-hidden {
+  display: none !important;
 }
-.wh-ripple {
-  position: absolute;
-  left: -28px;
-  top: -28px;
-  width: 56px;
-  height: 56px;
-  border-radius: 999px;
-  border: 3px solid var(--ripple-color);
-  background: color-mix(in oklch, var(--ripple-color) 18%, transparent);
-  animation: wh-ripple 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+.wh-playing .wh-marker {
+  animation: wh-appear 240ms var(--ease-out) both;
 }
-@keyframes wh-ripple {
+.wh-playing .wh-cluster {
+  animation: wh-bump 260ms var(--ease-out) both;
+}
+@keyframes wh-appear {
   from {
-    transform: scale(0.15);
-    opacity: 0.95;
+    opacity: 0;
+    transform: translateY(4px) scale(0.85);
   }
   to {
-    transform: scale(1.5);
-    opacity: 0;
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes wh-bump {
+  from {
+    transform: scale(0.88);
+  }
+  60% {
+    transform: scale(1.06);
+  }
+  to {
+    transform: scale(1);
   }
 }
 

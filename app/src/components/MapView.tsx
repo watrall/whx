@@ -6,12 +6,13 @@ import { BasemapPicker } from './BasemapPicker.tsx';
 import { MapTooltip } from './MapTooltip.tsx';
 import type { Basemap, BasemapId } from '../lib/basemaps.ts';
 import type { Bounds, Site, SiteType } from '../lib/types.ts';
+import { PlaybackLayer } from '../lib/playbackLayer.ts';
+import type { PlaybackEntry } from '../lib/timeline.ts';
 import {
   clusterIconHtml,
   clusterSize,
   escapeHtml,
   markerIconHtml,
-  TYPE_COLOR,
   siteMeta,
   typeCounts,
 } from '../lib/utils.ts';
@@ -61,8 +62,11 @@ interface MapViewProps {
   controlsSideClass?: string;
   /** Centre the first view on this site instead of fitting every marker. */
   initialFocus?: { site: Site; offset: [number, number] } | null;
-  /** Sites inscribed in this year get a one-off ripple on the map (playback). */
-  rippleYear?: number | null;
+  /**
+   * While the timeline plays: every site playback will reveal, the year it has reached and the
+   * playback speed. The map then draws clusters from a fixed layout instead of the live group.
+   */
+  playback?: { entries: PlaybackEntry<Site>[]; year: number; speed: number } | null;
   /** Extra buttons added to the end of the map control stack (such as locate). */
   extraControls?: ReactNode;
   /** The places that make up the selected serial site, drawn as small dots. */
@@ -132,7 +136,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     controlsBottomClass = 'bottom-28',
     controlsSideClass = 'right-4',
     initialFocus = null,
-    rippleYear = null,
+    playback = null,
     extraControls,
     parts = null,
     partsType = 'cultural',
@@ -157,7 +161,9 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
   const hasFitRef = useRef(false);
   const lastFitKeyRef = useRef('');
   const selectedIdRef = useRef<string | null>(null);
-  const rippleLayerRef = useRef<L.LayerGroup | null>(null);
+  const playLayerRef = useRef<PlaybackLayer | null>(null);
+  const playbackRef = useRef(playback);
+  playbackRef.current = playback;
   const sitesRef = useRef<Site[]>([]);
   sitesRef.current = sites;
   const initialFocusRef = useRef(initialFocus);
@@ -218,7 +224,6 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       },
     });
     cluster.addTo(map);
-    rippleLayerRef.current = L.layerGroup().addTo(map);
     // A pane above the pins and clusters, so a serial site's parts are never hidden under them.
     map.createPane('parts').style.zIndex = '650';
     partsLayerRef.current = L.layerGroup().addTo(map);
@@ -246,7 +251,6 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       map.off('moveend', emitBounds);
       map.off('zoomend', emitBounds);
       map.remove();
-      rippleLayerRef.current = null;
       partsLayerRef.current = null;
       mapRef.current = null;
       clusterRef.current = null;
@@ -404,26 +408,42 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     }
   }, [highlightedId]);
 
-  // Ripples sit outside the cluster group, so a new inscription is visible
-  // even when its marker is folded into a cluster at world zoom.
+  // While playing, clusters come from a fixed layout (see PlaybackLayer) so they do not jump
+  // as sites arrive. The live cluster group steps aside and returns when playback stops.
+  const playEntries = playback?.entries ?? null;
+  const playActive = playEntries !== null;
   useEffect(() => {
-    const layer = rippleLayerRef.current;
-    if (!layer) return;
-    layer.clearLayers();
-    if (rippleYear === null) return;
-    const fresh = sitesRef.current.filter((site) => site.year === rippleYear).slice(0, 80);
-    for (const site of fresh) {
-      L.marker([site.lat, site.lon], {
-        interactive: false,
-        keyboard: false,
-        icon: L.divIcon({
-          className: 'wh-ripple-wrapper',
-          html: `<span class="wh-ripple" style="--ripple-color:${TYPE_COLOR[site.type]}"></span>`,
-          iconSize: [0, 0],
-        }),
-      }).addTo(layer);
-    }
-  }, [rippleYear]);
+    const map = mapRef.current;
+    const cluster = clusterRef.current;
+    const current = playbackRef.current;
+    if (!map || !cluster || !current) return;
+    cluster.remove();
+    const layer = new PlaybackLayer(map, current.entries);
+    playLayerRef.current = layer;
+    layer.reveal(current.year, current.speed);
+    return () => {
+      layer.stop();
+      playLayerRef.current = null;
+      // The map may already be gone if the whole view is unmounting.
+      if (mapRef.current === map) cluster.addTo(map);
+    };
+  }, [playActive]);
+
+  // Moving the start handle during playback changes which sites take part; the live cluster
+  // group stays out of it, so nothing is re-clustered.
+  useEffect(() => {
+    const layer = playLayerRef.current;
+    const current = playbackRef.current;
+    if (!layer || !playEntries || !current) return;
+    layer.setEntries(playEntries);
+    layer.reveal(current.year, current.speed);
+  }, [playEntries]);
+
+  const playYear = playback?.year ?? null;
+  useEffect(() => {
+    if (playYear === null) return;
+    playLayerRef.current?.reveal(playYear, playbackRef.current?.speed ?? 1);
+  }, [playYear]);
 
   // The parts of a selected serial site, outside the cluster group so they never merge.
   const partsLayerRef = useRef<L.LayerGroup | null>(null);

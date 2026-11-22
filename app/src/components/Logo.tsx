@@ -1,6 +1,13 @@
 import museumIcon from '../assets/museum.png';
 
-export function Logo({ className = '' }: { className?: string }) {
+interface LogoProps {
+  className?: string;
+  /** The page's own logo is its h1. Anywhere else (a dialog) it is only a mark. */
+  asHeading?: boolean;
+}
+
+export function Logo({ className = '', asHeading = true }: LogoProps) {
+  const Wordmark = asHeading ? 'h1' : 'div';
   return (
     <div className={`flex items-center gap-[9px] whitespace-nowrap ${className}`}>
       {/* Flaticon museum glyph, masked so it takes the ink token instead of pure black. */}
@@ -20,7 +27,7 @@ export function Logo({ className = '' }: { className?: string }) {
       />
 
       <div className="flex flex-col">
-        <h1 className="text-[30px] font-bold leading-none tracking-[-0.01em]">
+        <Wordmark className="text-[30px] font-bold leading-none tracking-[-0.01em]">
           <span className="text-cultural">W</span>
           <span className="text-natural">H</span>
           <span className="text-mixed">X</span>
@@ -28,7 +35,7 @@ export function Logo({ className = '' }: { className?: string }) {
             className="ml-1 inline-block h-[5px] w-[5px] rounded-full bg-cultural align-baseline"
             aria-hidden="true"
           />
-        </h1>
+        </Wordmark>
         <p className="mt-[3.9px] text-xs font-semibold uppercase leading-none tracking-[0.18em] text-muted">
           World Heritage Explorer
         </p>
