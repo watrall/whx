@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   playbackHold,
+  nearestHandle,
   playbackPool,
   rangeAfterYearClick,
   staggerBatches,
@@ -62,4 +63,12 @@ test('playback pool holds dated sites from the start year and undated ones with 
     playbackPool(sites, 1985, [1978, 2026]).map((entry) => entry.site.id),
     ['b'],
   );
+});
+
+test('the nearest handle wins, and the start wins a tie', () => {
+  assert.equal(nearestHandle(100, 100, 118), 'start');
+  assert.equal(nearestHandle(118, 100, 118), 'end');
+  assert.equal(nearestHandle(95, 100, 118), 'start');
+  assert.equal(nearestHandle(109, 100, 118), 'start');
+  assert.equal(nearestHandle(110, 100, 118), 'end');
 });

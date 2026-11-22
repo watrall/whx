@@ -34,8 +34,7 @@ import { Logo } from './components/Logo.tsx';
 import { MAP_CONTROL, MapView, type MapViewHandle } from './components/MapView.tsx';
 import { MobileSheet, type SheetSnap } from './components/MobileSheet.tsx';
 import { Modal } from './components/Modal.tsx';
-import { playbackHold, playbackPool } from './lib/timeline.ts';
-import { WorldHeritageGuide, WorldHeritageIntro } from './components/WorldHeritageIntro.tsx';
+import { WorldHeritageDialog } from './components/WorldHeritageDialog.tsx';
 import { PlayHint } from './components/PlayHint.tsx';
 import { PlaybackReadout } from './components/PlaybackReadout.tsx';
 import { SearchOverlay } from './components/SearchOverlay.tsx';
@@ -57,6 +56,7 @@ import type { PartPoint } from './lib/unesco.ts';
 import { NO_EXTRA, hasExtraFilters, matchesExtra, shareListUrl } from './lib/filters.ts';
 import type { ExtraFilters } from './lib/filters.ts';
 import { buildUrlHash, parseUrlState } from './lib/urlState.ts';
+import { playbackHold, playbackPool } from './lib/timeline.ts';
 import {
   countryCount,
   formatNumber,
@@ -149,11 +149,10 @@ export default function App() {
   const [discoverNotice, setDiscoverNotice] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
-  // The explanation of what World Heritage is; the About dialog holds the project's own details.
+  // The "what is World Heritage?" guide, and the first-visit card in front of it until dismissed.
   const [guideOpen, setGuideOpen] = useState(false);
-  // A short "what is World Heritage?" card, shown on a first visit until the visitor opts out.
   const [introOpen, setIntroOpen] = useState(() => readStored(INTRO_KEY) !== '1');
-  // The card waits for the data, and a failed load never shows it, so only count it while visible.
+  // The card waits for the data and never shows after a failed load.
   const introVisible = introOpen && !loading && !error;
   const closeIntro = useCallback((remember: boolean) => {
     if (remember) writeStored(INTRO_KEY, '1');
@@ -414,7 +413,8 @@ export default function App() {
     };
   }, [loading, hintSeen, introVisible]);
 
-  const showHint = hintReady && !hintSeen && !playing && !selectedSite && !searchOpen && !aboutOpen && !guideOpen && !introVisible;
+  const dialogOpen = aboutOpen || guideOpen || searchOpen || introVisible;
+  const showHint = hintReady && !hintSeen && !playing && !selectedSite && !dialogOpen;
 
   const handleReset = useCallback(() => {
     setQuery('');
@@ -539,7 +539,7 @@ export default function App() {
         return;
       }
 
-      if (aboutOpen || guideOpen || searchOpen || introVisible) return;
+      if (dialogOpen) return;
       if (typing) return;
 
       if (event.key === '/') {
@@ -577,7 +577,7 @@ export default function App() {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [aboutOpen, guideOpen, searchOpen, introVisible, selectedSite, isDesktop, handleStep, handleToggleType, handlePlayToggle]);
+  }, [dialogOpen, selectedSite, isDesktop, handleStep, handleToggleType, handlePlayToggle]);
 
   const sortSelect = (
     <label className="relative inline-flex items-center">
@@ -889,32 +889,24 @@ export default function App() {
     [fallBackBasemap],
   );
 
-  // The intro waits for the data, so it never covers a map that has nothing on it yet.
-  const introModal = (
-    <WorldHeritageIntro
-      open={introVisible}
-      onClose={closeIntro}
-      onReadMore={(remember) => {
+  // The card and the guide share one dialog so the guide can go back to the card.
+  const worldHeritageDialog = (
+    <WorldHeritageDialog
+      open={introVisible || guideOpen}
+      view={guideOpen ? 'guide' : 'intro'}
+      canGoBack={introVisible}
+      onReadMore={() => setGuideOpen(true)}
+      onBack={() => setGuideOpen(false)}
+      onClose={(remember) => {
+        setGuideOpen(false);
         closeIntro(remember);
-        setGuideOpen(true);
+      }}
+      onAbout={(remember) => {
+        setGuideOpen(false);
+        closeIntro(remember);
+        setAboutOpen(true);
       }}
     />
-  );
-
-  const guideModal = (
-    <Modal
-      open={guideOpen}
-      onClose={() => setGuideOpen(false)}
-      title="What is World Heritage?"
-      width="lg"
-    >
-      <WorldHeritageGuide
-        onAbout={() => {
-          setGuideOpen(false);
-          setAboutOpen(true);
-        }}
-      />
-    </Modal>
   );
 
   const aboutModal = (
@@ -1026,7 +1018,7 @@ export default function App() {
                 type="button"
                 onClick={() => setGuideOpen(true)}
                 aria-label="What is World Heritage?"
-                className="group relative focus-ring grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink transition hover:bg-canvas"
+                className="group relative focus-ring grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink transition duration-150 wh-tint"
               >
                 <Info className="h-[18px] w-[18px]" aria-hidden="true" />
                 <MapTooltip placement="belowEnd">What is World Heritage?</MapTooltip>
@@ -1154,8 +1146,7 @@ export default function App() {
 
         {searchOverlay}
         {aboutModal}
-        {guideModal}
-        {introModal}
+        {worldHeritageDialog}
       </div>
     );
   }
@@ -1240,7 +1231,7 @@ export default function App() {
                 type="button"
                 onClick={() => setGuideOpen(true)}
                 aria-label="What is World Heritage?"
-                className="focus-ring grid h-11 w-11 place-items-center rounded-lg text-ink transition hover:bg-canvas"
+                className="focus-ring grid h-11 w-11 place-items-center rounded-full text-ink transition duration-150 wh-tint"
               >
                 <Info className="h-[18px] w-[18px]" aria-hidden="true" />
               </button>
@@ -1341,8 +1332,7 @@ export default function App() {
 
       {searchOverlay}
       {aboutModal}
-      {guideModal}
-      {introModal}
+      {worldHeritageDialog}
     </main>
   );
 }

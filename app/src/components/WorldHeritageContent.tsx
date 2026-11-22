@@ -1,8 +1,5 @@
-import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import { ArrowUpRight } from 'lucide-react';
-import { Logo } from './Logo.tsx';
-import { Modal } from './Modal.tsx';
 
 /**
  * Plain-language context for the list, drawn from UNESCO's own pages:
@@ -23,24 +20,10 @@ function ChipLink({ href, children }: { href: string; children: ReactNode }) {
   );
 }
 
-interface IntroModalProps {
-  open: boolean;
-  /** `remember` is true when the visitor ticked "Don't show this again". */
-  onClose: (remember: boolean) => void;
-  onReadMore: (remember: boolean) => void;
-}
-
-/** A short first-visit card: what the list is, and why it is more than a list of nice places. */
-export function WorldHeritageIntro({ open, onClose, onReadMore }: IntroModalProps) {
-  const [remember, setRemember] = useState(false);
-  const checkId = useId();
-
+/** The short card: what the list is, and why it is more than a list of nice places. */
+export function IntroPane() {
   return (
-    <Modal open={open} onClose={() => onClose(remember)} title="What is World Heritage?" masthead={
-        <div aria-hidden="true">
-          <Logo asHeading={false} />
-        </div>
-      } width="lg">
+    <div className="pb-4">
       <p className="text-[15px] leading-relaxed text-ink">
         The World Heritage List is not a ranking of favorite places. It is a register kept under an
         international treaty, the 1972 Convention concerning the Protection of the World Cultural and
@@ -71,38 +54,7 @@ export function WorldHeritageIntro({ open, onClose, onReadMore }: IntroModalProp
         <ChipLink href="https://whc.unesco.org/en/convention">The Convention</ChipLink>
         <ChipLink href="https://www.unesco.org/en/world-heritage">UNESCO World Heritage</ChipLink>
       </div>
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-t border-line pt-4">
-        <label
-          htmlFor={checkId}
-          className="flex min-h-11 cursor-pointer items-center gap-2.5 text-xs text-muted"
-        >
-          <input
-            id={checkId}
-            type="checkbox"
-            checked={remember}
-            onChange={(event) => setRemember(event.target.checked)}
-            className="h-4 w-4 accent-[oklch(var(--ink))]"
-          />
-          Don't show this again
-        </label>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => onReadMore(remember)}
-            className="focus-ring min-h-11 rounded-lg border border-line bg-surface px-4 text-sm font-medium text-ink transition hover:bg-canvas active:scale-95 lg:min-h-9"
-          >
-            Read more
-          </button>
-          <button
-            type="button"
-            onClick={() => onClose(remember)}
-            className="focus-ring min-h-11 rounded-lg bg-ink px-4 text-sm font-medium text-canvas transition active:scale-95 lg:min-h-9"
-          >
-            Explore the map
-          </button>
-        </div>
-      </div>
-    </Modal>
+    </div>
   );
 }
 
@@ -114,10 +66,10 @@ function Heading({ children }: { children: ReactNode }) {
   );
 }
 
-/** The longer version, shown inside the About dialog. */
-export function WorldHeritageGuide({ onAbout }: { onAbout: () => void }) {
+/** The longer version, reached from the card or the header info button. */
+export function GuidePane({ onAbout }: { onAbout: () => void }) {
   return (
-    <section>
+    <section className="pb-1 pr-1">
       <p className="text-[15px] leading-relaxed text-ink">
         UNESCO describes heritage as "our legacy from the past, what we live with today, and what we
         pass on to future generations." The World Heritage List applies that idea through an

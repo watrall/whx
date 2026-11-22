@@ -8,7 +8,7 @@ import type {
 } from 'react';
 import { Pause, Play } from 'lucide-react';
 import type { Site, SiteType, YearRange } from '../lib/types.ts';
-import { rangeAfterYearClick } from '../lib/timeline.ts';
+import { nearestHandle, rangeAfterYearClick } from '../lib/timeline.ts';
 import { TYPE_COLOR, TYPE_ORDER, formatRange, pluralize } from '../lib/utils.ts';
 
 interface TimelineProps {
@@ -169,20 +169,19 @@ export function Timeline({
   const onHandlePointerDown = (handle: Handle, event: ReactPointerEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    // When the handles sit a year apart their hit areas overlap and the later one covers the
-    // other, so the handle under the pointer is not always the one meant. Take the nearest.
+    // Handles a year apart overlap, and the later one covers the other, so take the nearest.
     const rect = chartRef.current?.getBoundingClientRect();
-    let chosen = handle;
-    if (rect) {
-      const startX = rect.left + (startPct / 100) * rect.width;
-      const endX = rect.left + (endPct / 100) * rect.width;
-      chosen = Math.abs(event.clientX - startX) <= Math.abs(event.clientX - endX) ? 'start' : 'end';
-    }
-    dragRef.current = chosen;
+    dragRef.current = rect
+      ? nearestHandle(
+          event.clientX,
+          rect.left + (startPct / 100) * rect.width,
+          rect.left + (endPct / 100) * rect.width,
+        )
+      : handle;
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
-  const onHandlePointerMove = (_handle: Handle, event: ReactPointerEvent<HTMLDivElement>) => {
+  const onHandlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     const handle = dragRef.current;
     if (!handle) return;
     const rect = chartRef.current?.getBoundingClientRect();
@@ -197,7 +196,7 @@ export function Timeline({
     }
   };
 
-  const onHandlePointerUp = (_handle: Handle, event: ReactPointerEvent<HTMLDivElement>) => {
+  const onHandlePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
     dragRef.current = null;
     event.stopPropagation();
   };
@@ -259,8 +258,8 @@ export function Timeline({
       style={{ left: `${startPct}%` }}
       onKeyDown={(event) => onHandleKeyDown('start', event)}
       onPointerDown={(event) => onHandlePointerDown('start', event)}
-      onPointerMove={(event) => onHandlePointerMove('start', event)}
-      onPointerUp={(event) => onHandlePointerUp('start', event)}
+      onPointerMove={onHandlePointerMove}
+      onPointerUp={onHandlePointerUp}
       onPointerCancel={onHandlePointerCancel}
       onLostPointerCapture={onHandleLostPointerCapture}
       onClick={onHandleClick}
@@ -283,8 +282,8 @@ export function Timeline({
       style={{ left: `${endPct}%` }}
       onKeyDown={(event) => onHandleKeyDown('end', event)}
       onPointerDown={(event) => onHandlePointerDown('end', event)}
-      onPointerMove={(event) => onHandlePointerMove('end', event)}
-      onPointerUp={(event) => onHandlePointerUp('end', event)}
+      onPointerMove={onHandlePointerMove}
+      onPointerUp={onHandlePointerUp}
       onPointerCancel={onHandlePointerCancel}
       onLostPointerCapture={onHandleLostPointerCapture}
       onClick={onHandleClick}

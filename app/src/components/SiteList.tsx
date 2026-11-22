@@ -67,11 +67,23 @@ export function SiteList({
     window.requestAnimationFrame(() => virtualizer.scrollToIndex(index, { align: 'center' }));
   }, [selectedId, sites, virtualizer]);
 
+  // Hovering a pin centers its row. Hovering a row itself must not scroll, or the list would
+  // move out from under the pointer.
+  const hoveredRowRef = useRef<string | null>(null);
+  const enterRow = (site: Site) => {
+    hoveredRowRef.current = site.id;
+    onHover(site);
+  };
+  const leaveRow = () => {
+    hoveredRowRef.current = null;
+    onHover(null);
+  };
   useEffect(() => {
     if (!followHighlight || !highlightedId) return;
+    if (hoveredRowRef.current === highlightedId) return;
     const index = sites.findIndex((site) => site.id === highlightedId);
     if (index < 0) return;
-    virtualizer.scrollToIndex(index, { align: 'auto' });
+    virtualizer.scrollToIndex(index, { align: 'center' });
   }, [followHighlight, highlightedId, sites, virtualizer]);
 
   if (sites.length === 0) {
@@ -95,17 +107,17 @@ export function SiteList({
               key={site.id}
               type="button"
               onClick={() => onSelect(site)}
-              onMouseEnter={() => onHover(site)}
-              onMouseLeave={() => onHover(null)}
-              onFocus={() => onHover(site)}
-              onBlur={() => onHover(null)}
+              onMouseEnter={() => enterRow(site)}
+              onMouseLeave={leaveRow}
+              onFocus={() => enterRow(site)}
+              onBlur={leaveRow}
               aria-current={selected ? 'true' : undefined}
               className={`focus-ring absolute left-0 top-0 flex w-full items-center gap-3 border-b border-line/60 px-4 text-left transition-colors ${
                 selected
                   ? 'bg-sunken'
                   : highlighted
-                    ? 'bg-canvas'
-                    : 'bg-surface hover:bg-canvas'
+                    ? 'wh-tint-on'
+                    : 'wh-tint bg-surface'
               }`}
               style={{
                 height: item.size,

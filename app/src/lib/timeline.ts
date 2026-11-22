@@ -70,3 +70,8 @@ export function playbackPool<T extends { year: number | null }>(
   }
   return pool;
 }
+
+/** Which of two handles a pointer at `x` is closer to; the start wins a tie. */
+export function nearestHandle(x: number, startX: number, endX: number): 'start' | 'end' {
+  return Math.abs(x - startX) <= Math.abs(x - endX) ? 'start' : 'end';
+}

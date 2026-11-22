@@ -19,6 +19,9 @@ function hash(id: string): number {
   return value;
 }
 
+/** What a site belongs to at the current zoom: a cluster, or itself when it stands alone. */
+type Parent = L.Marker | L.MarkerCluster;
+
 interface Shown {
   marker: L.Marker;
   count: number;
@@ -40,8 +43,8 @@ export class PlaybackLayer {
   private entries: PlaybackEntry<Site>[] = [];
   private markers = new Map<string, L.Marker>();
   private readonly revealed = new Set<string>();
-  private members = new Map<unknown, { parent: unknown; sites: Site[] }>();
-  private shown = new Map<unknown, Shown>();
+  private members = new Map<Parent, Site[]>();
+  private shown = new Map<Parent, Shown>();
   private timers: number[] = [];
   private stopped = false;
 
@@ -52,11 +55,12 @@ export class PlaybackLayer {
     this.load(entries);
   }
 
-  /** Swaps in a new set of sites (the start year moved) without touching the live cluster group. */
-  setEntries(entries: PlaybackEntry<Site>[]): void {
-    if (this.stopped || entries === this.entries) return;
+  /** Swaps in a new set of sites (the start year moved). Returns false if nothing changed. */
+  setEntries(entries: PlaybackEntry<Site>[]): boolean {
+    if (this.stopped || entries === this.entries) return false;
     this.clearTimers();
     this.load(entries);
+    return true;
   }
 
   /** Builds the hidden reference group for these sites and works out their clusters. */
@@ -70,8 +74,8 @@ export class PlaybackLayer {
       spiderfyOnMaxZoom: false,
       animate: false,
       animateAddingMarkers: false,
-      // Keep sites outside the viewport in their clusters too. Without this their icons are
-      // dropped, getVisibleParent cannot find their cluster, and panning would show lone pins.
+      // Without this, sites outside the viewport lose their icons and getVisibleParent cannot
+      // find their cluster.
       removeOutsideVisibleBounds: false,
       iconCreateFunction: () => HIDDEN_ICON,
     });
@@ -148,13 +152,10 @@ export class PlaybackLayer {
     for (const { site } of this.entries) {
       const marker = this.markers.get(site.id);
       if (!marker) continue;
-      const parent = this.group?.getVisibleParent(marker) ?? marker;
-      let entry = this.members.get(parent);
-      if (!entry) {
-        entry = { parent, sites: [] };
-        this.members.set(parent, entry);
-      }
-      entry.sites.push(site);
+      const parent: Parent = this.group?.getVisibleParent(marker) ?? marker;
+      const sites = this.members.get(parent);
+      if (sites) sites.push(site);
+      else this.members.set(parent, [site]);
     }
     this.display.clearLayers();
     this.shown = new Map();
@@ -163,56 +164,56 @@ export class PlaybackLayer {
 
   private render(): void {
     if (this.stopped) return;
-    const live = new Set<unknown>();
-    for (const [key, { parent, sites }] of this.members) {
+    const live = new Set<Parent>();
+    for (const [parent, sites] of this.members) {
       const visible = sites.filter((site) => this.revealed.has(site.id));
-      if (visible.length === 0) continue;
-      live.add(key);
-      const isCluster = typeof (parent as L.MarkerCluster).getChildCount === 'function';
-      const existing = this.shown.get(key);
-
-      if (!isCluster) {
-        if (existing) continue;
-        const site = visible[0]!;
-        const marker = L.marker([site.lat, site.lon], {
-          interactive: false,
-          keyboard: false,
-          icon: L.divIcon({
-            html: markerIconHtml(site.type, false, false, site.danger),
-            className: 'wh-marker-wrapper wh-playing',
-            iconSize: [34, 42],
-            iconAnchor: [17, 40],
-          }),
-        }).addTo(this.display);
-        this.shown.set(key, { marker, count: 1 });
-        continue;
-      }
-
-      if (existing && existing.count === visible.length) continue;
-      const size = clusterSize(visible.length);
-      const icon = L.divIcon({
-        html: clusterIconHtml(visible.length, typeCounts(visible.map((site) => site.type))),
-        className: 'wh-cluster-wrapper wh-playing',
-        iconSize: [size, size],
-        iconAnchor: [size / 2, size / 2],
-      });
-      if (existing) {
-        existing.marker.setIcon(icon);
-        existing.count = visible.length;
-      } else {
-        const marker = L.marker((parent as L.MarkerCluster).getLatLng(), {
-          interactive: false,
-          keyboard: false,
-          icon,
-        }).addTo(this.display);
-        this.shown.set(key, { marker, count: visible.length });
-      }
+      const first = visible[0];
+      if (!first) continue;
+      live.add(parent);
+      if (parent instanceof L.MarkerCluster) this.showCluster(parent, visible);
+      else this.showPin(parent, first);
     }
     // Sites can also go away (the viewer dragged the end handle back).
-    for (const [key, entry] of this.shown) {
-      if (live.has(key)) continue;
+    for (const [parent, entry] of this.shown) {
+      if (live.has(parent)) continue;
       entry.marker.remove();
-      this.shown.delete(key);
+      this.shown.delete(parent);
     }
+  }
+
+  private showPin(parent: Parent, site: Site): void {
+    if (this.shown.has(parent)) return;
+    const marker = L.marker([site.lat, site.lon], {
+      interactive: false,
+      keyboard: false,
+      icon: L.divIcon({
+        html: markerIconHtml(site.type, false, false, site.danger),
+        className: 'wh-marker-wrapper wh-playing',
+        iconSize: [34, 42],
+        iconAnchor: [17, 40],
+      }),
+    }).addTo(this.display);
+    this.shown.set(parent, { marker, count: 1 });
+  }
+
+  private showCluster(parent: L.MarkerCluster, visible: Site[]): void {
+    const existing = this.shown.get(parent);
+    if (existing?.count === visible.length) return;
+    const size = clusterSize(visible.length);
+    const icon = L.divIcon({
+      html: clusterIconHtml(visible.length, typeCounts(visible.map((site) => site.type))),
+      className: 'wh-cluster-wrapper wh-playing',
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
+    });
+    if (existing) {
+      existing.marker.setIcon(icon);
+      existing.count = visible.length;
+      return;
+    }
+    const marker = L.marker(parent.getLatLng(), { interactive: false, keyboard: false, icon }).addTo(
+      this.display,
+    );
+    this.shown.set(parent, { marker, count: visible.length });
   }
 }

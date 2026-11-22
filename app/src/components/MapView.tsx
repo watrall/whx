@@ -408,8 +408,8 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     }
   }, [highlightedId]);
 
-  // While playing, clusters come from a fixed layout (see PlaybackLayer) so they do not jump
-  // as sites arrive. The live cluster group steps aside and returns when playback stops.
+  // While playing, clusters come from a fixed layout (see PlaybackLayer) so they do not jump.
+  // The live cluster group steps aside and returns when playback stops.
   const playEntries = playback?.entries ?? null;
   const playActive = playEntries !== null;
   useEffect(() => {
@@ -424,19 +424,17 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     return () => {
       layer.stop();
       playLayerRef.current = null;
-      // The map may already be gone if the whole view is unmounting.
+      // Skip if the whole map is being torn down.
       if (mapRef.current === map) cluster.addTo(map);
     };
   }, [playActive]);
 
-  // Moving the start handle during playback changes which sites take part; the live cluster
-  // group stays out of it, so nothing is re-clustered.
+  // Moving the start handle mid-playback changes which sites take part.
   useEffect(() => {
     const layer = playLayerRef.current;
     const current = playbackRef.current;
     if (!layer || !playEntries || !current) return;
-    layer.setEntries(playEntries);
-    layer.reveal(current.year, current.speed);
+    if (layer.setEntries(playEntries)) layer.reveal(current.year, current.speed);
   }, [playEntries]);
 
   const playYear = playback?.year ?? null;
