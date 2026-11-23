@@ -7,13 +7,15 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, '..');
 // Static JSON served from /data: the site list and the lazily loaded descriptions, serial-site
-// parts and danger notes, all built by scripts/import-*.mjs, plus the Wikidata photo list.
+// parts and danger notes, all built by scripts/import-*.mjs, plus the Wikidata photo list and the photo galleries.
 const DATA_FILES = [
   'unesco.json',
   'unesco-text.json',
   'unesco-parts.json',
   'danger.json',
   'photos.json',
+  'gallery.json',
+  'unsplash.json',
 ];
 
 export default defineConfig({

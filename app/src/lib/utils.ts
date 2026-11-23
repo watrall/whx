@@ -52,6 +52,12 @@ export function imageCreditUrl(image: string | null): string | null {
   }
 }
 
+/** "Photo: Ron Van Oers, CC BY-SA 3.0 IGO", or a plain credit when Commons names no author. */
+export function photoCreditText(photo: { by: string | null; license: string | null }): string {
+  const parts = [photo.by, photo.license].filter(Boolean);
+  return parts.length > 0 ? `Photo: ${parts.join(', ')}` : 'Photo: Wikimedia Commons';
+}
+
 export const IS_APPLE =
   typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent);
 

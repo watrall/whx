@@ -22,12 +22,12 @@ import {
   TYPE_TINT,
   directionsUrl,
   formatNumber,
-  imageCreditUrl,
   unescoUrl,
 } from '../lib/utils.ts';
 import { DangerNote } from './DangerNote.tsx';
 import { SiteDescription } from './SiteDescription.tsx';
-import { SiteImage, SiteThumb } from './SiteImage.tsx';
+import { PhotoCarousel } from './PhotoCarousel.tsx';
+import { SiteThumb } from './SiteImage.tsx';
 import { TypeIcon } from './TypeIcon.tsx';
 
 interface SiteDetailProps {
@@ -87,7 +87,6 @@ export function SiteDetail({
   }, [site.id]);
 
   const criteria = criteriaFromCodes(site.criteriaCodes);
-  const creditUrl = imageCreditUrl(site.image);
   const officialUrl = unescoUrl(site);
   const [copied, setCopied] = useState(false);
 
@@ -186,17 +185,7 @@ export function SiteDetail({
           mobile ? 'aspect-[16/9]' : 'aspect-[3/2] [@media(max-height:900px)]:aspect-[16/9]'
         }`}
       >
-        <SiteImage site={site} alt={site.name} loading="eager" className="h-full w-full" />
-        {creditUrl && (
-          <a
-            href={creditUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="focus-ring absolute bottom-0 left-0 right-0 bg-gradient-to-t from-ink/70 to-transparent px-3 pb-2 pt-6 text-xs text-surface hover:underline"
-          >
-            Photo: Wikimedia Commons
-          </a>
-        )}
+        <PhotoCarousel site={site} />
         <button
           type="button"
           onClick={onClose}

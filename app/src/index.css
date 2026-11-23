@@ -322,6 +322,21 @@ img[data-preview='atlas'] {
   background-color: oklch(var(--ink) / 0.1);
 }
 
+/* The active photo dot fills over the time its photo stays. */
+.wh-dot-fill {
+  animation-name: wh-dot-fill;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+@keyframes wh-dot-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 /* The introduction dialog: the next pane wipes in from the side it is heading toward. */
 .wh-wipe-forward {
   animation: wh-wipe-forward 240ms var(--ease-out) both;

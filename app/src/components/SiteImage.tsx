@@ -5,6 +5,8 @@ import { TypeIcon } from './TypeIcon.tsx';
 
 interface SiteImageProps {
   site: Site;
+  /** Shows this URL instead of the site's first photo. */
+  image?: string | null;
   alt?: string;
   loading?: 'lazy' | 'eager';
   /** Requested pixel width. Commons resizes server-side, so small slots stay small. */
@@ -12,11 +14,19 @@ interface SiteImageProps {
   className?: string;
 }
 
-/** Re-sizes a Commons Special:FilePath URL; other URLs pass through untouched. */
+/** Re-sizes a Commons Special:FilePath URL or an Unsplash image URL; others pass through. */
 function withWidth(image: string, width?: number): string {
   if (!width) return image;
   try {
     const url = new URL(image);
+    if (url.hostname === 'images.unsplash.com') {
+      // Unsplash resizes on request; keep its own tracking parameter and ask for a smaller JPEG.
+      url.searchParams.set('w', String(width));
+      url.searchParams.set('q', '75');
+      url.searchParams.set('fm', 'jpg');
+      url.searchParams.set('fit', 'max');
+      return url.toString();
+    }
     if (!url.pathname.startsWith('/wiki/Special:FilePath/')) return image;
     url.searchParams.set('width', String(width));
     return url.toString();
@@ -27,11 +37,13 @@ function withWidth(image: string, width?: number): string {
 
 export function SiteImage({
   site,
+  image: imageOverride,
   alt = '',
   loading = 'lazy',
   width,
   className = '',
 }: SiteImageProps) {
+  const image = imageOverride === undefined ? site.image : imageOverride;
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -40,9 +52,9 @@ export function SiteImage({
     setFailed(false);
     // A cached image can finish before the load handler is attached.
     setLoaded(Boolean(imageRef.current?.complete && imageRef.current.naturalWidth > 0));
-  }, [site.image]);
+  }, [image]);
 
-  if (!site.image || failed) {
+  if (!image || failed) {
     return (
       <div
         className={`grid place-items-center bg-canvas ${className}`}
@@ -58,7 +70,7 @@ export function SiteImage({
   return (
     <img
       ref={imageRef}
-      src={withWidth(site.image, width ?? 900)}
+      src={withWidth(image, width ?? 900)}
       alt={alt}
       loading={loading}
       decoding="async"

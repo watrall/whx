@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildSites } from '../app/src/lib/data.ts';
+import { applyGallery, buildSites } from '../app/src/lib/data.ts';
 import { canonicalIds, findSite } from '../app/src/lib/ids.ts';
 import { countryAliases } from '../app/src/lib/countryAliases.ts';
 
@@ -91,4 +91,59 @@ test('country aliases add the names visitors search with', () => {
   assert.match(countryAliases(['Türkiye']), /Turkey/);
   assert.match(countryAliases(['Russian Federation', 'Türkiye']), /Russia/);
   assert.equal(countryAliases(['Peru']), '');
+});
+
+test('buildSites adds gallery photos after the main one, with credits', () => {
+  const unesco20 = { sites: { 20: unesco.sites[20] } };
+  const photos = { photos: { 20: { qid: 'Q1', image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Main.jpg' } } };
+  const gallery = {
+    extras: { 20: ['Second shot.jpg'] },
+    credits: { 'Main.jpg': { by: 'Ana', license: 'CC BY 4.0' }, 'Second shot.jpg': { by: '', license: 'CC0' } },
+  };
+  const [built] = buildSites(unesco20, photos, gallery);
+  assert.deepEqual(built.photos.map((entry) => entry.by), ['Ana', null]);
+  assert.deepEqual(built.photos.map((entry) => entry.license), ['CC BY 4.0', 'CC0']);
+  assert.match(built.photos[1].url, /Second%20shot\.jpg$/);
+  assert.equal(built.image, built.photos[0].url);
+});
+
+test('a demoted original goes to the end; a site with no main photo leads with an extra', () => {
+  const unesco20 = { sites: { 20: unesco.sites[20] } };
+  // photos.json already leads with the better photo for a demoted site.
+  const photos = { photos: { 20: { qid: 'Q1', image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Good.jpg' } } };
+  const gallery = { extras: { 20: ['Good.jpg', 'Second.jpg'] }, credits: {}, demoted: { 20: 'Map.png' } };
+  const [built] = buildSites(unesco20, photos, gallery);
+  assert.deepEqual(
+    built.photos.map((entry) => entry.url.split('/').pop()),
+    ['Good.jpg', 'Second.jpg', 'Map.png'],
+  );
+  const [bare] = buildSites(unesco20, { photos: {} }, { extras: { 20: ['Only.jpg'] } });
+  assert.match(bare.image, /Only\.jpg$/);
+});
+
+test('applyGallery adds photos to sites that were built without the gallery', () => {
+  const unesco20 = { sites: { 20: unesco.sites[20] } };
+  const photos = { photos: { 20: { qid: 'Q1', image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Main.jpg' } } };
+  const [plain] = buildSites(unesco20, photos);
+  assert.equal(plain.photos.length, 1);
+  const [full] = applyGallery([plain], { extras: { 20: ['Two.jpg'] }, credits: { 'Two.jpg': { by: 'Ana', license: 'CC0' } } });
+  assert.equal(full.photos.length, 2);
+  assert.equal(full.photos[1].by, 'Ana');
+  assert.equal(full.image, plain.image);
+});
+
+test('Unsplash photos follow the Commons ones and carry their credit links', () => {
+  const unesco20 = { sites: { 20: unesco.sites[20] } };
+  const photos = { photos: { 20: { qid: 'Q1', image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Main.jpg' } } };
+  const gallery = {
+    extras: { 20: [] },
+    unsplash: {
+      20: [{ id: 'u1', url: 'https://images.unsplash.com/photo-1?ixid=a', by: 'Ana', byUrl: 'https://unsplash.com/@ana', link: 'https://unsplash.com/photos/u1' }],
+    },
+  };
+  const [built] = buildSites(unesco20, photos, gallery);
+  assert.deepEqual(built.photos.map((entry) => entry.source), ['commons', 'unsplash']);
+  assert.equal(built.photos[1].by, 'Ana');
+  assert.equal(built.photos[1].byUrl, 'https://unsplash.com/@ana');
+  assert.equal(built.photos[1].page, 'https://unsplash.com/photos/u1');
 });
