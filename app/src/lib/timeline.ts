@@ -15,27 +15,21 @@ export function rangeAfterYearClick(
   return [year, year];
 }
 
-/** Shortest and longest time, in ms at 1×, over which one year's sites are spread out. */
 const STAGGER_MIN = 150;
 const STAGGER_MAX = 600;
 const STAGGER_PER_SITE = 10;
-/** A beat of stillness after a year has fully appeared, before the next one starts. */
 const PLAYBACK_PAUSE = 300;
-/** More new sites than this at once means the viewer jumped, so they appear without a stagger. */
 export const STAGGER_LIMIT = 150;
 
-/** How long a year's sites take to appear: busy years get longer, quiet ones stay snappy. */
 export function staggerWindow(count: number): number {
   if (count <= 0) return 0;
   return Math.min(Math.max(count * STAGGER_PER_SITE, STAGGER_MIN), STAGGER_MAX);
 }
 
-/** How long playback rests on a year before moving to the next one, in ms at 1×. */
 export function playbackHold(count: number): number {
   return staggerWindow(count) + PLAYBACK_PAUSE;
 }
 
-/** Splits `count` new sites into a few near-equal batches that appear one after another. */
 export function staggerBatches(count: number): number[] {
   if (count <= 0) return [];
   const steps = Math.min(8, Math.max(1, Math.ceil(count / 4)), count);
@@ -46,15 +40,9 @@ export function staggerBatches(count: number): number[] {
 
 export interface PlaybackEntry<T> {
   site: T;
-  /** The year this site appears during playback. */
   at: number;
 }
 
-/**
- * The sites playback will reveal, each with the year it appears. Sites with no year only show
- * when the whole range is in view, so they arrive with the final year rather than all at once
- * after playback ends.
- */
 export function playbackPool<T extends { year: number | null }>(
   sites: T[],
   start: number,
@@ -71,7 +59,6 @@ export function playbackPool<T extends { year: number | null }>(
   return pool;
 }
 
-/** Which of two handles a pointer at `x` is closer to; the start wins a tie. */
 export function nearestHandle(x: number, startX: number, endX: number): 'start' | 'end' {
   return Math.abs(x - startX) <= Math.abs(x - endX) ? 'start' : 'end';
 }

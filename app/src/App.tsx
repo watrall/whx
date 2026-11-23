@@ -139,7 +139,6 @@ export default function App() {
   const [domain, setDomain] = useState<YearRange>(FALLBACK_DOMAIN);
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
-  // When the extra photos arrive the site objects are replaced; keep the open card in step.
   useEffect(() => {
     setSelectedSite((current) => (current ? (sites.find((site) => site.id === current.id) ?? current) : current));
   }, [sites]);
@@ -153,10 +152,8 @@ export default function App() {
   const [discoverNotice, setDiscoverNotice] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
-  // The "what is World Heritage?" guide, and the first-visit card in front of it until dismissed.
   const [guideOpen, setGuideOpen] = useState(false);
   const [introOpen, setIntroOpen] = useState(() => readStored(INTRO_KEY) !== '1');
-  // The card waits for the data and never shows after a failed load.
   const introVisible = introOpen && !loading && !error;
   const closeIntro = useCallback((remember: boolean) => {
     if (remember) writeStored(INTRO_KEY, '1');
@@ -212,7 +209,6 @@ export default function App() {
           });
         }
         setLoading(false);
-        // Extra photos arrive after the map is showing.
         loadGallery(controller.signal)
           .then((gallery) => {
             if (gallery) setSites((current) => applyGallery(current, gallery));
@@ -272,8 +268,6 @@ export default function App() {
     [playing, filtered, playYear],
   );
 
-  // What the map draws while playing. The pool is fixed for the run (it only depends on where
-  // playback started), so the map keeps one cluster layout while the year advances.
   const playbackStart = yearRange[0];
   const playbackEntries = useMemo(
     () => (playing ? playbackPool(timelineSites, playbackStart, domain) : null),
@@ -899,7 +893,6 @@ export default function App() {
     [fallBackBasemap],
   );
 
-  // The card and the guide share one dialog so the guide can go back to the card.
   const worldHeritageDialog = (
     <WorldHeritageDialog
       open={introVisible || guideOpen}

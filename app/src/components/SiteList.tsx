@@ -67,8 +67,6 @@ export function SiteList({
     window.requestAnimationFrame(() => virtualizer.scrollToIndex(index, { align: 'center' }));
   }, [selectedId, sites, virtualizer]);
 
-  // Hovering a pin centers its row. Hovering a row itself must not scroll, or the list would
-  // move out from under the pointer.
   const hoveredRowRef = useRef<string | null>(null);
   const enterRow = (site: Site) => {
     hoveredRowRef.current = site.id;

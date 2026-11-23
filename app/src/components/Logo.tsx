@@ -2,7 +2,6 @@ import museumIcon from '../assets/museum.png';
 
 interface LogoProps {
   className?: string;
-  /** The page's own logo is its h1. Anywhere else (a dialog) it is only a mark. */
   asHeading?: boolean;
 }
 

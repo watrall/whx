@@ -58,7 +58,6 @@ test('playback pool holds dated sites from the start year and undated ones with 
     playbackPool(sites, 1978, [1978, 2026]).map((entry) => [entry.site.id, entry.at]),
     [['a', 1978], ['b', 1990], ['c', 2026]],
   );
-  // Starting later leaves out earlier years, and undated sites are not part of a partial range.
   assert.deepEqual(
     playbackPool(sites, 1985, [1978, 2026]).map((entry) => entry.site.id),
     ['b'],

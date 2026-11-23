@@ -5,7 +5,6 @@ import { TypeIcon } from './TypeIcon.tsx';
 
 interface SiteImageProps {
   site: Site;
-  /** Shows this URL instead of the site's first photo. */
   image?: string | null;
   alt?: string;
   loading?: 'lazy' | 'eager';
@@ -14,13 +13,11 @@ interface SiteImageProps {
   className?: string;
 }
 
-/** Re-sizes a Commons Special:FilePath URL or an Unsplash image URL; others pass through. */
-function withWidth(image: string, width?: number): string {
+export function withWidth(image: string, width?: number): string {
   if (!width) return image;
   try {
     const url = new URL(image);
     if (url.hostname === 'images.unsplash.com') {
-      // Unsplash resizes on request; keep its own tracking parameter and ask for a smaller JPEG.
       url.searchParams.set('w', String(width));
       url.searchParams.set('q', '75');
       url.searchParams.set('fm', 'jpg');

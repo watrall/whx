@@ -1,12 +1,6 @@
 import type { ReactNode } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 
-/**
- * Plain-language context for the list, drawn from UNESCO's own pages:
- * https://www.unesco.org/en/world-heritage and https://whc.unesco.org/en/convention
- */
-
-/** A small bordered link to a UNESCO page. 44px tall on touch screens, compact on desktop. */
 const CHIP =
   'focus-ring inline-flex min-h-11 items-center gap-1 rounded-lg border border-line bg-surface px-3 text-xs font-medium text-ink transition hover:bg-canvas lg:min-h-8';
 
@@ -20,7 +14,6 @@ function ChipLink({ href, children }: { href: string; children: ReactNode }) {
   );
 }
 
-/** The short card: what the list is, and why it is more than a list of nice places. */
 export function IntroPane() {
   return (
     <div className="pb-4">
@@ -66,7 +59,6 @@ function Heading({ children }: { children: ReactNode }) {
   );
 }
 
-/** The longer version, reached from the card or the header info button. */
 export function GuidePane({ onAbout }: { onAbout: () => void }) {
   return (
     <section className="pb-1 pr-1">

@@ -2,7 +2,6 @@ const PLACEMENT = {
   above: 'bottom-full left-1/2 mb-1.5 -translate-x-1/2',
   /** For a control at the right edge of the window, so the tooltip is not cut off. */
   aboveEnd: 'bottom-full right-0 mb-1.5',
-  /** For a control at the top right, where a tooltip above or beside it would cover the title. */
   belowEnd: 'top-full right-0 mt-1.5',
   right: 'left-full top-1/2 ml-2 -translate-y-1/2',
   left: 'right-full top-1/2 mr-2 -translate-y-1/2',

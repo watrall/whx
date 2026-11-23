@@ -169,7 +169,6 @@ export function Timeline({
   const onHandlePointerDown = (handle: Handle, event: ReactPointerEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    // Handles a year apart overlap, and the later one covers the other, so take the nearest.
     const rect = chartRef.current?.getBoundingClientRect();
     dragRef.current = rect
       ? nearestHandle(
@@ -395,7 +394,6 @@ export function Timeline({
         </span>
         {!compact && (
           <div className="ml-1 flex shrink-0 items-center gap-2">
-            {/* Fixed width: text that changes length while dragging must not resize the chart. */}
             <div className="w-28 text-right tabular-nums">
               <div className="whitespace-nowrap text-xs leading-none text-muted">{formatRange(value)}</div>
               <div className="mt-1 whitespace-nowrap text-xs font-semibold leading-none text-ink">

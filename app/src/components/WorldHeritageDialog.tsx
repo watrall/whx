@@ -10,19 +10,13 @@ type View = 'intro' | 'guide';
 interface DialogProps {
   open: boolean;
   view: View;
-  /** True when the guide was reached from the first-visit card, so there is a card to return to. */
   canGoBack: boolean;
   onReadMore: () => void;
   onBack: () => void;
-  /** `remember` is true when the visitor ticked "Don't show this again". */
   onClose: (remember: boolean) => void;
   onAbout: (remember: boolean) => void;
 }
 
-/**
- * The first-visit card and the longer guide, in one dialog. Moving between them wipes the body
- * sideways, and the guide has a back arrow when it was opened from the card.
- */
 export function WorldHeritageDialog({
   open,
   view,
@@ -33,7 +27,6 @@ export function WorldHeritageDialog({
   onAbout,
 }: DialogProps) {
   const [remember, setRemember] = useState(false);
-  // The pane being wiped away stays visible underneath until the animation ends.
   const [leaving, setLeaving] = useState<View | null>(null);
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
   const prevViewRef = useRef(view);
@@ -42,7 +35,6 @@ export function WorldHeritageDialog({
   const readMoreRef = useRef<HTMLButtonElement>(null);
   const checkId = useId();
 
-  // Opening the dialog straight onto a view is not a transition; only a change while open is.
   useLayoutEffect(() => {
     const previous = prevViewRef.current;
     const wasOpen = wasOpenRef.current;
@@ -70,8 +62,6 @@ export function WorldHeritageDialog({
     return leaving === pane ? 'z-0' : 'invisible';
   };
 
-  // The logo and back arrow share one slot and crossfade. Opened straight onto the guide there
-  // is no card to go back to, so there is no slot at all.
   const showLogo = view === 'intro';
   const masthead =
     showLogo || canGoBack ? (

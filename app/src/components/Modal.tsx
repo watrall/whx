@@ -1,30 +1,23 @@
-import { useEffect, useId, useRef } from 'react';
+import { useId, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { CircleX } from 'lucide-react';
+import { useDialog } from '../lib/useDialog.ts';
 
 interface ModalProps {
   open: boolean;
   onClose: () => void;
   title: string;
-  /** Shown above the title row, such as a logo. */
   masthead?: ReactNode;
-  /** Panel width: "md" (default) or "lg" for longer reading. */
   width?: 'md' | 'lg';
-  /** A fixed-height panel whose children fill it and scroll themselves, for content that swaps. */
   fill?: boolean;
   children: ReactNode;
   className?: string;
 }
 
-const FOCUSABLE =
-  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
 const WIDTH = { md: 'max-w-md', lg: 'max-w-lg' } as const;
 const PANEL =
   'animate-fade-up w-full rounded-2xl border border-line bg-surface p-5 shadow-float outline-none';
-/** Content flows and the whole panel scrolls. */
 const PANEL_FLOW = 'max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain scroll-thin';
-/** A fixed height; the children fill it and scroll themselves. */
 const PANEL_FILL = 'flex h-[min(44rem,calc(100dvh-2rem))] flex-col overflow-hidden';
 
 export function Modal({
@@ -38,52 +31,13 @@ export function Modal({
   className = '',
 }: ModalProps) {
   const titleId = useId();
-  // A ref, so a parent passing a new function each render does not re-run the effect below.
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
   const panelRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    // Focus the dialog itself so its title is announced and no button shows a focus ring yet.
-    panelRef.current?.focus();
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        onCloseRef.current();
-        return;
-      }
-      if (event.key !== 'Tab' || !panelRef.current) return;
-      const focusable = Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-        (element) => element.offsetParent !== null,
-      );
-      if (focusable.length === 0) {
-        event.preventDefault();
-        return;
-      }
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      const active = document.activeElement;
-      if (event.shiftKey && (active === first || active === panelRef.current)) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = previousOverflow;
-      previous?.focus();
-    };
-  }, [open]);
+  useDialog(panelRef, open, (event) => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    onClose();
+  });
 
   if (!open) return null;
 

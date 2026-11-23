@@ -5,10 +5,8 @@ import { STAGGER_LIMIT, staggerBatches, staggerWindow } from './timeline.ts';
 import type { PlaybackEntry } from './timeline.ts';
 import { clusterIconHtml, clusterSize, markerIconHtml, typeCounts } from './utils.ts';
 
-/** Same radius as the live map, so the clusters here are the ones the viewer ends up with. */
 const CLUSTER_RADIUS = 48;
 
-/** Reference markers are never seen; they only give the cluster group something to group. */
 const HIDDEN_ICON = L.divIcon({ className: 'wh-ref-hidden', html: '', iconSize: [0, 0] });
 
 function hash(id: string): number {
@@ -19,7 +17,6 @@ function hash(id: string): number {
   return value;
 }
 
-/** What a site belongs to at the current zoom: a cluster, or itself when it stands alone. */
 type Parent = L.Marker | L.MarkerCluster;
 
 interface Shown {
@@ -27,15 +24,6 @@ interface Shown {
   count: number;
 }
 
-/**
- * Draws the map while the timeline plays.
- *
- * The live cluster group moves its clusters as markers join (a cluster sits at the average of
- * its members), which makes them jump around. Here a hidden cluster group holds every site that
- * playback will reveal, so cluster positions are fixed from the start. Visible icons are drawn
- * at those fixed positions and only their counts change. When playback ends the live group
- * clusters the same sites, so the two match.
- */
 export class PlaybackLayer {
   private readonly map: L.Map;
   private group: L.MarkerClusterGroup | null = null;
@@ -55,7 +43,6 @@ export class PlaybackLayer {
     this.load(entries);
   }
 
-  /** Swaps in a new set of sites (the start year moved). Returns false if nothing changed. */
   setEntries(entries: PlaybackEntry<Site>[]): boolean {
     if (this.stopped || entries === this.entries) return false;
     this.clearTimers();
@@ -63,7 +50,6 @@ export class PlaybackLayer {
     return true;
   }
 
-  /** Builds the hidden reference group for these sites and works out their clusters. */
   private load(entries: PlaybackEntry<Site>[]): void {
     this.group?.remove();
     this.entries = entries;
@@ -74,8 +60,6 @@ export class PlaybackLayer {
       spiderfyOnMaxZoom: false,
       animate: false,
       animateAddingMarkers: false,
-      // Without this, sites outside the viewport lose their icons and getVisibleParent cannot
-      // find their cluster.
       removeOutsideVisibleBounds: false,
       iconCreateFunction: () => HIDDEN_ICON,
     });
@@ -95,7 +79,6 @@ export class PlaybackLayer {
     this.rebuild();
   }
 
-  /** Reveals every site up to `year`. New ones appear in small batches over a short window. */
   reveal(year: number, speed: number): void {
     this.clearTimers();
     const wanted = new Set<string>();
@@ -130,7 +113,6 @@ export class PlaybackLayer {
     if (sizes.length === 0) this.render();
   }
 
-  /** Cancels pending reveals and removes the playback drawing. */
   stop(): void {
     if (this.stopped) return;
     this.stopped = true;
@@ -145,7 +127,6 @@ export class PlaybackLayer {
     this.timers = [];
   }
 
-  /** Works out which cluster (or lone pin) each site belongs to at the current zoom. */
   private readonly rebuild = (): void => {
     if (this.stopped) return;
     this.members = new Map();
@@ -173,7 +154,6 @@ export class PlaybackLayer {
       if (parent instanceof L.MarkerCluster) this.showCluster(parent, visible);
       else this.showPin(parent, first);
     }
-    // Sites can also go away (the viewer dragged the end handle back).
     for (const [parent, entry] of this.shown) {
       if (live.has(parent)) continue;
       entry.marker.remove();

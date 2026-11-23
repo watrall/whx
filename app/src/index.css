@@ -128,7 +128,6 @@ img[data-preview='atlas'] {
   display: none !important;
 }
 
-
 .leaflet-popup-content-wrapper {
   border-radius: 16px;
   box-shadow: 0 16px 40px oklch(var(--ink) / 0.16);
@@ -281,7 +280,6 @@ img[data-preview='atlas'] {
   background: oklch(var(--type-mixed));
 }
 
-/* Playback: the reference cluster group is never seen, and what appears eases in. */
 .wh-ref-hidden {
   display: none !important;
 }
@@ -313,7 +311,6 @@ img[data-preview='atlas'] {
   }
 }
 
-/* A faint ink tint for hovered controls and highlighted rows, so there is one number to tune. */
 .wh-tint:hover,
 .wh-tint-on {
   background-color: oklch(var(--ink) / 0.07);
@@ -322,7 +319,6 @@ img[data-preview='atlas'] {
   background-color: oklch(var(--ink) / 0.1);
 }
 
-/* The active photo dot fills over the time its photo stays. */
 .wh-dot-fill {
   animation-name: wh-dot-fill;
   animation-timing-function: linear;
@@ -337,14 +333,12 @@ img[data-preview='atlas'] {
   }
 }
 
-/* The introduction dialog: the next pane wipes in from the side it is heading toward. */
 .wh-wipe-forward {
   animation: wh-wipe-forward 240ms var(--ease-out) both;
 }
 .wh-wipe-back {
   animation: wh-wipe-back 240ms var(--ease-out) both;
 }
-/* The incoming pane also drifts 12px toward its final place while the edge uncovers it. */
 @keyframes wh-wipe-forward {
   from {
     clip-path: inset(0 0 0 100%);
