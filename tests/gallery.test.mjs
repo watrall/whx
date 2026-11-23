@@ -6,6 +6,7 @@ import {
   fileNameFromImage,
   groupKey,
   hamming,
+  isAnimalPhoto,
   isDuplicate,
   isUsablePhoto,
   pickExtras,
@@ -104,4 +105,17 @@ test('pruneCredits keeps only the credits of files still in use', () => {
     'A.jpg': { by: 'Ana' },
     'C.jpg': { by: 'Cy' },
   });
+});
+
+test('isAnimalPhoto spots animal categories', () => {
+  assert.equal(isAnimalPhoto({ categories: 'Farnese Gardens (Rome)|Aves heads in right lateral aspect' }), true);
+  assert.equal(isAnimalPhoto({ categories: 'Dogs in Delhi' }), true);
+  assert.equal(isAnimalPhoto({ categories: 'Colosseum|Roman amphitheatres' }), false);
+  assert.equal(isAnimalPhoto({}), false);
+});
+
+test('pickExtras skips animal photos unless they are allowed', () => {
+  const files = [photo('Gull.jpg', { categories: 'Birds of Italy' }), photo('Forum.jpg')];
+  assert.deepEqual(pickExtras(files, [], 5, { allowAnimals: false }), ['Forum.jpg']);
+  assert.deepEqual(pickExtras(files, [], 5).sort(), ['Forum.jpg', 'Gull.jpg']);
 });

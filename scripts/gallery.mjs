@@ -8,6 +8,9 @@ const MAX_ASPECT = 2.6;
 const NAME_REJECT =
   /\b(maps?|plans?|diagrams?|logos?|flags?|locator|location|coat of arms|stamps?|seals?|icons?|charts?|graphs?|schematic|drawings?|engravings?|lithographs?|posters?|brochures?|screenshots?|signs?|plaques?)\b/i;
 
+const ANIMAL_CATEGORY =
+  /\b(aves|birds?|animals?|mammals?|insects?|reptiles?|amphibians?|fish|butterflies|wildlife|spiders?|dogs|cats)\b/i;
+
 const CATEGORY_REJECT =
   /\b(maps?|diagrams?|logos?|flags?|coats of arms|drawings?|paintings?|engravings?|lithographs?|postage stamps?|posters?|screenshots?|icons?|floor plans?|scanned)\b/i;
 
@@ -72,12 +75,16 @@ export function groupKey(title) {
     .toLowerCase();
 }
 
-export function pickExtras(files, skip = [], limit = PHOTOS_PER_SITE - 1) {
+export function isAnimalPhoto({ categories }) {
+  return (categories ?? '').split('|').some((category) => ANIMAL_CATEGORY.test(category));
+}
+
+export function pickExtras(files, skip = [], limit = PHOTOS_PER_SITE - 1, { allowAnimals = true } = {}) {
   const skipped = new Set(skip.map((name) => name.replace(/_/g, ' ')));
   const seen = new Set(skip.map((name) => groupKey(name)));
   const picked = [];
   const ranked = files
-    .filter((file) => !skipped.has(file.title) && isUsablePhoto(file))
+    .filter((file) => !skipped.has(file.title) && isUsablePhoto(file) && (allowAnimals || !isAnimalPhoto(file)))
     .sort((a, b) => scorePhoto(b) - scorePhoto(a) || a.title.localeCompare(b.title));
   for (const file of ranked) {
     const key = groupKey(file.title);

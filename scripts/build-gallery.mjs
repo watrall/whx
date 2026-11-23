@@ -168,21 +168,22 @@ function parseArgs(argv) {
 }
 
 async function pickForSite(number, context) {
-  const { photos, categories, names, hide, hashOf } = context;
+  const { photos, categories, names, types, hide, hashOf } = context;
   const primary = photos[number].image ? fileNameFromImage(photos[number].image) : null;
   const category = categories.get(number);
   const skip = [...(primary ? [primary] : []), ...(hide[number] ?? [])];
   const limit = PHOTOS_PER_SITE - (primary ? 1 : 0);
+  const options = { allowAnimals: types[number] !== 'cultural' };
 
   let files = category ? await candidates(category) : [];
-  if (pickExtras(files, skip, limit).length < limit) {
+  if (pickExtras(files, skip, limit, options).length < limit) {
     const known = new Set(files.map((file) => file.title));
     const named = await searchByName(names[number] ?? '');
     files = [...files, ...named.filter((file) => !known.has(file.title))];
   }
   await addUsage(files);
 
-  const ranked = pickExtras(files, skip, limit * RANK_DEPTH);
+  const ranked = pickExtras(files, skip, limit * RANK_DEPTH, options);
   const extras = await distinct(ranked, primary ? [primary] : [], limit, hashOf);
   const credits = Object.fromEntries(files.filter((file) => extras.includes(file.title)).map((file) => [file.title, file.credit]));
   return { extras, credits };
@@ -223,6 +224,7 @@ async function main() {
     photos,
     categories: await categoriesByNumber(photos),
     names: Object.fromEntries(Object.entries(unesco.sites).map(([number, record]) => [number, record.name])),
+    types: Object.fromEntries(Object.entries(unesco.sites).map(([number, record]) => [number, record.type])),
     hide: (await readJson(OVERRIDES, {})).hide ?? {},
     hashOf: createHasher(hashCache),
   };
