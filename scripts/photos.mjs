@@ -26,7 +26,7 @@ export function unescoNumber(unescoId) {
 }
 
 /** How much a Wikidata record looks like the property itself, not one of its components. */
-function parentRank(unescoId) {
+export function parentRank(unescoId) {
   if (/-\d+/.test(unescoId)) return 2; // "669bis-007": one component of a serial site
   if (/^\d+$/.test(unescoId)) return 0; // the plain number
   return 1; // an extension or revision such as "710bis"
@@ -58,4 +58,37 @@ export function buildPhotos(bindings) {
       : { qid: entries[0].qid };
   }
   return photos;
+}
+
+/**
+ * Replaces the photo for the sites listed in `overrides` ({ [unescoNumber]: Commons file name }),
+ * for the few places where Wikidata's choice is a map or render rather than a photograph.
+ * Numbers that are not in `photos`, and file names that do not make a valid URL, are ignored.
+ */
+export function applyPhotoOverrides(photos, overrides) {
+  const result = { ...photos };
+  for (const [number, file] of Object.entries(overrides ?? {})) {
+    const entry = result[number];
+    const image = normalizeCommonsImage(
+      `https://commons.wikimedia.org${FILE_PATH}${encodeURIComponent(file)}`,
+    );
+    if (entry && image) result[number] = { ...entry, image };
+  }
+  return result;
+}
+
+/**
+ * Puts the gallery's best photo first where Wikidata's is missing or a poor fit
+ * (`gallery.demoted` maps a UNESCO number to the Wikidata file it replaces). The lead is the
+ * first of the site's extras. Every other site is untouched.
+ */
+export function applyGalleryLeads(photos, gallery) {
+  const result = { ...photos };
+  for (const [number, entry] of Object.entries(photos)) {
+    if (entry.image && !(number in (gallery?.demoted ?? {}))) continue;
+    const lead = gallery?.extras?.[number]?.[0];
+    const image = lead && normalizeCommonsImage(`https://commons.wikimedia.org${FILE_PATH}${encodeURIComponent(lead)}`);
+    if (image) result[number] = { ...entry, image };
+  }
+  return result;
 }

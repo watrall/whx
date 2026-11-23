@@ -1,0 +1,38 @@
+name: Update site photo galleries
+
+on:
+  schedule:
+    - cron: '0 4 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Slow (a few thousand Commons requests), so it runs monthly and rebuilds every site.
+      - name: Fetch photos from Wikimedia Commons
+        run: node scripts/build-gallery.mjs --refresh
+
+      - name: Commit refreshed galleries
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/gallery.json
+          if git diff --staged --quiet; then
+            echo "No gallery changes."
+          else
+            git commit -m "Refresh site photo galleries"
+            git push
+          fi

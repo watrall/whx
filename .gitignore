@@ -6,3 +6,7 @@ app/dist/
 # Local working notes
 project-notes.md
 design-notes.md
+
+# Local secrets and caches
+.env
+.cache/

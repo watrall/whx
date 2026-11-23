@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildPhotos, normalizeCommonsImage, unescoNumber } from '../scripts/photos.mjs';
+import {
+  applyGalleryLeads,
+  applyPhotoOverrides,
+  buildPhotos,
+  normalizeCommonsImage,
+  unescoNumber,
+} from '../scripts/photos.mjs';
 
 const binding = (qid, unescoId, image) => ({
   item: { value: `http://www.wikidata.org/entity/${qid}` },
@@ -49,4 +55,37 @@ test('a plain number outranks an extension suffix', () => {
 
 test('records without a UNESCO number are skipped', () => {
   assert.deepEqual(buildPhotos([{ item: { value: 'x/Q1' } }]), {});
+});
+
+test('applyPhotoOverrides swaps the image and keeps the Wikidata item', () => {
+  const photos = { 1325: { qid: 'Q863815', image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Render.jpg' } };
+  const result = applyPhotoOverrides(photos, { 1325: 'Phoenix Islands Protected Area-114879.jpg' });
+  assert.deepEqual(result[1325], {
+    qid: 'Q863815',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Phoenix%20Islands%20Protected%20Area-114879.jpg',
+  });
+  assert.equal(photos[1325].image.endsWith('Render.jpg'), true);
+});
+
+test('applyPhotoOverrides ignores unknown sites and missing overrides', () => {
+  const photos = { 1: { qid: 'Q1' } };
+  assert.deepEqual(applyPhotoOverrides(photos, { 999: 'A.jpg' }), photos);
+  assert.deepEqual(applyPhotoOverrides(photos, undefined), photos);
+});
+
+test('applyGalleryLeads leads with the first extra where the main photo is poor or missing', () => {
+  const photos = {
+    1: { qid: 'Q1', image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Map.png' },
+    2: { qid: 'Q2' },
+    3: { qid: 'Q3', image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Fine.jpg' },
+  };
+  const gallery = {
+    extras: { 1: ['Better one.jpg'], 2: ['Only.jpg'], 3: ['Extra.jpg'] },
+    demoted: { 1: 'Map.png' },
+  };
+  const result = applyGalleryLeads(photos, gallery);
+  assert.match(result[1].image, /Better%20one\.jpg$/);
+  assert.match(result[2].image, /Only\.jpg$/);
+  assert.equal(result[3].image, photos[3].image);
+  assert.equal(applyGalleryLeads(photos, null)[1].image, photos[1].image);
 });
