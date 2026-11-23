@@ -36,7 +36,6 @@ export interface Site {
   danger: boolean;
   type: SiteType;
   image: string | null;
-  photos: SitePhoto[];
   /** Selection criteria codes such as ["ii", "iv"]. */
   criteriaCodes: string[];
   /** How many separate places make up the property. 1 for most sites. */

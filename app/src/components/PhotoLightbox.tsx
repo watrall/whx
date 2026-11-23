@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
-import type { Site } from '../lib/types.ts';
+import type { Site, SitePhoto } from '../lib/types.ts';
 import { useDialog } from '../lib/useDialog.ts';
 import { useSwipe } from '../lib/useSwipe.ts';
 import { PhotoCredit, PhotoDots } from './PhotoChrome.tsx';
@@ -26,13 +26,13 @@ function fitFrame(natural: Size, viewport: Size) {
 
 interface PhotoLightboxProps {
   site: Site;
+  photos: SitePhoto[];
   index: number;
   onIndexChange: (index: number) => void;
   onClose: () => void;
 }
 
-export function PhotoLightbox({ site, index, onIndexChange, onClose }: PhotoLightboxProps) {
-  const { photos } = site;
+export function PhotoLightbox({ site, photos, index, onIndexChange, onClose }: PhotoLightboxProps) {
   const photo = photos[index];
   const dialogRef = useRef<HTMLDivElement>(null);
   const [loaded, setLoaded] = useState<string | null>(null);

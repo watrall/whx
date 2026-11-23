@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Site } from '../lib/types.ts';
 import { useMediaQuery } from '../lib/useMediaQuery.ts';
+import { useSitePhotos } from '../lib/useSitePhotos.ts';
 import { useSwipe } from '../lib/useSwipe.ts';
 import { PhotoCredit, PhotoDots } from './PhotoChrome.tsx';
 import { PhotoLightbox } from './PhotoLightbox.tsx';
@@ -10,7 +11,7 @@ const ADVANCE_MS = 5000;
 const EDGE_RESISTANCE = 4;
 
 export function PhotoCarousel({ site }: { site: Site }) {
-  const { photos } = site;
+  const photos = useSitePhotos(site);
   const [index, setIndex] = useState(0);
   const [dragX, setDragX] = useState(0);
   const [playing, setPlaying] = useState(true);
@@ -131,7 +132,13 @@ export function PhotoCarousel({ site }: { site: Site }) {
       )}
 
       {lightbox && (
-        <PhotoLightbox site={site} index={index} onIndexChange={choose} onClose={() => setLightbox(false)} />
+        <PhotoLightbox
+          site={site}
+          photos={photos}
+          index={index}
+          onIndexChange={choose}
+          onClose={() => setLightbox(false)}
+        />
       )}
     </div>
   );

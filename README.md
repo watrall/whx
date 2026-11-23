@@ -68,6 +68,8 @@ The plain-language wording of the ten selection criteria is written in the app, 
 
 A card header shows up to five photographs: the Wikidata photo, then extras from the site's Wikimedia Commons category. Extras are ranked by Commons' featured and quality marks, how many Wikipedia articles use them, resolution and shape. Maps, diagrams, small files, portraits and panoramas are skipped, and near-duplicate shots are dropped. When Wikidata's photo is a poor fit, the best extra leads instead. Each photo is credited with its author and licence, linked to its Commons page.
 
+Each site's gallery is written at build time to its own small file, `data/gallery/<number>.json`, and loaded when its card opens, so the page never downloads every gallery at once.
+
 - `node scripts/build-gallery.mjs` builds `data/gallery.json` and rewrites `data/photos.json`. It is slow, so a monthly workflow runs it with `--refresh`; run it yourself with no flags to fill in sites that have no entry yet.
 - `data/photo-overrides.json` replaces a site's Wikidata photo (`photos`) or bars files from its gallery (`hide`), keyed by UNESCO number.
 - `node scripts/fill-unsplash.mjs` tops up sites that Commons covers thinly from Unsplash and writes `data/unsplash.json`. It needs a free API key as `UNSPLASH_ACCESS_KEY`, in the environment or an uncommitted `.env` file. Only photos whose Unsplash description, tags or location name the site are kept, and each is credited to the photographer and to Unsplash with links.

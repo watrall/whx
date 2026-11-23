@@ -2,8 +2,7 @@ import type { CommonsPhoto, Site, SitePhoto, SiteType, UnsplashPhoto } from './t
 
 const SITES_URL = 'data/unesco.json';
 const PHOTOS_URL = 'data/photos.json';
-const GALLERY_URL = 'data/gallery.json';
-const UNSPLASH_DATA_URL = 'data/unsplash.json';
+const GALLERY_URL = 'data/gallery';
 
 export interface LoadResult {
   sites: Site[];
@@ -22,10 +21,6 @@ async function fetchJson(url: string, signal?: AbortSignal): Promise<unknown> {
   return response.json();
 }
 
-/**
- * Builds the site list from UNESCO's records and, optionally, the Wikidata photo list.
- * Records that are malformed are skipped rather than failing the whole load.
- */
 function text(value: unknown): string | null {
   return typeof value === 'string' && value ? value : null;
 }
@@ -94,15 +89,20 @@ function photosFor(site: Pick<Site, 'id' | 'image'>, gallery: Gallery): SitePhot
   ];
 }
 
-export function applyGallery(sites: Site[], gallery: unknown): Site[] {
+export function siteGalleries(photos: unknown, gallery: unknown): Record<string, SitePhoto[]> {
   const parsed = galleryFrom(gallery);
-  return sites.map((site) => {
-    const photos = photosFor(site, parsed);
-    return { ...site, photos, image: photos[0]?.url ?? null };
-  });
+  const byId = isRecord(photos) && isRecord(photos.photos) ? photos.photos : {};
+  return Object.fromEntries(
+    Object.entries(byId).map(([id, record]) => [
+      id,
+      photosFor({ id, image: isRecord(record) ? text(record.image) : null }, parsed),
+    ]),
+  );
 }
 
-const NO_GALLERY = galleryFrom(null);
+function isSitePhoto(value: unknown): value is SitePhoto {
+  return isRecord(value) && (value.source === 'commons' || value.source === 'unsplash') && typeof value.url === 'string';
+}
 
 /**
  * Builds the site list from UNESCO's records and, optionally, the Wikidata photo list.
@@ -129,7 +129,6 @@ export function buildSites(unesco: unknown, photos: unknown): Site[] {
     const photo = photoById[id];
     const photoRecord = isRecord(photo) ? photo : null;
     const mainImage = typeof photoRecord?.image === 'string' ? photoRecord.image : null;
-    const photoList = photosFor({ id, image: mainImage }, NO_GALLERY);
 
     sites.push({
       id,
@@ -142,8 +141,7 @@ export function buildSites(unesco: unknown, photos: unknown): Site[] {
       year: typeof year === 'number' ? year : null,
       danger: danger === true,
       type: type as SiteType,
-      image: photoList[0]?.url ?? null,
-      photos: photoList,
+      image: mainImage,
       criteriaCodes: Array.isArray(criteria)
         ? criteria.filter((entry): entry is string => typeof entry === 'string')
         : [],
@@ -169,13 +167,12 @@ export async function loadSites(signal?: AbortSignal): Promise<LoadResult> {
   return { sites, recordCount };
 }
 
-export async function loadGallery(signal?: AbortSignal): Promise<unknown> {
-  const optional = (url: string) =>
-    fetchJson(url, signal).catch((error: unknown) => {
-      if (signal?.aborted) throw error;
-      return null;
-    });
-  const [gallery, unsplash] = await Promise.all([optional(GALLERY_URL), optional(UNSPLASH_DATA_URL)]);
-  if (!gallery && !unsplash) return null;
-  return { ...(isRecord(gallery) ? gallery : {}), unsplash: isRecord(unsplash) ? unsplash : {} };
+export async function loadSitePhotos(id: string, signal?: AbortSignal): Promise<SitePhoto[] | null> {
+  try {
+    const data = await fetchJson(`${GALLERY_URL}/${id}.json`, signal);
+    return Array.isArray(data) && data.every(isSitePhoto) ? data : null;
+  } catch (error) {
+    if (signal?.aborted) throw error;
+    return null;
+  }
 }

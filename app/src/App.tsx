@@ -42,7 +42,7 @@ import { SiteDetail } from './components/SiteDetail.tsx';
 import { SiteList } from './components/SiteList.tsx';
 import { Timeline } from './components/Timeline.tsx';
 import { TypeFilter } from './components/TypeFilter.tsx';
-import { applyGallery, loadGallery, loadSites } from './lib/data.ts';
+import { loadSites } from './lib/data.ts';
 import type { Bounds, Site, SiteType, YearRange } from './lib/types.ts';
 import { useDebouncedValue } from './lib/useDebouncedValue.ts';
 import { useMediaQuery } from './lib/useMediaQuery.ts';
@@ -139,9 +139,6 @@ export default function App() {
   const [domain, setDomain] = useState<YearRange>(FALLBACK_DOMAIN);
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
-  useEffect(() => {
-    setSelectedSite((current) => (current ? (sites.find((site) => site.id === current.id) ?? current) : current));
-  }, [sites]);
   const [sort, setSort] = useState<SortKey>('name');
   // The list follows the map by default; "all" lists every match and leaves the map alone.
   const [listScope, setListScope] = useState<ListScope>('view');
@@ -209,11 +206,6 @@ export default function App() {
           });
         }
         setLoading(false);
-        loadGallery(controller.signal)
-          .then((gallery) => {
-            if (gallery) setSites((current) => applyGallery(current, gallery));
-          })
-          .catch(() => {});
       })
       .catch((err: unknown) => {
         if (controller.signal.aborted) return;

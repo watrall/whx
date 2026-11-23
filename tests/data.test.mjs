@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { applyGallery, buildSites } from '../app/src/lib/data.ts';
+import { buildSites, siteGalleries } from '../app/src/lib/data.ts';
 import { canonicalIds, findSite } from '../app/src/lib/ids.ts';
 import { countryAliases } from '../app/src/lib/countryAliases.ts';
 
@@ -93,54 +93,47 @@ test('country aliases add the names visitors search with', () => {
   assert.equal(countryAliases(['Peru']), '');
 });
 
-const unesco20 = { sites: { 20: unesco.sites[20] } };
 const commons = (name) => `https://commons.wikimedia.org/wiki/Special:FilePath/${name}`;
-const siteWith = (image, gallery) => {
-  const [site] = buildSites(unesco20, { photos: { 20: { qid: 'Q1', ...(image ? { image: commons(image) } : {}) } } });
-  return applyGallery([site], gallery)[0];
-};
+const galleryFor = (image, gallery) =>
+  siteGalleries({ photos: { 20: { qid: 'Q1', ...(image ? { image: commons(image) } : {}) } } }, gallery)[20];
 
-test('a site starts with just its main photo', () => {
-  const [site] = buildSites(unesco20, { photos: { 20: { qid: 'Q1', image: commons('Main.jpg') } } });
-  assert.deepEqual(site.photos.map((photo) => photo.source), ['commons']);
-  assert.equal(site.image, site.photos[0].url);
+test('a site card starts from just its main photo', () => {
+  const [site] = buildSites({ sites: { 20: unesco.sites[20] } }, { photos: { 20: { qid: 'Q1', image: commons('Main.jpg') } } });
+  assert.equal(site.image, commons('Main.jpg'));
+  assert.equal('photos' in site, false);
 });
 
-test('applyGallery adds extras after the main photo, with their credits', () => {
-  const site = siteWith('Main.jpg', {
+test('a gallery lists extras after the main photo, with their credits', () => {
+  const photos = galleryFor('Main.jpg', {
     extras: { 20: ['Second shot.jpg'] },
     credits: { 'Main.jpg': { by: 'Ana', license: 'CC BY 4.0' }, 'Second shot.jpg': { by: '', license: 'CC0' } },
   });
-  assert.deepEqual(site.photos.map((photo) => photo.by), ['Ana', null]);
-  assert.deepEqual(site.photos.map((photo) => photo.license), ['CC BY 4.0', 'CC0']);
-  assert.match(site.photos[1].url, /Second%20shot\.jpg$/);
-  assert.equal(site.image, site.photos[0].url);
+  assert.deepEqual(photos.map((photo) => photo.by), ['Ana', null]);
+  assert.deepEqual(photos.map((photo) => photo.license), ['CC BY 4.0', 'CC0']);
+  assert.match(photos[1].url, /Second%20shot\.jpg$/);
 });
 
 test('a demoted original goes to the end, and a site with no main photo leads with an extra', () => {
-  const demoted = siteWith('Good.jpg', {
-    extras: { 20: ['Good.jpg', 'Second.jpg'] },
-    demoted: { 20: 'Map.png' },
-  });
-  assert.deepEqual(demoted.photos.map((photo) => photo.url.split('/').pop()), ['Good.jpg', 'Second.jpg', 'Map.png']);
-  assert.match(siteWith(null, { extras: { 20: ['Only.jpg'] } }).image, /Only\.jpg$/);
+  const demoted = galleryFor('Good.jpg', { extras: { 20: ['Good.jpg', 'Second.jpg'] }, demoted: { 20: 'Map.png' } });
+  assert.deepEqual(demoted.map((photo) => photo.url.split('/').pop()), ['Good.jpg', 'Second.jpg', 'Map.png']);
+  assert.match(galleryFor(null, { extras: { 20: ['Only.jpg'] } })[0].url, /Only\.jpg$/);
 });
 
 test('Unsplash photos follow the Commons ones and carry their credit links', () => {
-  const site = siteWith('Main.jpg', {
+  const photos = galleryFor('Main.jpg', {
     extras: { 20: [] },
     unsplash: {
       20: [{ id: 'u1', url: 'https://images.unsplash.com/photo-1?ixid=a', by: 'Ana', byUrl: 'https://unsplash.com/@ana', link: 'https://unsplash.com/photos/u1' }],
     },
   });
-  assert.deepEqual(site.photos.map((photo) => photo.source), ['commons', 'unsplash']);
-  assert.equal(site.photos[1].by, 'Ana');
-  assert.equal(site.photos[1].byUrl, 'https://unsplash.com/@ana');
-  assert.equal(site.photos[1].page, 'https://unsplash.com/photos/u1');
+  assert.deepEqual(photos.map((photo) => photo.source), ['commons', 'unsplash']);
+  assert.equal(photos[1].by, 'Ana');
+  assert.equal(photos[1].byUrl, 'https://unsplash.com/@ana');
+  assert.equal(photos[1].page, 'https://unsplash.com/photos/u1');
 });
 
 test('malformed gallery data is ignored', () => {
-  const site = siteWith('Main.jpg', { extras: { 20: 'not a list' }, unsplash: { 20: [null, { id: 'x' }] }, credits: 5 });
-  assert.equal(site.photos.length, 1);
-  assert.equal(applyGallery([site], null)[0].photos.length, 1);
+  const photos = galleryFor('Main.jpg', { extras: { 20: 'not a list' }, unsplash: { 20: [null, { id: 'x' }] }, credits: 5 });
+  assert.equal(photos.length, 1);
+  assert.equal(siteGalleries(null, null)[20], undefined);
 });
