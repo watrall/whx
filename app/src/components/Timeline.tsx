@@ -100,19 +100,43 @@ export function Timeline({
     if (culturalHeight > 0) {
       y -= culturalHeight;
       bars.push(
-        <rect key={`${year}-c`} x={x} y={y} width={width} height={culturalHeight} fill={TYPE_COLOR.cultural} rx={0.4} />,
+        <rect
+          key={`${year}-c`}
+          x={x}
+          y={y}
+          width={width}
+          height={culturalHeight}
+          fill={TYPE_COLOR.cultural}
+          rx={0.4}
+        />,
       );
     }
     if (naturalHeight > 0) {
       y -= naturalHeight;
       bars.push(
-        <rect key={`${year}-n`} x={x} y={y} width={width} height={naturalHeight} fill={TYPE_COLOR.natural} rx={0.4} />,
+        <rect
+          key={`${year}-n`}
+          x={x}
+          y={y}
+          width={width}
+          height={naturalHeight}
+          fill={TYPE_COLOR.natural}
+          rx={0.4}
+        />,
       );
     }
     if (mixedHeight > 0) {
       y -= mixedHeight;
       bars.push(
-        <rect key={`${year}-m`} x={x} y={y} width={width} height={mixedHeight} fill={TYPE_COLOR.mixed} rx={0.4} />,
+        <rect
+          key={`${year}-m`}
+          x={x}
+          y={y}
+          width={width}
+          height={mixedHeight}
+          fill={TYPE_COLOR.mixed}
+          rx={0.4}
+        />,
       );
     }
   }
@@ -239,9 +263,7 @@ export function Timeline({
   };
 
   const hoverCounts = hoverYear === null ? undefined : yearCounts.get(hoverYear);
-  const hoverTotal = hoverCounts
-    ? hoverCounts.cultural + hoverCounts.natural + hoverCounts.mixed
-    : 0;
+  const hoverTotal = hoverCounts ? hoverCounts.cultural + hoverCounts.natural + hoverCounts.mixed : 0;
 
   const handleStart = (
     <div
@@ -308,9 +330,7 @@ export function Timeline({
             {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
           </button>
         )}
-        <span
-          className={`shrink-0 tabular-nums text-muted ${compact ? 'text-xs' : 'text-xs font-medium'}`}
-        >
+        <span className={`shrink-0 tabular-nums text-muted ${compact ? 'text-xs' : 'text-xs font-medium'}`}>
           {domain[0]}
         </span>
         <div
@@ -366,9 +386,7 @@ export function Timeline({
               aria-hidden="true"
             >
               <div className="text-xs font-semibold leading-none">{hoverYear}</div>
-              <div className="mt-1 text-xs leading-none text-canvas/70">
-                {pluralize(hoverTotal, 'site')}
-              </div>
+              <div className="mt-1 text-xs leading-none text-canvas/70">{pluralize(hoverTotal, 'site')}</div>
               {hoverCounts && (
                 <div className="mt-1.5 flex items-center gap-2 text-xs leading-none">
                   {TYPE_ORDER.map((type) =>
@@ -387,9 +405,7 @@ export function Timeline({
             </div>
           )}
         </div>
-        <span
-          className={`shrink-0 tabular-nums text-muted ${compact ? 'text-xs' : 'text-xs font-medium'}`}
-        >
+        <span className={`shrink-0 tabular-nums text-muted ${compact ? 'text-xs' : 'text-xs font-medium'}`}>
           {domain[1]}
         </span>
         {!compact && (
@@ -407,8 +423,7 @@ export function Timeline({
                 aria-label={`${speed}× playback speed, change`}
                 className="group relative focus-ring grid h-9 min-w-9 place-items-center rounded-full px-2 text-xs font-semibold tabular-nums text-muted transition hover:bg-canvas hover:text-ink"
               >
-                {speed}×
-                <MapTooltip>Playback speed</MapTooltip>
+                {speed}×<MapTooltip>Playback speed</MapTooltip>
               </button>
             )}
             <button

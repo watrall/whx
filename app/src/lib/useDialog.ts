@@ -31,7 +31,10 @@ export function useDialog(
   capture = false,
 ) {
   const keyRef = useRef(onKeyDown);
-  keyRef.current = onKeyDown;
+
+  useEffect(() => {
+    keyRef.current = onKeyDown;
+  });
 
   useEffect(() => {
     if (!open) return;

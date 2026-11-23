@@ -9,13 +9,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, '..');
 // Static JSON served from /data: the site list and the lazily loaded descriptions, serial-site
 // parts and danger notes, all built by scripts/import-*.mjs, plus the Wikidata photo list.
-const DATA_FILES = [
-  'unesco.json',
-  'unesco-text.json',
-  'unesco-parts.json',
-  'danger.json',
-  'photos.json',
-];
+const DATA_FILES = ['unesco.json', 'unesco-text.json', 'unesco-parts.json', 'danger.json', 'photos.json'];
 
 function readData(name: string) {
   const file = resolve(repoRoot, 'data', name);
@@ -23,7 +17,10 @@ function readData(name: string) {
 }
 
 function galleries() {
-  return siteGalleries(readData('photos.json'), { ...(readData('gallery.json') ?? {}), unsplash: readData('unsplash.json') ?? {} });
+  return siteGalleries(readData('photos.json'), {
+    ...(readData('gallery.json') ?? {}),
+    unsplash: readData('unsplash.json') ?? {},
+  });
 }
 
 export default defineConfig({
@@ -70,5 +67,13 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          map: ['leaflet', 'leaflet.markercluster'],
+        },
+      },
+    },
   },
 });

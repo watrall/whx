@@ -40,7 +40,10 @@ test('the property itself wins over its components for the item and the photo', 
     binding('Q2', '669bis-007', img('Lugo.jpg')),
     binding('Q1', '669bis', img('Camino.jpg')),
   ]);
-  assert.deepEqual(photos['669'], { qid: 'Q1', image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Camino.jpg' });
+  assert.deepEqual(photos['669'], {
+    qid: 'Q1',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Camino.jpg',
+  });
 });
 
 test('a component photo is used when the property has none, but the item stays the property', () => {
@@ -59,11 +62,14 @@ test('records without a UNESCO number are skipped', () => {
 });
 
 test('applyPhotoOverrides swaps the image and keeps the Wikidata item', () => {
-  const photos = { 1325: { qid: 'Q863815', image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Render.jpg' } };
+  const photos = {
+    1325: { qid: 'Q863815', image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Render.jpg' },
+  };
   const result = applyPhotoOverrides(photos, { 1325: 'Phoenix Islands Protected Area-114879.jpg' });
   assert.deepEqual(result[1325], {
     qid: 'Q863815',
-    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Phoenix%20Islands%20Protected%20Area-114879.jpg',
+    image:
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Phoenix%20Islands%20Protected%20Area-114879.jpg',
   });
   assert.equal(photos[1325].image.endsWith('Render.jpg'), true);
 });

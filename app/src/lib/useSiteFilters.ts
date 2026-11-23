@@ -19,10 +19,7 @@ export function useSiteFilters(
   { query, types, extra, saved, yearRange, domain }: FilterState,
 ) {
   const normalizedQuery = normalizeSearch(query);
-  const tokens = useMemo(
-    () => normalizedQuery.split(/\s+/).filter(Boolean),
-    [normalizedQuery],
-  );
+  const tokens = useMemo(() => normalizedQuery.split(/\s+/).filter(Boolean), [normalizedQuery]);
 
   const searchIndex = useMemo(() => {
     const index = new Map<string, string>();

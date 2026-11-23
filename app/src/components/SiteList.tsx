@@ -111,11 +111,7 @@ export function SiteList({
               onBlur={leaveRow}
               aria-current={selected ? 'true' : undefined}
               className={`focus-ring absolute left-0 top-0 flex w-full items-center gap-3 border-b border-line/60 px-4 text-left transition-colors ${
-                selected
-                  ? 'bg-sunken'
-                  : highlighted
-                    ? 'wh-tint-on'
-                    : 'wh-tint bg-surface'
+                selected ? 'bg-sunken' : highlighted ? 'wh-tint-on' : 'wh-tint bg-surface'
               }`}
               style={{
                 height: item.size,
@@ -141,10 +137,7 @@ export function SiteList({
                     {[siteMeta(site), extraMeta?.(site)].filter(Boolean).join(' · ')}
                   </span>
                   {site.danger && (
-                    <TriangleAlert
-                      className="h-3.5 w-3.5 shrink-0 text-danger"
-                      aria-label="In danger"
-                    />
+                    <TriangleAlert className="h-3.5 w-3.5 shrink-0 text-danger" aria-label="In danger" />
                   )}
                 </span>
               </span>

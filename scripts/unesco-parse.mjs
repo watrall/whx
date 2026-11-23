@@ -5,12 +5,36 @@
  */
 
 const NAMED_ENTITIES = {
-  nbsp: ' ', amp: '&', lt: '<', gt: '>', quot: '"', apos: "'",
-  lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”',
-  ndash: '–', mdash: '—', hellip: '…',
-  eacute: 'é', egrave: 'è', ecirc: 'ê', aacute: 'á', agrave: 'à', acirc: 'â',
-  iacute: 'í', oacute: 'ó', ocirc: 'ô', uacute: 'ú', ccedil: 'ç', ntilde: 'ñ',
-  scaron: 'š', yacute: 'ý', uuml: 'ü', ouml: 'ö', auml: 'ä',
+  nbsp: '\u00a0',
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  lsquo: '‘',
+  rsquo: '’',
+  ldquo: '“',
+  rdquo: '”',
+  ndash: '–',
+  mdash: '—',
+  hellip: '…',
+  eacute: 'é',
+  egrave: 'è',
+  ecirc: 'ê',
+  aacute: 'á',
+  agrave: 'à',
+  acirc: 'â',
+  iacute: 'í',
+  oacute: 'ó',
+  ocirc: 'ô',
+  uacute: 'ú',
+  ccedil: 'ç',
+  ntilde: 'ñ',
+  scaron: 'š',
+  yacute: 'ý',
+  uuml: 'ü',
+  ouml: 'ö',
+  auml: 'ä',
 };
 
 /** Decodes numeric entities and the five predefined XML entities. */
@@ -50,7 +74,7 @@ export function htmlToParagraphs(html, onUnknown) {
   );
   return text
     .split(/\n\s*\n/)
-    .map((paragraph) => paragraph.replace(/[\s ]+/g, ' ').trim())
+    .map((paragraph) => paragraph.replace(/[\s\u00a0]+/g, ' ').trim())
     .filter(Boolean);
 }
 

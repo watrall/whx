@@ -1,0 +1,7 @@
+app/dist
+dist
+node_modules
+data
+package-lock.json
+*.md
+wrangler.jsonc

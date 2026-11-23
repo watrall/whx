@@ -1,4 +1,4 @@
-import { useId, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { AnimationEvent } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Logo } from './Logo.tsx';
@@ -29,26 +29,23 @@ export function WorldHeritageDialog({
   const [remember, setRemember] = useState(false);
   const [leaving, setLeaving] = useState<View | null>(null);
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
-  const prevViewRef = useRef(view);
-  const wasOpenRef = useRef(open);
+  const [prevView, setPrevView] = useState(view);
   const backRef = useRef<HTMLButtonElement>(null);
   const readMoreRef = useRef<HTMLButtonElement>(null);
   const checkId = useId();
 
-  useLayoutEffect(() => {
-    const previous = prevViewRef.current;
-    const wasOpen = wasOpenRef.current;
-    prevViewRef.current = view;
-    wasOpenRef.current = open;
-    if (!open) {
-      setLeaving(null);
-      return;
+  if (prevView !== view) {
+    setPrevView(view);
+    if (open) {
+      setLeaving(prevView);
+      setDirection(view === 'guide' ? 'forward' : 'back');
     }
-    if (!wasOpen || previous === view) return;
-    setLeaving(previous);
-    setDirection(view === 'guide' ? 'forward' : 'back');
-    (view === 'guide' ? backRef : readMoreRef).current?.focus();
-  }, [view, open]);
+  }
+  if (!open && leaving) setLeaving(null);
+
+  useEffect(() => {
+    if (leaving) (view === 'guide' ? backRef : readMoreRef).current?.focus();
+  }, [leaving, view]);
 
   const endWipe = (event: AnimationEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget) setLeaving(null);

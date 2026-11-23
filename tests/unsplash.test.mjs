@@ -29,7 +29,10 @@ test('normalize drops accents and punctuation', () => {
 });
 
 test('searchTerm drops subtitles and distinctiveWords drops generic words', () => {
-  assert.equal(searchTerm('Frontiers of the Roman Empire: The Danube Limes'), 'Frontiers of the Roman Empire');
+  assert.equal(
+    searchTerm('Frontiers of the Roman Empire: The Danube Limes'),
+    'Frontiers of the Roman Empire',
+  );
   assert.deepEqual(distinctiveWords('Historic Sanctuary of Machu Picchu'), ['sanctuary', 'machu', 'picchu']);
   assert.deepEqual(distinctiveWords('The Old Town'), []);
 });
@@ -67,5 +70,8 @@ test('pickUnsplash takes the most liked relevant photos, within the limit', () =
     photo('used', { description: 'Machu Picchu', likes: 60 }),
   ];
   const picked = pickUnsplash(results, 'Machu Picchu', 2, ['used']);
-  assert.deepEqual(picked.map((entry) => entry.id), ['high', 'low']);
+  assert.deepEqual(
+    picked.map((entry) => entry.id),
+    ['high', 'low'],
+  );
 });

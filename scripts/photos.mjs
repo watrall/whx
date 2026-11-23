@@ -57,9 +57,7 @@ export function buildPhotos(bindings) {
   for (const [number, entries] of groups) {
     entries.sort((a, b) => a.rank - b.rank);
     const withImage = entries.find((entry) => entry.image);
-    photos[number] = withImage
-      ? { qid: entries[0].qid, image: withImage.image }
-      : { qid: entries[0].qid };
+    photos[number] = withImage ? { qid: entries[0].qid, image: withImage.image } : { qid: entries[0].qid };
   }
   return photos;
 }

@@ -52,7 +52,9 @@ export function FilterChip({
         {label}
       </span>
       {count !== undefined && (
-        <span className={`${variant === 'strip' ? 'ml-1 ' : ''}tabular-nums ${active ? 'text-canvas/70' : 'text-muted'}`}>
+        <span
+          className={`${variant === 'strip' ? 'ml-1 ' : ''}tabular-nums ${active ? 'text-canvas/70' : 'text-muted'}`}
+        >
           {formatNumber(count)}
         </span>
       )}

@@ -24,7 +24,9 @@ export const NO_EXTRA: ExtraFilters = {
 
 export function hasExtraFilters(filters: ExtraFilters): boolean {
   return (
-    filters.danger || filters.savedOnly || filters.listIds !== null ||
+    filters.danger ||
+    filters.savedOnly ||
+    filters.listIds !== null ||
     filters.criteria.size > 0 ||
     filters.country !== null
   );

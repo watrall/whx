@@ -8,13 +8,7 @@ interface EmptyStateProps {
   className?: string;
 }
 
-export function EmptyState({
-  title,
-  description,
-  actionLabel,
-  onAction,
-  className = '',
-}: EmptyStateProps) {
+export function EmptyState({ title, description, actionLabel, onAction, className = '' }: EmptyStateProps) {
   return (
     <div className={`grid place-items-center px-6 py-10 text-center ${className}`} role="status">
       <span className="grid h-11 w-11 place-items-center rounded-full border border-line bg-canvas text-muted">

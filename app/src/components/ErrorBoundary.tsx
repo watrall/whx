@@ -28,8 +28,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="max-w-sm">
           <h1 className="text-xl font-medium">Something went wrong</h1>
           <p className="mt-2 text-sm text-muted">
-            The map hit an unexpected error. Reloading usually fixes it, and your filters are kept
-            in the address bar.
+            The map hit an unexpected error. Reloading usually fixes it, and your filters are kept in the
+            address bar.
           </p>
           <button
             type="button"

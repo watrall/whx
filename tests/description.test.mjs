@@ -31,8 +31,15 @@ test('distanceKm matches a known city pair', () => {
 
 test('nearestSites excludes the origin and sorts by distance', () => {
   const mk = (id, lat, lon) => ({ id, lat, lon });
-  const out = nearestSites(mk('a', 0, 0), [mk('a', 0, 0), mk('far', 0, 50), mk('near', 0, 1), mk('mid', 0, 10)], 2);
-  assert.deepEqual(out.map((x) => x.site.id), ['near', 'mid']);
+  const out = nearestSites(
+    mk('a', 0, 0),
+    [mk('a', 0, 0), mk('far', 0, 50), mk('near', 0, 1), mk('mid', 0, 10)],
+    2,
+  );
+  assert.deepEqual(
+    out.map((x) => x.site.id),
+    ['near', 'mid'],
+  );
 });
 
 test('formatDistance picks sensible precision and units', () => {
@@ -49,15 +56,25 @@ test('nearbyOrNearest keeps only sites within day-trip distance', () => {
   // 1 degree of longitude at the equator is about 111 km.
   const out = nearbyOrNearest(mk('a', 0), [mk('a', 0), mk('close', 1), mk('mid', 2), mk('far', 40)], 3);
   assert.equal(out.mode, 'nearby');
-  assert.deepEqual(out.items.map((x) => x.site.id), ['close', 'mid']);
+  assert.deepEqual(
+    out.items.map((x) => x.site.id),
+    ['close', 'mid'],
+  );
   assert.ok(out.items.every((x) => x.km <= NEARBY_KM));
 });
 
 test('nearbyOrNearest falls back to the nearest sites when none are close', () => {
   const mk = (id, lon) => ({ id, lat: 0, lon });
-  const out = nearbyOrNearest(mk('island', 0), [mk('island', 0), mk('x', 30), mk('y', 60), mk('z', 90), mk('w', 120)], 3);
+  const out = nearbyOrNearest(
+    mk('island', 0),
+    [mk('island', 0), mk('x', 30), mk('y', 60), mk('z', 90), mk('w', 120)],
+    3,
+  );
   assert.equal(out.mode, 'nearest');
-  assert.deepEqual(out.items.map((x) => x.site.id), ['x', 'y', 'z']);
+  assert.deepEqual(
+    out.items.map((x) => x.site.id),
+    ['x', 'y', 'z'],
+  );
 });
 
 import { siteSearchText, tokenMatches } from '../app/src/lib/utils.ts';

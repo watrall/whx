@@ -42,7 +42,10 @@ test('playback rests on a year for its stagger window plus a pause', () => {
 test('stagger batches add up to the count and never exceed eight steps', () => {
   for (const count of [0, 1, 3, 4, 9, 30, 67, 150]) {
     const sizes = staggerBatches(count);
-    assert.equal(sizes.reduce((sum, size) => sum + size, 0), count);
+    assert.equal(
+      sizes.reduce((sum, size) => sum + size, 0),
+      count,
+    );
     assert.ok(sizes.length <= 8);
     assert.ok(sizes.every((size) => size > 0));
   }
@@ -56,7 +59,11 @@ test('playback pool holds dated sites from the start year and undated ones with 
   ];
   assert.deepEqual(
     playbackPool(sites, 1978, [1978, 2026]).map((entry) => [entry.site.id, entry.at]),
-    [['a', 1978], ['b', 1990], ['c', 2026]],
+    [
+      ['a', 1978],
+      ['b', 1990],
+      ['c', 2026],
+    ],
   );
   assert.deepEqual(
     playbackPool(sites, 1985, [1978, 2026]).map((entry) => entry.site.id),

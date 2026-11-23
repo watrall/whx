@@ -55,7 +55,10 @@ export function CriteriaFilter({
     selected.size === 0
       ? 'Any criterion'
       : [...selected]
-          .sort((a, b) => ALL_CRITERIA.findIndex((c) => c.code === a) - ALL_CRITERIA.findIndex((c) => c.code === b))
+          .sort(
+            (a, b) =>
+              ALL_CRITERIA.findIndex((c) => c.code === a) - ALL_CRITERIA.findIndex((c) => c.code === b),
+          )
           .join(', ');
 
   const group = (title: string, codes: string[]) => (
@@ -75,13 +78,9 @@ export function CriteriaFilter({
             onChange={() => onToggle(criterion.code)}
             className="focus-ring h-4 w-4 shrink-0 cursor-pointer accent-[oklch(0.22_0.015_60)]"
           />
-          <span className="w-8 shrink-0 text-xs font-semibold tabular-nums text-muted">
-            {criterion.code}
-          </span>
+          <span className="w-8 shrink-0 text-xs font-semibold tabular-nums text-muted">{criterion.code}</span>
           <span className="min-w-0 flex-1 truncate text-ink">{criterion.label}</span>
-          <span className="text-xs tabular-nums text-muted">
-            {formatNumber(counts[criterion.code] ?? 0)}
-          </span>
+          <span className="text-xs tabular-nums text-muted">{formatNumber(counts[criterion.code] ?? 0)}</span>
         </label>
       ))}
     </fieldset>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { useDialog } from '../lib/useDialog.ts';
 import { Check, Search, X } from 'lucide-react';
 import type { Site } from '../lib/types.ts';
 import { formatNumber, siteMeta } from '../lib/utils.ts';
@@ -19,9 +20,6 @@ interface SearchOverlayProps {
   className?: string;
 }
 
-const FOCUSABLE =
-  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
 export function SearchOverlay({
   open,
   onClose,
@@ -38,34 +36,24 @@ export function SearchOverlay({
   const inputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const activeRowRef = useRef<HTMLButtonElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [pick, setPick] = useState({ query, index: 0 });
 
   const results = useMemo(() => sites.slice(0, 20), [sites]);
+  const activeIndex = pick.query === query ? Math.min(pick.index, Math.max(0, results.length - 1)) : 0;
+  const setActiveIndex = (next: number | ((index: number) => number)) =>
+    setPick({ query, index: typeof next === 'function' ? next(activeIndex) : next });
+
+  useDialog(panelRef, open, (event) => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    onClose();
+  });
 
   useEffect(() => {
     if (!open) return;
-    previousFocusRef.current =
-      document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
     const timer = window.setTimeout(() => inputRef.current?.focus(), 40);
-    return () => {
-      window.clearTimeout(timer);
-      document.body.style.overflow = previousOverflow;
-      previousFocusRef.current?.focus();
-    };
+    return () => window.clearTimeout(timer);
   }, [open]);
-
-  useEffect(() => {
-    setActiveIndex(0);
-  }, [query]);
-
-  useEffect(() => {
-    if (activeIndex >= results.length) {
-      setActiveIndex(Math.max(0, results.length - 1));
-    }
-  }, [activeIndex, results.length]);
 
   useEffect(() => {
     activeRowRef.current?.scrollIntoView({ block: 'nearest' });
@@ -105,45 +93,21 @@ export function SearchOverlay({
     }
   };
 
-  const handlePanelKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      onClose();
-      return;
-    }
-    if (event.key !== 'Tab' || !panelRef.current) return;
-    const focusable = Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-      (element) => element.offsetParent !== null,
-    );
-    if (focusable.length === 0) {
-      event.preventDefault();
-      return;
-    }
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  };
-
   if (!open) return null;
 
   return (
     <div
+      role="presentation"
       className="animate-fade-in fixed inset-0 z-[1150] bg-ink/25 backdrop-blur-sm"
-      onClick={onClose}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
     >
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label="Search sites"
-        onKeyDown={handlePanelKeyDown}
-        onClick={(event) => event.stopPropagation()}
         className={
           mobile
             ? `flex h-full flex-col bg-surface ${className}`
@@ -196,9 +160,7 @@ export function SearchOverlay({
           {query === '' && recent.length > 0 && (
             <div className="border-b border-line px-4 py-3">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
-                  Recent searches
-                </p>
+                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">Recent searches</p>
                 <button
                   type="button"
                   onClick={onClearRecent}

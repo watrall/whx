@@ -2,7 +2,8 @@ import type { SitePhoto } from '../lib/types.ts';
 import { imageCreditUrl, photoCreditText } from '../lib/utils.ts';
 
 const UNSPLASH_URL = 'https://unsplash.com/?utm_source=whx&utm_medium=referral';
-const CREDIT_LINK = 'focus-ring rounded underline decoration-surface/60 underline-offset-2 hover:decoration-surface';
+const CREDIT_LINK =
+  'focus-ring rounded underline decoration-surface/60 underline-offset-2 hover:decoration-surface';
 
 export function PhotoCredit({ photo, className = '' }: { photo: SitePhoto; className?: string }) {
   if (photo.source === 'unsplash') {

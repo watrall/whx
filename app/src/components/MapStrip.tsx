@@ -76,9 +76,7 @@ export function MapStrip({
       </div>
 
       <div className="pointer-events-auto">{renderTypes(compact)}</div>
-      <div className="pointer-events-auto flex flex-wrap items-start gap-2">
-        {renderFilters(wide)}
-      </div>
+      <div className="pointer-events-auto flex flex-wrap items-start gap-2">{renderFilters(wide)}</div>
       {extras && <div className="pointer-events-auto flex flex-wrap items-start gap-2">{extras}</div>}
       {isFiltered && (
         <button

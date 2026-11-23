@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { Site } from '../lib/types.ts';
 import { useMediaQuery } from '../lib/useMediaQuery.ts';
 import { useSitePhotos } from '../lib/useSitePhotos.ts';
@@ -11,6 +11,10 @@ const ADVANCE_MS = 5000;
 const EDGE_RESISTANCE = 4;
 
 export function PhotoCarousel({ site }: { site: Site }) {
+  return <Carousel key={site.id} site={site} />;
+}
+
+function Carousel({ site }: { site: Site }) {
   const photos = useSitePhotos(site);
   const [index, setIndex] = useState(0);
   const [dragX, setDragX] = useState(0);
@@ -18,13 +22,6 @@ export function PhotoCarousel({ site }: { site: Site }) {
   const [held, setHeld] = useState(false);
   const [lightbox, setLightbox] = useState(false);
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
-
-  useEffect(() => {
-    setIndex(0);
-    setDragX(0);
-    setPlaying(true);
-    setLightbox(false);
-  }, [site.id]);
 
   const last = photos.length - 1;
   const current = photos[index];
@@ -110,7 +107,9 @@ export function PhotoCarousel({ site }: { site: Site }) {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-ink/70 to-transparent" />
       )}
 
-      {current && <PhotoCredit photo={current} className="absolute bottom-2 left-3 max-w-[calc(100%-9rem)]" />}
+      {current && (
+        <PhotoCredit photo={current} className="absolute bottom-2 left-3 max-w-[calc(100%-9rem)]" />
+      )}
 
       {last > 0 && (
         <PhotoDots

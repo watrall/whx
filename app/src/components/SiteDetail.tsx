@@ -16,14 +16,7 @@ import type { Site } from '../lib/types.ts';
 import { formatDistance } from '../lib/geo.ts';
 import type { NearbySite } from '../lib/geo.ts';
 import { criteriaFromCodes } from '../lib/criteria.ts';
-import {
-  TYPE_INK,
-  TYPE_LABEL,
-  TYPE_TINT,
-  directionsUrl,
-  formatNumber,
-  unescoUrl,
-} from '../lib/utils.ts';
+import { TYPE_INK, TYPE_LABEL, TYPE_TINT, directionsUrl, formatNumber, unescoUrl } from '../lib/utils.ts';
 import { DangerNote } from './DangerNote.tsx';
 import { SiteDescription } from './SiteDescription.tsx';
 import { PhotoCarousel } from './PhotoCarousel.tsx';
@@ -334,9 +327,7 @@ export function SiteDetail({
                     </span>
                     <span className="min-w-0">
                       <span className="block text-sm font-medium text-ink">{criterion.label}</span>
-                      <span className="block text-xs leading-snug text-muted">
-                        {criterion.description}
-                      </span>
+                      <span className="block text-xs leading-snug text-muted">{criterion.description}</span>
                     </span>
                   </li>
                 ))}

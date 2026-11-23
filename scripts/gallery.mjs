@@ -31,7 +31,8 @@ export function cleanText(html) {
     .replace(/<[^>]*>/g, ' ')
     .replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (match, code) => {
       if (code[0] === '#') {
-        const point = code[1].toLowerCase() === 'x' ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10);
+        const point =
+          code[1].toLowerCase() === 'x' ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10);
         return Number.isFinite(point) ? String.fromCodePoint(point) : match;
       }
       return ENTITIES[code.toLowerCase()] ?? match;
@@ -105,7 +106,9 @@ export function pickExtras(files, skip = [], limit = PHOTOS_PER_SITE - 1, { allo
   const seen = new Set(skip.map((name) => groupKey(name)));
   const picked = [];
   const ranked = files
-    .filter((file) => !skipped.has(file.title) && isUsablePhoto(file) && (allowAnimals || !isAnimalPhoto(file)))
+    .filter(
+      (file) => !skipped.has(file.title) && isUsablePhoto(file) && (allowAnimals || !isAnimalPhoto(file)),
+    )
     .sort((a, b) => scorePhoto(b) - scorePhoto(a) || a.title.localeCompare(b.title));
   for (const file of ranked) {
     const key = groupKey(file.title);

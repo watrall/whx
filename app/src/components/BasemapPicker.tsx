@@ -38,10 +38,7 @@ export function BasemapPicker({ basemaps, value, onChange, tileClass, iconClass,
   useDismiss(open, rootRef, close);
 
   useEffect(() => {
-    if (open) {
-      setShown(true);
-      return;
-    }
+    if (open) return;
     const timer = window.setTimeout(() => setShown(false), FOLD_MS);
     return () => window.clearTimeout(timer);
   }, [open]);
@@ -61,7 +58,8 @@ export function BasemapPicker({ basemaps, value, onChange, tileClass, iconClass,
         type="button"
         onClick={(event) => {
           setByKeyboard(event.detail === 0);
-          setOpen((current) => !current);
+          if (!open) setShown(true);
+          setOpen(!open);
         }}
         aria-label="Map style"
         aria-expanded={open}

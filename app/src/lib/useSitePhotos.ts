@@ -12,11 +12,7 @@ export function useSitePhotos(site: Site): SitePhoto[] {
   );
 
   useEffect(() => {
-    const cached = cache.get(site.id);
-    if (cached) {
-      setLoaded({ id: site.id, photos: cached });
-      return;
-    }
+    if (cache.has(site.id)) return;
     const controller = new AbortController();
     loadSitePhotos(site.id, controller.signal)
       .then((photos) => {

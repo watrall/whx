@@ -43,5 +43,8 @@ export function useSwipe({ onSwipe, onDrag, capture = false }: SwipeOptions) {
     return dragged;
   };
 
-  return { handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp }, wasDragged };
+  return {
+    handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp },
+    wasDragged,
+  };
 }

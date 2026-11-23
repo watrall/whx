@@ -64,9 +64,7 @@ export function TypeFilter({
               onClick={() => onToggle(type)}
               aria-pressed={active}
               title={TYPE_LABEL[type]}
-              className={`${item} ${
-                active ? 'text-canvas' : 'text-muted hover:bg-canvas hover:text-ink'
-              }`}
+              className={`${item} ${active ? 'text-canvas' : 'text-muted hover:bg-canvas hover:text-ink'}`}
               style={active ? { backgroundColor: TYPE_COLOR[type] } : undefined}
             >
               <TypeIcon type={type} className="h-3.5 w-3.5" />
@@ -119,9 +117,7 @@ export function TypeFilter({
             >
               <TypeIcon type={type} className="h-4 w-4" />
               {TYPE_LABEL[type]}
-              <span className={active ? 'text-canvas/75' : 'text-muted'}>
-                {formatNumber(counts[type])}
-              </span>
+              <span className={active ? 'text-canvas/75' : 'text-muted'}>{formatNumber(counts[type])}</span>
             </button>
           );
         })}

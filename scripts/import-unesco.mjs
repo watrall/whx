@@ -125,7 +125,9 @@ await writeFile('data/unesco-text.json', JSON.stringify({ attribution, text }) +
 await writeFile('data/unesco-parts.json', JSON.stringify({ parts }) + '\n');
 
 console.log(`Read ${rows.length} rows`);
-console.log(`Wrote ${Object.keys(sites).length} sites, ${Object.keys(text).length} descriptions, ${Object.keys(parts).length} serial sites with parts`);
+console.log(
+  `Wrote ${Object.keys(sites).length} sites, ${Object.keys(text).length} descriptions, ${Object.keys(parts).length} serial sites with parts`,
+);
 if (filled.length) console.log(`Coordinates filled from a fallback for: ${filled.join(', ')}`);
 if (unplaced.length) console.warn(`No coordinates, left out: ${unplaced.join('; ')}`);
 if (unknownEntities.size > 0) {

@@ -54,8 +54,11 @@ export function Modal({
 
   return (
     <div
+      role="presentation"
       className="animate-fade-in fixed inset-0 z-[1200] grid place-items-center bg-ink/20 p-4 backdrop-blur-sm"
-      onClick={onClose}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
     >
       <div
         ref={panelRef}
@@ -64,7 +67,6 @@ export function Modal({
         aria-labelledby={titleId}
         tabIndex={-1}
         className={`${PANEL} ${WIDTH[width]} ${fill ? PANEL_FILL : PANEL_FLOW} ${className}`}
-        onClick={(event) => event.stopPropagation()}
       >
         {masthead ? (
           <>

@@ -21,7 +21,8 @@ const PEEK_CONTENT = 152;
 
 function safeBottomInset(): number {
   const probe = document.createElement('div');
-  probe.style.cssText = 'position:fixed;bottom:0;visibility:hidden;padding-bottom:env(safe-area-inset-bottom,0px)';
+  probe.style.cssText =
+    'position:fixed;bottom:0;visibility:hidden;padding-bottom:env(safe-area-inset-bottom,0px)';
   document.body.appendChild(probe);
   const value = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
   probe.remove();

@@ -110,7 +110,10 @@ test('pruneCredits keeps only the credits of files still in use', () => {
 });
 
 test('isAnimalPhoto spots animal categories', () => {
-  assert.equal(isAnimalPhoto({ categories: 'Farnese Gardens (Rome)|Aves heads in right lateral aspect' }), true);
+  assert.equal(
+    isAnimalPhoto({ categories: 'Farnese Gardens (Rome)|Aves heads in right lateral aspect' }),
+    true,
+  );
   assert.equal(isAnimalPhoto({ categories: 'Dogs in Delhi' }), true);
   assert.equal(isAnimalPhoto({ categories: 'Colosseum|Roman amphitheatres' }), false);
   assert.equal(isAnimalPhoto({}), false);
@@ -137,8 +140,18 @@ test('articleImageNames lists the image files of a Wikipedia media list once eac
 });
 
 test('countLanguages counts how many articles use each photo', () => {
-  const english = { items: [{ type: 'image', title: 'File:A.jpg' }, { type: 'image', title: 'File:B.jpg' }] };
-  const french = { items: [{ type: 'image', title: 'File:A.jpg' }, { type: 'image', title: 'File:A.jpg' }] };
+  const english = {
+    items: [
+      { type: 'image', title: 'File:A.jpg' },
+      { type: 'image', title: 'File:B.jpg' },
+    ],
+  };
+  const french = {
+    items: [
+      { type: 'image', title: 'File:A.jpg' },
+      { type: 'image', title: 'File:A.jpg' },
+    ],
+  };
   const counts = countLanguages([english, french]);
   assert.equal(counts.get('A.jpg'), 2);
   assert.equal(counts.get('B.jpg'), 1);

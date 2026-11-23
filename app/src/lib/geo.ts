@@ -7,10 +7,7 @@ function toRadians(degrees: number): number {
 }
 
 /** Great-circle distance in kilometres. */
-export function distanceKm(
-  a: { lat: number; lon: number },
-  b: { lat: number; lon: number },
-): number {
+export function distanceKm(a: { lat: number; lon: number }, b: { lat: number; lon: number }): number {
   const dLat = toRadians(b.lat - a.lat);
   const dLon = toRadians(b.lon - a.lon);
   const h =

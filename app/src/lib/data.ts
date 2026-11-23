@@ -75,7 +75,9 @@ function unsplashPhoto(entry: unknown): UnsplashPhoto | null {
 }
 
 function photosFor(site: Pick<Site, 'id' | 'image'>, gallery: Gallery): SitePhoto[] {
-  const urls = [...new Set([...(site.image ? [site.image] : []), ...strings(gallery.extras[site.id]).map(commonsUrl)])];
+  const urls = [
+    ...new Set([...(site.image ? [site.image] : []), ...strings(gallery.extras[site.id]).map(commonsUrl)]),
+  ];
   const originalName = text(gallery.demoted[site.id]);
   const original = originalName && !urls.includes(commonsUrl(originalName)) ? [commonsUrl(originalName)] : [];
   const unsplashEntries = gallery.unsplash[site.id];
@@ -101,7 +103,11 @@ export function siteGalleries(photos: unknown, gallery: unknown): Record<string,
 }
 
 function isSitePhoto(value: unknown): value is SitePhoto {
-  return isRecord(value) && (value.source === 'commons' || value.source === 'unsplash') && typeof value.url === 'string';
+  return (
+    isRecord(value) &&
+    (value.source === 'commons' || value.source === 'unsplash') &&
+    typeof value.url === 'string'
+  );
 }
 
 /**

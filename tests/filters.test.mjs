@@ -84,15 +84,32 @@ test('url state round-trips criteria and drops unknown codes', () => {
 
 test("country filter matches any of a site's countries", () => {
   const f = { ...NO_EXTRA, country: 'Italy' };
-  assert.equal(matchesExtra({ id: 'Q1', danger: false, criteriaCodes: [], countries: ['Italy', 'France'] }, f, new Set()), true);
-  assert.equal(matchesExtra({ id: 'Q2', danger: false, criteriaCodes: [], countries: ['France'] }, f, new Set()), false);
+  assert.equal(
+    matchesExtra(
+      { id: 'Q1', danger: false, criteriaCodes: [], countries: ['Italy', 'France'] },
+      f,
+      new Set(),
+    ),
+    true,
+  );
+  assert.equal(
+    matchesExtra({ id: 'Q2', danger: false, criteriaCodes: [], countries: ['France'] }, f, new Set()),
+    false,
+  );
   assert.equal(hasExtraFilters(f), true);
 });
 
 test('url state round-trips a country', () => {
   const hash = buildUrlHash({
-    site: null, query: '', types: new Set(), years: [1978, 2026], domain: [1978, 2026],
-    danger: false, list: null, criteria: new Set(), country: 'Iran (Islamic Republic of)',
+    site: null,
+    query: '',
+    types: new Set(),
+    years: [1978, 2026],
+    domain: [1978, 2026],
+    danger: false,
+    list: null,
+    criteria: new Set(),
+    country: 'Iran (Islamic Republic of)',
   });
   assert.equal(parseUrlState(hash).country, 'Iran (Islamic Republic of)');
 });

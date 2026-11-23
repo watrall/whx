@@ -190,6 +190,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
   }, [highlightedId]);
 
   useEffect(() => {
+    const markers = markerRefs.current;
     if (!containerRef.current || mapRef.current) return;
 
     const map = L.map(containerRef.current, {
@@ -250,7 +251,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       partsLayerRef.current = null;
       mapRef.current = null;
       clusterRef.current = null;
-      markerRefs.current.clear();
+      markers.clear();
       markerSites.current = new WeakMap();
       prevSelectedRef.current = null;
       prevHighlightedRef.current = null;
@@ -262,7 +263,10 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    const layer = L.tileLayer(basemap.url, { maxZoom: map.getMaxZoom(), maxNativeZoom: basemap.maxNativeZoom });
+    const layer = L.tileLayer(basemap.url, {
+      maxZoom: map.getMaxZoom(),
+      maxNativeZoom: basemap.maxNativeZoom,
+    });
     // A style whose first few tiles all fail has no usable key or no network; give up on it.
     let loaded = 0;
     let failed = 0;
@@ -298,11 +302,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     for (const site of sites) {
       if (markerRefs.current.has(site.id)) continue;
       const marker = L.marker([site.lat, site.lon], {
-        icon: makeMarkerIcon(
-          site,
-          site.id === selectedIdRef.current,
-          site.id === highlightedIdRef.current,
-        ),
+        icon: makeMarkerIcon(site, site.id === selectedIdRef.current, site.id === highlightedIdRef.current),
         title: site.name,
         alt: site.name,
         riseOnHover: true,
@@ -364,9 +364,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     if (previous) {
       const site = markerSites.current.get(previous);
       if (site) {
-        previous.setIcon(
-          makeMarkerIcon(site, false, site.id === highlightedIdRef.current),
-        );
+        previous.setIcon(makeMarkerIcon(site, false, site.id === highlightedIdRef.current));
       }
     }
     if (selectedSite) {
@@ -499,7 +497,12 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
 
   return (
     <div className={`relative h-full w-full ${className}`}>
-      <div ref={containerRef} data-basemap={basemap.id} className="absolute inset-0" aria-label="Map of World Heritage sites" />
+      <div
+        ref={containerRef}
+        data-basemap={basemap.id}
+        className="absolute inset-0"
+        aria-label="Map of World Heritage sites"
+      />
       <div
         className={`absolute z-[500] flex flex-col ${MAP_CONTROL[controlSize].stack} ${controlsSideClass} ${controlsBottomClass}`}
       >
@@ -509,7 +512,14 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
           aria-label="Zoom in"
           className={`group relative focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL[controlSize].button}`}
         >
-          <svg viewBox="0 0 24 24" className={MAP_CONTROL[controlSize].icon} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <svg
+            viewBox="0 0 24 24"
+            className={MAP_CONTROL[controlSize].icon}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          >
             <path d="M12 5v14M5 12h14" />
           </svg>
           <MapTooltip placement={tooltipSide}>Zoom in</MapTooltip>
@@ -520,7 +530,14 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
           aria-label="Zoom out"
           className={`group relative focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL[controlSize].button}`}
         >
-          <svg viewBox="0 0 24 24" className={MAP_CONTROL[controlSize].icon} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <svg
+            viewBox="0 0 24 24"
+            className={MAP_CONTROL[controlSize].icon}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          >
             <path d="M5 12h14" />
           </svg>
           <MapTooltip placement={tooltipSide}>Zoom out</MapTooltip>
@@ -537,7 +554,15 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
           aria-label="Fit all sites"
           className={`group relative focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL[controlSize].button}`}
         >
-          <svg viewBox="0 0 24 24" className={MAP_CONTROL[controlSize].icon} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            viewBox="0 0 24 24"
+            className={MAP_CONTROL[controlSize].icon}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" />
           </svg>
           <MapTooltip placement={tooltipSide}>Fit all sites</MapTooltip>

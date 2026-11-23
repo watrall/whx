@@ -4,7 +4,10 @@ import { createBasemaps } from '../app/src/lib/basemaps.ts';
 
 test('Atlas is always on offer and needs no key', () => {
   const basemaps = createBasemaps({});
-  assert.deepEqual(basemaps.map((basemap) => basemap.id), ['atlas']);
+  assert.deepEqual(
+    basemaps.map((basemap) => basemap.id),
+    ['atlas'],
+  );
 });
 
 test('keyed styles appear only when their key is set', () => {

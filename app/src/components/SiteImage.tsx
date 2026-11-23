@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import type { Site } from '../lib/types.ts';
 import { TYPE_COLOR } from '../lib/utils.ts';
 import { TypeIcon } from './TypeIcon.tsx';
@@ -41,15 +41,10 @@ export function SiteImage({
   className = '',
 }: SiteImageProps) {
   const image = imageOverride === undefined ? site.image : imageOverride;
-  const [failed, setFailed] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-  const imageRef = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    setFailed(false);
-    // A cached image can finish before the load handler is attached.
-    setLoaded(Boolean(imageRef.current?.complete && imageRef.current.naturalWidth > 0));
-  }, [image]);
+  const [failedImage, setFailedImage] = useState<string | null>(null);
+  const [loadedImage, setLoadedImage] = useState<string | null>(null);
+  const failed = failedImage === image;
+  const loaded = loadedImage === image;
 
   if (!image || failed) {
     return (
@@ -66,14 +61,16 @@ export function SiteImage({
 
   return (
     <img
-      ref={imageRef}
+      ref={(element) => {
+        if (element?.complete && element.naturalWidth > 0) setLoadedImage(image ?? null);
+      }}
       src={withWidth(image, width ?? 900)}
       alt={alt}
       loading={loading}
       decoding="async"
       referrerPolicy="no-referrer"
-      onLoad={() => setLoaded(true)}
-      onError={() => setFailed(true)}
+      onLoad={() => setLoadedImage(image ?? null)}
+      onError={() => setFailedImage(image ?? null)}
       className={`object-cover transition-opacity duration-200 ${loaded ? 'opacity-100' : 'opacity-0'} ${className}`}
     />
   );

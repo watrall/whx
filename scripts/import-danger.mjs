@@ -59,15 +59,21 @@ const attribution = {
 };
 await writeFile('data/danger.json', JSON.stringify({ attribution, sites }) + '\n');
 
-const flagged = Object.entries(unesco).filter(([, site]) => site.danger).map(([id]) => id);
+const flagged = Object.entries(unesco)
+  .filter(([, site]) => site.danger)
+  .map(([id]) => id);
 const missing = flagged.filter((id) => !sites[id]);
 const extra = Object.keys(sites).filter((id) => !unesco[id]?.danger);
 console.log(`Wrote ${Object.keys(sites).length} entries from revision ${revid}`);
 console.log(`With a reason: ${Object.values(sites).filter((site) => site.reason).length}`);
 if (unmatched.length) console.warn(`Could not match to a UNESCO ID: ${unmatched.join('; ')}`);
 if (missing.length) {
-  console.warn(`Flagged in danger by UNESCO but not in Wikipedia's list: ${missing.map((id) => unesco[id].name).join('; ')}`);
+  console.warn(
+    `Flagged in danger by UNESCO but not in Wikipedia's list: ${missing.map((id) => unesco[id].name).join('; ')}`,
+  );
 }
 if (extra.length) {
-  console.warn(`In Wikipedia's list but not flagged by UNESCO (ignored by the app): ${extra.map((id) => unesco[id]?.name ?? id).join('; ')}`);
+  console.warn(
+    `In Wikipedia's list but not flagged by UNESCO (ignored by the app): ${extra.map((id) => unesco[id]?.name ?? id).join('; ')}`,
+  );
 }

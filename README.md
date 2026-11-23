@@ -34,6 +34,8 @@ An independent, map-first explorer for UNESCO World Heritage Sites. It puts ever
 
 ## Development
 
+`npm run dev` starts the app locally. `npm run check` runs the same steps as the Check workflow on GitHub, which are the type check, ESLint with the React hooks and accessibility rules, a Prettier format check, the unit tests and a production build. `npm run format` rewrites files to the Prettier style.
+
 The app serves everything itself. The typeface (Quicksand) and the map pin icons are bundled, so a visit contacts only the map tile servers and the photo hosts. The `_headers` file in `app/public` sets a Content Security Policy that allows exactly those hosts, plus the usual headers against framing and content sniffing. A new image or tile host has to be added to the `img-src` list there before it will load.
 
 The GitHub Actions workflows pin each action to a commit hash.

@@ -24,13 +24,16 @@ test('htmlToParagraphs splits paragraphs and strips markup', () => {
 });
 
 test('htmlToParagraphs keeps squared units and ordinals readable', () => {
-  const raw = '&lt;p&gt;55,000 km&lt;sup&gt;2&lt;/sup&gt; in the 16&lt;sup&gt;th&lt;/sup&gt; century&lt;/p&gt;';
+  const raw =
+    '&lt;p&gt;55,000 km&lt;sup&gt;2&lt;/sup&gt; in the 16&lt;sup&gt;th&lt;/sup&gt; century&lt;/p&gt;';
   assert.deepEqual(htmlToParagraphs(raw), ['55,000 km² in the 16th century']);
 });
 
 test('htmlToParagraphs decodes typographic entities and reports unknown ones', () => {
   const unknown = [];
-  const out = htmlToParagraphs('&lt;p&gt;It&amp;rsquo;s &amp;madeup; here&lt;/p&gt;', (name) => unknown.push(name));
+  const out = htmlToParagraphs('&lt;p&gt;It&amp;rsquo;s &amp;madeup; here&lt;/p&gt;', (name) =>
+    unknown.push(name),
+  );
   assert.deepEqual(out, ['It’s &madeup; here']);
   assert.deepEqual(unknown, ['madeup']);
 });
@@ -40,7 +43,10 @@ test('decodeHtmlEntities leaves unknown entities in place', () => {
 });
 
 test('htmlToText strips italics from names', () => {
-  assert.equal(htmlToText('&lt;i&gt;Aflaj&lt;/i&gt; Irrigation Systems of Oman'), 'Aflaj Irrigation Systems of Oman');
+  assert.equal(
+    htmlToText('&lt;i&gt;Aflaj&lt;/i&gt; Irrigation Systems of Oman'),
+    'Aflaj Irrigation Systems of Oman',
+  );
   assert.equal(htmlToText('&lt;I&gt;Sacri Monti&lt;/I&gt; of Piedmont'), 'Sacri Monti of Piedmont');
 });
 
@@ -76,12 +82,20 @@ test('parsePois reads component points and ignores bad ones', () => {
     '<poi><latitude>10.5</latitude><longitude>-20.25</longitude><iso2>xx</iso2></poi>' +
     '<poi><latitude>95</latitude><longitude>0</longitude></poi>' +
     '<poi><latitude>-1</latitude><longitude>2</longitude></poi>';
-  assert.deepEqual(parsePois(xml), [[10.5, -20.25], [-1, 2]]);
+  assert.deepEqual(parsePois(xml), [
+    [10.5, -20.25],
+    [-1, 2],
+  ]);
   assert.deepEqual(parsePois(''), []);
 });
 
 test('medoid picks the component nearest the middle, not the average', () => {
-  const points = [[0, 0], [0, 1], [0, 2], [0, 30]];
+  const points = [
+    [0, 0],
+    [0, 1],
+    [0, 2],
+    [0, 30],
+  ];
   // The average sits near longitude 8; the component closest to it is the one at 2.
   assert.deepEqual(medoid(points), [0, 2]);
   assert.deepEqual(medoid([[5, 5]]), [5, 5]);
@@ -89,7 +103,11 @@ test('medoid picks the component nearest the middle, not the average', () => {
 });
 
 test('medoid is safe across the antimeridian', () => {
-  const [lat, lon] = medoid([[0, 179], [0, -179], [0, 178]]);
+  const [lat, lon] = medoid([
+    [0, 179],
+    [0, -179],
+    [0, 178],
+  ]);
   assert.equal(lat, 0);
   assert.ok(Math.abs(lon) >= 178);
 });

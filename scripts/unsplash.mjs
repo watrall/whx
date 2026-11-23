@@ -1,10 +1,43 @@
 const UTM = 'utm_source=whx&utm_medium=referral';
 
 const GENERIC = new Set([
-  'the', 'of', 'and', 'de', 'la', 'le', 'del', 'des', 'du', 'in', 'at', 'on',
-  'historic', 'historical', 'ancient', 'old', 'centre', 'center', 'city', 'town', 'site', 'sites',
-  'national', 'park', 'area', 'region', 'cultural', 'natural', 'heritage', 'world', 'landscape',
-  'monument', 'monuments', 'zone', 'reserve', 'protected', 'archaeological',
+  'the',
+  'of',
+  'and',
+  'de',
+  'la',
+  'le',
+  'del',
+  'des',
+  'du',
+  'in',
+  'at',
+  'on',
+  'historic',
+  'historical',
+  'ancient',
+  'old',
+  'centre',
+  'center',
+  'city',
+  'town',
+  'site',
+  'sites',
+  'national',
+  'park',
+  'area',
+  'region',
+  'cultural',
+  'natural',
+  'heritage',
+  'world',
+  'landscape',
+  'monument',
+  'monuments',
+  'zone',
+  'reserve',
+  'protected',
+  'archaeological',
 ]);
 
 export function normalize(text) {
@@ -17,7 +50,10 @@ export function normalize(text) {
 }
 
 export function searchTerm(siteName) {
-  return String(siteName ?? '').split(/[:(]/)[0].replace(/\s+/g, ' ').trim();
+  return String(siteName ?? '')
+    .split(/[:(]/)[0]
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 export function distinctiveWords(siteName) {

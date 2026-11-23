@@ -94,7 +94,9 @@ export function parseDangerList(wikitext, idByName = new Map()) {
   let lastReason = '';
 
   for (const row of parseTable(currentTable(wikitext))) {
-    const criteriaAt = row.cells.findIndex((cell) => /^(cultural|natural|mixed)\b/i.test(cleanWikitext(cell)));
+    const criteriaAt = row.cells.findIndex((cell) =>
+      /^(cultural|natural|mixed)\b/i.test(cleanWikitext(cell)),
+    );
     if (criteriaAt < 0) continue;
 
     const before = row.cells.slice(0, criteriaAt); // image, location, year listed, years endangered

@@ -45,9 +45,7 @@ export function FiltersMenu({ activeCount, children }: FiltersMenuProps) {
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         className={`focus-ring inline-flex h-10 items-center gap-2 rounded-xl border px-3 text-xs font-medium shadow-card transition ${
-          active
-            ? 'border-ink bg-ink text-canvas'
-            : 'border-line bg-surface text-ink hover:bg-canvas'
+          active ? 'border-ink bg-ink text-canvas' : 'border-line bg-surface text-ink hover:bg-canvas'
         }`}
       >
         <ListFilter className="h-3.5 w-3.5" aria-hidden="true" />
