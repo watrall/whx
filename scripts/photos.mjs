@@ -6,6 +6,10 @@
 
 const FILE_PATH = '/wiki/Special:FilePath/';
 
+export function commonsFileUrl(name) {
+  return `https://commons.wikimedia.org${FILE_PATH}${encodeURIComponent(name)}`;
+}
+
 /** A Commons file URL on https, without any size parameter; anything else is rejected. */
 export function normalizeCommonsImage(value) {
   if (typeof value !== 'string') return null;
@@ -60,34 +64,22 @@ export function buildPhotos(bindings) {
   return photos;
 }
 
-/**
- * Replaces the photo for the sites listed in `overrides` ({ [unescoNumber]: Commons file name }),
- * for the few places where Wikidata's choice is a map or render rather than a photograph.
- * Numbers that are not in `photos`, and file names that do not make a valid URL, are ignored.
- */
 export function applyPhotoOverrides(photos, overrides) {
   const result = { ...photos };
   for (const [number, file] of Object.entries(overrides ?? {})) {
     const entry = result[number];
-    const image = normalizeCommonsImage(
-      `https://commons.wikimedia.org${FILE_PATH}${encodeURIComponent(file)}`,
-    );
+    const image = normalizeCommonsImage(commonsFileUrl(file));
     if (entry && image) result[number] = { ...entry, image };
   }
   return result;
 }
 
-/**
- * Puts the gallery's best photo first where Wikidata's is missing or a poor fit
- * (`gallery.demoted` maps a UNESCO number to the Wikidata file it replaces). The lead is the
- * first of the site's extras. Every other site is untouched.
- */
 export function applyGalleryLeads(photos, gallery) {
   const result = { ...photos };
   for (const [number, entry] of Object.entries(photos)) {
     if (entry.image && !(number in (gallery?.demoted ?? {}))) continue;
     const lead = gallery?.extras?.[number]?.[0];
-    const image = lead && normalizeCommonsImage(`https://commons.wikimedia.org${FILE_PATH}${encodeURIComponent(lead)}`);
+    const image = lead && normalizeCommonsImage(commonsFileUrl(lead));
     if (image) result[number] = { ...entry, image };
   }
   return result;

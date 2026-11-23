@@ -9,6 +9,7 @@ import {
   isDuplicate,
   isUsablePhoto,
   pickExtras,
+  pruneCredits,
   scorePhoto,
 } from '../scripts/gallery.mjs';
 
@@ -92,7 +93,15 @@ test('hamming counts differing bits between two 16-digit hashes', () => {
 
 test('isDuplicate treats near hashes as the same photo and far ones as different', () => {
   const kept = ['0000000000000000'];
-  assert.equal(isDuplicate('00000000000003ff', kept), true); // 10 bits apart
-  assert.equal(isDuplicate('0000000000ffffff', kept), false); // 24 bits apart
+  assert.equal(isDuplicate('00000000000003ff', kept), true);
+  assert.equal(isDuplicate('0000000000ffffff', kept), false);
   assert.equal(isDuplicate('00000000000003ff', []), false);
+});
+
+test('pruneCredits keeps only the credits of files still in use', () => {
+  const credits = { 'A.jpg': { by: 'Ana' }, 'B.jpg': { by: 'Ben' }, 'C.jpg': { by: 'Cy' } };
+  assert.deepEqual(pruneCredits(credits, ['A.jpg', 'C.jpg', 'Z.jpg']), {
+    'A.jpg': { by: 'Ana' },
+    'C.jpg': { by: 'Cy' },
+  });
 });

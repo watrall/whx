@@ -21,7 +21,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Slow (a few thousand Commons requests), so it runs monthly and rebuilds every site.
       - name: Fetch photos from Wikimedia Commons
         run: node scripts/build-gallery.mjs --refresh
 
@@ -29,7 +28,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/gallery.json
+          git add data/gallery.json data/photos.json
           if git diff --staged --quiet; then
             echo "No gallery changes."
           else

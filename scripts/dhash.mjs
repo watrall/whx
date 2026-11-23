@@ -1,13 +1,8 @@
-/**
- * A perceptual "difference hash" of a JPEG: 64 bits that stay almost the same when a photo is
- * resized, recompressed or cropped a little, so two shots of one scene land close together.
- */
 import jpeg from 'jpeg-js';
 
 const COLS = 9;
 const ROWS = 8;
 
-/** Mean brightness of the part of the image under cell (x, y) of a COLS x ROWS grid. */
 function cellBrightness({ width, height, data }, x, y) {
   const x0 = Math.floor((x * width) / COLS);
   const x1 = Math.max(x0 + 1, Math.floor(((x + 1) * width) / COLS));
@@ -25,7 +20,6 @@ function cellBrightness({ width, height, data }, x, y) {
   return sum / count;
 }
 
-/** The hash of a JPEG file's bytes, as 16 hex digits. */
 export function dhash(buffer) {
   const image = jpeg.decode(buffer, { useTArray: true, maxResolutionInMP: 30 });
   let bits = 0n;

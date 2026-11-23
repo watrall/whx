@@ -4,6 +4,7 @@ import {
   applyGalleryLeads,
   applyPhotoOverrides,
   buildPhotos,
+  commonsFileUrl,
   normalizeCommonsImage,
   unescoNumber,
 } from '../scripts/photos.mjs';
@@ -88,4 +89,11 @@ test('applyGalleryLeads leads with the first extra where the main photo is poor 
   assert.match(result[2].image, /Only\.jpg$/);
   assert.equal(result[3].image, photos[3].image);
   assert.equal(applyGalleryLeads(photos, null)[1].image, photos[1].image);
+});
+
+test('commonsFileUrl encodes a file name into a FilePath URL', () => {
+  assert.equal(
+    commonsFileUrl('Phoenix Islands (1).jpg'),
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Phoenix%20Islands%20(1).jpg',
+  );
 });

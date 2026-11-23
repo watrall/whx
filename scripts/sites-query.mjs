@@ -1,8 +1,3 @@
-/**
- * The Wikidata query behind data/sites.json: every item that is a World Heritage Site, with its
- * country, description, coordinate, inscription year, one image, criteria and UNESCO ID.
- * Restored from the legacy scripts.js, which an earlier refactor deleted.
- */
 export const UNESCO_SITES_QUERY = `
 SELECT ?item ?itemLabel ?country ?description ?coordinate ?inscriptionYear ?image ?criteria ?unescoId ?officialUrl WHERE {
   {

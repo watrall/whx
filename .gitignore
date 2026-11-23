@@ -7,6 +7,5 @@ app/dist/
 project-notes.md
 design-notes.md
 
-# Local secrets and caches
 .env
 .cache/
