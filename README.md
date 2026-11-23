@@ -66,10 +66,26 @@ The plain-language wording of the ten selection criteria is written in the app, 
 
 ### Photo galleries
 
-A card header shows up to five photographs: the Wikidata photo, then extras from the site's Wikimedia Commons category. Extras are ranked by Commons' featured and quality marks, how many Wikipedia articles use them, resolution and shape. Maps, diagrams, small files, portraits and panoramas are skipped, and near-duplicate shots are dropped. When Wikidata's photo is a poor fit, the best extra leads instead. Each photo is credited with its author and licence, linked to its Commons page.
+A card header shows up to five photographs. The Wikidata photo comes first, then extras from the site's Wikimedia Commons category, and sites that still have fewer than four are topped up from the images in their Wikipedia articles. Extras are ranked by Commons' featured and quality marks, how many Wikipedia articles use them, resolution and shape. Maps, diagrams, small files, portraits and panoramas are skipped, and near-duplicate shots are dropped. When Wikidata's photo is a poor fit, the best extra leads instead. Each photo is credited with its author and licence, linked to its Commons page.
 
 Each site's gallery is written at build time to its own small file, `data/gallery/<number>.json`, and loaded when its card opens, so the page never downloads every gallery at once.
 
-- `node scripts/build-gallery.mjs` builds `data/gallery.json` and rewrites `data/photos.json`. It is slow, so a monthly workflow runs it with `--refresh`; run it yourself with no flags to fill in sites that have no entry yet.
+- `node scripts/build-gallery.mjs` builds `data/gallery.json` and rewrites `data/photos.json`. It is slow, so a monthly workflow runs it with `--refresh`. Run it yourself with no flags to fill in sites that have no entry yet.
 - `data/photo-overrides.json` replaces a site's Wikidata photo (`photos`) or bars files from its gallery (`hide`), keyed by UNESCO number.
 - `node scripts/fill-unsplash.mjs` tops up sites that Commons covers thinly from Unsplash and writes `data/unsplash.json`. It needs a free API key as `UNSPLASH_ACCESS_KEY`, in the environment or an uncommitted `.env` file. Only photos whose Unsplash description, tags or location name the site are kept, and each is credited to the photographer and to Unsplash with links.
+
+### Image coverage and where each source falls short
+
+No single source has good photographs of every World Heritage Site. The pipeline layers several, and each covers a different part of the list.
+
+**Wikidata** holds at most one photograph per site, and 1,218 of the 1,274 entries have one. Quality is uneven. Some are maps, satellite views, wide panoramas or small files, and one site had a 3D render. When the Wikidata photo is a poor fit, the best photo from the layers below leads instead. That applies to 375 sites.
+
+**Wikimedia Commons** is the main source, and 1,164 sites have a linked Commons category. Photos are ranked by Commons' featured and quality marks, by how many Wikipedia articles use them, and by resolution and shape. That ranking measures how good a photograph is, not whether it shows the site. A featured photograph of a gull filed under Rome once outranked every photograph of the Forum. Cultural sites now skip photos in animal categories, near duplicates are dropped by comparing image fingerprints, and a hide list in `data/photo-overrides.json` catches anything else that slips through.
+
+**Wikipedia articles** fill the sites that still have fewer than four photos. The pipeline reads the images used in the site's article in every language edition and ranks each image by how many editions use it. Of the 74 sites that qualified, 19 gained photos. The others have no linked article, or their articles only use maps, diagrams and images too small to show.
+
+**Unsplash** has an API with a free demo tier limited to 50 requests an hour, and production access needs an application and review. Its search is loose, so a photo is kept only when its description, tags or location name the site. That filter is strict and it has to be. In a first pass over the 40 sites with the fewest photos, 37 returned nothing relevant. Unsplash works for famous places and does very little for obscure ones, which are the sites that need help. Its photos live in their own file, `data/unsplash.json`, and the site shows them only when that file is deployed.
+
+**Flickr** does not issue API keys to free accounts. Programmatic access requires a paid Pro subscription. Many institutions publish photographs on Flickr under permissive licences or public domain labels, but a free, non-commercial project cannot retrieve them through the API. That largely cancels out the benefit of those licences.
+
+About 97 percent of sites show two or more photos and about 95 percent show four or more. Thirty-one sites show a single photo or none. They are small or obscure places with no usable image in any source, and their cards fall back to the lead photo or the site type icon.
