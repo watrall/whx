@@ -85,11 +85,11 @@ test('slugify drops accents, apostrophes and punctuation', () => {
   assert.equal(slugify('Pimachiowin Aki'), 'pimachiowin-aki');
 });
 
-test('slugify keeps long names short and ends on a whole word', () => {
-  const slug = slugify('Mount Qingcheng and the Dujiangyan Irrigation System');
-  assert.ok(slug.length <= 50);
-  assert.ok(!slug.endsWith('-'));
-  assert.equal(slug, 'mount-qingcheng-and-the-dujiangyan-irrigation');
+test('slugify keeps the whole name however long it is', () => {
+  assert.equal(
+    slugify('Mount Qingcheng and the Dujiangyan Irrigation System'),
+    'mount-qingcheng-and-the-dujiangyan-irrigation-system',
+  );
 });
 
 test('slugify returns nothing for a name with no Latin letters', () => {
