@@ -2,27 +2,21 @@
 /**
  * Refreshes data/sites.json from Wikidata, then rebuilds data/photos.json from it.
  *
- * The SPARQL query is read from scripts.js so there is a single source of
- * truth. Run manually with `node scripts/update-data.mjs`; the GitHub Action
- * runs it daily.
+ * The SPARQL query lives in scripts/sites-query.mjs. Run manually with
+ * `node scripts/update-data.mjs`; the GitHub Action runs it daily.
  */
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { writePhotos } from './build-photos.mjs';
+import { UNESCO_SITES_QUERY } from './sites-query.mjs';
 
 const ENDPOINT = 'https://query.wikidata.org/sparql';
-const SOURCE = 'scripts.js';
 const OUTPUT = 'data/sites.json';
 const USER_AGENT = 'WHX/1.0 (data update; https://github.com/watrall/whx)';
 const REQUEST_TIMEOUT_MS = 60000;
 
 async function main() {
-  const source = await readFile(SOURCE, 'utf8');
-  const match = source.match(/const UNESCO_SITES_QUERY = `([\s\S]*?)`;/);
-  if (!match) {
-    throw new Error(`Could not find UNESCO_SITES_QUERY in ${SOURCE}`);
-  }
-  const query = match[1];
+  const query = UNESCO_SITES_QUERY;
 
   const params = new URLSearchParams({ query, format: 'json' });
   const controller = new AbortController();
