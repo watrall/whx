@@ -1,6 +1,6 @@
 import { Landmark, Leaf } from 'lucide-react';
 import type { SiteType } from '../lib/types.ts';
-import { TYPE_ICON } from '../lib/utils.ts';
+import { TYPE_ICON_SHAPE } from '../lib/utils.ts';
 
 const ICONS = {
   cultural: Landmark,
@@ -13,8 +13,11 @@ export function TypeIcon({ type, className }: { type: SiteType; className?: stri
       <span
         className={`type-icon inline-flex items-center justify-center ${className ?? ''}`}
         aria-hidden="true"
-        dangerouslySetInnerHTML={{ __html: TYPE_ICON.mixed }}
-      />
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox={TYPE_ICON_SHAPE.mixed.viewBox} focusable="false">
+          <path d={TYPE_ICON_SHAPE.mixed.path} />
+        </svg>
+      </span>
     );
   }
   const Icon = ICONS[type];

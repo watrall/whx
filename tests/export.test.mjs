@@ -27,7 +27,7 @@ test('csvCell neutralises spreadsheet formulas', () => {
   assert.equal(csvCell('=SUM(A1)'), "'=SUM(A1)");
   assert.equal(csvCell('+1'), "'+1");
   assert.equal(csvCell('@cmd'), "'@cmd");
-  assert.equal(csvCell('-5'), "'-5");
+  assert.equal(csvCell('-5+2'), "'-5+2");
 });
 
 test('toCsv writes a header, a BOM and one row per site', () => {
@@ -47,4 +47,13 @@ test('toGeoJson puts longitude first and keeps properties', () => {
   assert.deepEqual(geo.features[0].geometry.coordinates, [12.5, 41.9]);
   assert.equal(geo.features[0].properties.in_danger, true);
   assert.deepEqual(geo.features[0].properties.countries, ['Italy', 'France']);
+});
+
+test('negative numbers are not treated as formulas, but formula cells still are', () => {
+  assert.equal(csvCell('-13.16'), '-13.16');
+  assert.equal(csvCell('36.3'), '36.3');
+  assert.equal(csvCell('-'), "'-");
+  assert.equal(csvCell('=SUM(A1)'), "'=SUM(A1)");
+  assert.equal(csvCell('+1+1'), "'+1+1");
+  assert.equal(csvCell('@cmd'), "'@cmd");
 });

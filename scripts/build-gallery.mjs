@@ -107,7 +107,13 @@ function filesFrom(data) {
 }
 
 function searchFiles(search) {
-  return commons({ ...INFO, generator: 'search', gsrnamespace: '6', gsrlimit: SEARCH_LIMIT, gsrsearch: search });
+  return commons({
+    ...INFO,
+    generator: 'search',
+    gsrnamespace: '6',
+    gsrlimit: SEARCH_LIMIT,
+    gsrsearch: search,
+  });
 }
 
 async function candidates(category) {
@@ -115,7 +121,13 @@ async function candidates(category) {
   const [featured, relevant, members] = await Promise.all([
     searchFiles(`deepcategory:"${name}" incategory:"${FEATURED}"`),
     searchFiles(`deepcategory:"${name}" filetype:bitmap`),
-    commons({ ...INFO, generator: 'categorymembers', gcmtitle: `Category:${name}`, gcmtype: 'file', gcmlimit: SEARCH_LIMIT }),
+    commons({
+      ...INFO,
+      generator: 'categorymembers',
+      gcmtitle: `Category:${name}`,
+      gcmtype: 'file',
+      gcmlimit: SEARCH_LIMIT,
+    }),
   ]);
   const byTitle = new Map();
   for (const file of [...filesFrom(featured), ...filesFrom(relevant), ...filesFrom(members)]) {
@@ -138,7 +150,9 @@ async function addUsage(files) {
   if (best.length === 0) return;
   const titles = best.map((file) => `File:${file.title}`).join('|');
   const data = await commons({ action: 'query', prop: 'globalusage', gulimit: 'max', titles });
-  const usage = new Map((data?.query?.pages ?? []).map((page) => [page.title, page.globalusage?.length ?? 0]));
+  const usage = new Map(
+    (data?.query?.pages ?? []).map((page) => [page.title, page.globalusage?.length ?? 0]),
+  );
   for (const file of best) file.usage = usage.get(`File:${file.title}`) ?? 0;
 }
 
@@ -151,7 +165,8 @@ async function categoriesByNumber(photos) {
     if (!number) continue;
     const qid = row.item.value.split('/').pop();
     const rank = qid === photos[number]?.qid ? -1 : parentRank(id);
-    if (!best.has(number) || rank < best.get(number).rank) best.set(number, { rank, category: row.cat.value });
+    if (!best.has(number) || rank < best.get(number).rank)
+      best.set(number, { rank, category: row.cat.value });
   }
   return new Map([...best].map(([number, { category }]) => [number, category]));
 }
@@ -159,7 +174,10 @@ async function categoriesByNumber(photos) {
 async function infoFor(names) {
   const info = new Map();
   for (let start = 0; start < names.length; start += INFO_BATCH) {
-    const titles = names.slice(start, start + INFO_BATCH).map((name) => `File:${name}`).join('|');
+    const titles = names
+      .slice(start, start + INFO_BATCH)
+      .map((name) => `File:${name}`)
+      .join('|');
     for (const file of filesFrom(await commons({ ...INFO, titles }))) info.set(file.title, file);
   }
   return info;
@@ -171,13 +189,17 @@ function mediaListUrl(lang, title) {
 
 async function articlesFor(numbers) {
   const byNumber = new Map();
-  if (numbers.length === 0) return byNumber;
-  const ids = numbers.map((number) => `"${number}"`).join(',');
+  const digits = numbers.filter((number) => /^\d+$/.test(number));
+  if (digits.length === 0) return byNumber;
+  const ids = digits.map((number) => `"${number}"`).join(',');
   const query = `SELECT ?unescoId ?article WHERE { ?item wdt:P757 ?unescoId . FILTER(?unescoId IN (${ids})) ?article schema:about ?item ; schema:isPartOf ?site . FILTER(CONTAINS(STR(?site), ".wikipedia.org")) }`;
   for (const row of (await queryWikidata(query)).results.bindings) {
     const number = unescoNumber(row.unescoId.value.trim());
     const url = new URL(row.article.value);
-    const article = { lang: url.hostname.split('.')[0], title: decodeURIComponent(url.pathname.replace('/wiki/', '')) };
+    const article = {
+      lang: url.hostname.split('.')[0],
+      title: decodeURIComponent(url.pathname.replace('/wiki/', '')),
+    };
     byNumber.set(number, [...(byNumber.get(number) ?? []), article]);
   }
   return byNumber;
@@ -205,7 +227,9 @@ async function fillFromArticles(number, articles, context, gallery) {
   const options = { allowAnimals: types[number] !== 'cultural' };
   const ranked = pickExtras(files, [...seed, ...(hide[number] ?? [])], limit * RANK_DEPTH, options);
   const added = await distinct(ranked, seed, limit, hashOf);
-  const credits = Object.fromEntries(files.filter((file) => added.includes(file.title)).map((file) => [file.title, file.credit]));
+  const credits = Object.fromEntries(
+    files.filter((file) => added.includes(file.title)).map((file) => [file.title, file.credit]),
+  );
   return { extras: [...have, ...added], credits };
 }
 
@@ -232,7 +256,9 @@ async function pickForSite(number, context) {
 
   const ranked = pickExtras(files, skip, limit * RANK_DEPTH, options);
   const extras = await distinct(ranked, primary ? [primary] : [], limit, hashOf);
-  const credits = Object.fromEntries(files.filter((file) => extras.includes(file.title)).map((file) => [file.title, file.credit]));
+  const credits = Object.fromEntries(
+    files.filter((file) => extras.includes(file.title)).map((file) => [file.title, file.credit]),
+  );
   return { extras, credits };
 }
 
@@ -311,7 +337,9 @@ async function main() {
     gallery.extras[number] = filled.extras;
     if (filled.extras.length > before) gained += 1;
   }
-  console.log(`${thin.length} sites had fewer than ${ARTICLE_FILL_BELOW} photos; ${gained} gained some from Wikipedia articles`);
+  console.log(
+    `${thin.length} sites had fewer than ${ARTICLE_FILL_BELOW} photos; ${gained} gained some from Wikipedia articles`,
+  );
 
   const { demoted, primaryNames } = await findDemoted(photos, gallery);
   gallery.demoted = demoted;
@@ -320,7 +348,9 @@ async function main() {
   await writeJson(HASH_CACHE, hashCache);
 
   console.log('Photos per site (count of sites):', countPhotos(gallery, photos));
-  console.log(`${Object.keys(demoted).length} sites lead with an extra because their Wikidata photo is a poor fit`);
+  console.log(
+    `${Object.keys(demoted).length} sites lead with an extra because their Wikidata photo is a poor fit`,
+  );
   await writePhotos();
 }
 

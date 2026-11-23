@@ -15,13 +15,15 @@ const COLUMNS = [
   'wikidata_id',
 ] as const;
 
+const PLAIN_NUMBER = /^-?\d+(\.\d+)?$/;
+
 /**
  * Quotes a CSV cell. Cells that start with a formula character get a leading
  * apostrophe so a spreadsheet shows them as text instead of running them.
  */
 export function csvCell(value: string | number | boolean | null | undefined): string {
   let text = value === null || value === undefined ? '' : String(value);
-  if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+  if (!PLAIN_NUMBER.test(text) && /^[=+\-@\t\r]/.test(text)) text = `'${text}`;
   return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
@@ -44,7 +46,7 @@ function row(site: Site): string[] {
 /** CSV with a UTF-8 byte order mark so Excel reads accents correctly. */
 export function toCsv(sites: Site[]): string {
   const lines = [COLUMNS.join(','), ...sites.map((site) => row(site).map(csvCell).join(','))];
-  return `﻿${lines.join('\r\n')}\r\n`;
+  return `\uFEFF${lines.join('\r\n')}\r\n`;
 }
 
 export function toGeoJson(sites: Site[]): string {

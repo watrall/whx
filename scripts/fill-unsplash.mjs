@@ -7,6 +7,7 @@ import { readJson, writeJson } from './io.mjs';
 import { pickUnsplash, searchTerm } from './unsplash.mjs';
 
 const API = 'https://api.unsplash.com';
+const API_ORIGIN = new URL(API).origin;
 const GALLERY = 'data/gallery.json';
 const OUTPUT = 'data/unsplash.json';
 const CACHE = '.cache/unsplash.json';
@@ -47,6 +48,7 @@ function createClient(key) {
   const headers = { Authorization: `Client-ID ${key}`, 'Accept-Version': 'v1' };
   return async function request(path, params = {}) {
     const url = new URL(path.startsWith('http') ? path : `${API}${path}`);
+    if (url.origin !== API_ORIGIN) throw new Error(`Refusing to send the API key to ${url.origin}`);
     for (const [name, value] of Object.entries(params)) url.searchParams.set(name, value);
     const response = await fetch(url, { headers });
     const header = response.headers.get('x-ratelimit-remaining');
@@ -95,13 +97,15 @@ async function main() {
   const downloaded = new Set(store.downloads);
   const base = await readBasePhotos();
   const unesco = await readJson(UNESCO, { sites: {} });
-  const names = Object.fromEntries(Object.entries(unesco.sites).map(([number, record]) => [number, record.name]));
+  const names = Object.fromEntries(
+    Object.entries(unesco.sites).map(([number, record]) => [number, record.name]),
+  );
 
   const commonsCount = (number) => (gallery.extras[number] ?? []).length + (base[number]?.image ? 1 : 0);
-  const needsFill = (number) =>
-    !(number in found) || (retryEmpty && found[number].length === 0);
+  const needsFill = (number) => !(number in found) || (retryEmpty && found[number].length === 0);
   const todo = Object.keys(base).filter(
-    (number) => names[number] && (!only || only.has(number)) && commonsCount(number) < below && needsFill(number),
+    (number) =>
+      names[number] && (!only || only.has(number)) && commonsCount(number) < below && needsFill(number),
   );
   console.log(`${todo.length} sites need Unsplash photos`);
 

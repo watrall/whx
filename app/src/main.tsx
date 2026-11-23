@@ -1,5 +1,13 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import '@fontsource/quicksand/latin-400.css';
+import '@fontsource/quicksand/latin-ext-400.css';
+import '@fontsource/quicksand/latin-500.css';
+import '@fontsource/quicksand/latin-ext-500.css';
+import '@fontsource/quicksand/latin-600.css';
+import '@fontsource/quicksand/latin-ext-600.css';
+import '@fontsource/quicksand/latin-700.css';
+import '@fontsource/quicksand/latin-ext-700.css';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';

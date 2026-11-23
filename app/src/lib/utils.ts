@@ -27,12 +27,25 @@ export const TYPE_INK: Record<SiteType, string> = {
   mixed: 'oklch(var(--type-mixed-ink))',
 };
 
-export const TYPE_ICON: Record<SiteType, string> = {
-  cultural: '<i class="fa-solid fa-torii-gate" aria-hidden="true"></i>',
-  natural: '<i class="fa-solid fa-leaf" aria-hidden="true"></i>',
-  mixed:
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" aria-hidden="true" focusable="false"><path d="M248 106.6c18.9-9 32-28.3 32-50.6c0-30.9-25.1-56-56-56s-56 25.1-56 56c0 22.3 13.1 41.6 32 50.6l0 98.8c-2.8 1.3-5.5 2.9-8 4.7l-80.1-45.8c1.6-20.8-8.6-41.6-27.9-52.8C57.2 96 23 105.2 7.5 132S1.2 193 28 208.5c1.3 .8 2.6 1.5 4 2.1l0 90.8c-1.3 .6-2.7 1.3-4 2.1C1.2 319-8 353.2 7.5 380S57.2 416 84 400.5c19.3-11.1 29.4-32 27.8-52.8l50.5-28.9c-11.5-11.2-19.9-25.6-23.8-41.7L88 306.1c-2.6-1.8-5.2-3.3-8-4.7l0-90.8c2.8-1.3 5.5-2.9 8-4.7l80.1 45.8c-.1 1.4-.2 2.8-.2 4.3c0 22.3 13.1 41.6 32 50.6l0 98.8c-18.9 9-32 28.3-32 50.6c0 30.9 25.1 56 56 56s56-25.1 56-56c0-22.3-13.1-41.6-32-50.6l0-98.8c2.8-1.3 5.5-2.9 8-4.7l80.1 45.8c-1.6 20.8 8.6 41.6 27.8 52.8c26.8 15.5 61 6.3 76.5-20.5s6.3-61-20.5-76.5c-1.3-.8-2.7-1.5-4-2.1l0-90.8c1.4-.6 2.7-1.3 4-2.1c26.8-15.5 36-49.7 20.5-76.5S390.8 96 364 111.5c-19.3 11.1-29.4 32-27.8 52.8l-50.6 28.9c11.5 11.2 19.9 25.6 23.8 41.7L360 205.9c2.6 1.8 5.2 3.3 8 4.7l0 90.8c-2.8 1.3-5.5 2.9-8 4.6l-80.1-45.8c.1-1.4 .2-2.8 .2-4.3c0-22.3-13.1-41.6-32-50.6l0-98.8z"/></svg>',
+export const TYPE_ICON_SHAPE: Record<SiteType, { viewBox: string; path: string }> = {
+  cultural: {
+    viewBox: '0 0 512 512',
+    path: 'M0 80c0 26.5 21.5 48 48 48H64v64h64V128h96v64h64V128h96v64h64V128h16c26.5 0 48-21.5 48-48V13.4C512 6 506 0 498.6 0c-1.7 0-3.4 .3-5 1l-49 19.6C425.7 28.1 405.5 32 385.2 32H126.8c-20.4 0-40.5-3.9-59.4-11.4L18.4 1c-1.6-.6-3.3-1-5-1C6 0 0 6 0 13.4V80zM64 288V480c0 17.7 14.3 32 32 32s32-14.3 32-32V288H384V480c0 17.7 14.3 32 32 32s32-14.3 32-32V288h32c17.7 0 32-14.3 32-32s-14.3-32-32-32H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H64z',
+  },
+  natural: {
+    viewBox: '0 0 512 512',
+    path: 'M272 96c-78.6 0-145.1 51.5-167.7 122.5c33.6-17 71.5-26.5 111.7-26.5h88c8.8 0 16 7.2 16 16s-7.2 16-16 16H288 216s0 0 0 0c-16.6 0-32.7 1.9-48.3 5.4c-25.9 5.9-49.9 16.4-71.4 30.7c0 0 0 0 0 0C38.3 298.8 0 364.9 0 440v16c0 13.3 10.7 24 24 24s24-10.7 24-24V440c0-48.7 20.7-92.5 53.8-123.2C121.6 392.3 190.3 448 272 448l1 0c132.1-.7 239-130.9 239-291.4c0-42.6-7.5-83.1-21.1-119.6c-2.6-6.9-12.7-6.6-16.2-.1C455.9 72.1 418.7 96 376 96L272 96z',
+  },
+  mixed: {
+    viewBox: '0 0 448 512',
+    path: 'M248 106.6c18.9-9 32-28.3 32-50.6c0-30.9-25.1-56-56-56s-56 25.1-56 56c0 22.3 13.1 41.6 32 50.6l0 98.8c-2.8 1.3-5.5 2.9-8 4.7l-80.1-45.8c1.6-20.8-8.6-41.6-27.9-52.8C57.2 96 23 105.2 7.5 132S1.2 193 28 208.5c1.3 .8 2.6 1.5 4 2.1l0 90.8c-1.3 .6-2.7 1.3-4 2.1C1.2 319-8 353.2 7.5 380S57.2 416 84 400.5c19.3-11.1 29.4-32 27.8-52.8l50.5-28.9c-11.5-11.2-19.9-25.6-23.8-41.7L88 306.1c-2.6-1.8-5.2-3.3-8-4.7l0-90.8c2.8-1.3 5.5-2.9 8-4.7l80.1 45.8c-.1 1.4-.2 2.8-.2 4.3c0 22.3 13.1 41.6 32 50.6l0 98.8c-18.9 9-32 28.3-32 50.6c0 30.9 25.1 56 56 56s56-25.1 56-56c0-22.3-13.1-41.6-32-50.6l0-98.8c2.8-1.3 5.5-2.9 8-4.7l80.1 45.8c-1.6 20.8 8.6 41.6 27.8 52.8c26.8 15.5 61 6.3 76.5-20.5s6.3-61-20.5-76.5c-1.3-.8-2.7-1.5-4-2.1l0-90.8c1.4-.6 2.7-1.3 4-2.1c26.8-15.5 36-49.7 20.5-76.5S390.8 96 364 111.5c-19.3 11.1-29.4 32-27.8 52.8l-50.6 28.9c11.5 11.2 19.9 25.6 23.8 41.7L360 205.9c2.6 1.8 5.2 3.3 8 4.7l0 90.8c-2.8 1.3-5.5 2.9-8 4.6l-80.1-45.8c.1-1.4 .2-2.8 .2-4.3c0-22.3-13.1-41.6-32-50.6l0-98.8z',
+  },
 };
+
+function typeIconSvg(type: SiteType): string {
+  const { viewBox, path } = TYPE_ICON_SHAPE[type];
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" aria-hidden="true" focusable="false"><path d="${path}"/></svg>`;
+}
 
 /** Canonical UNESCO page for a site: its numeric ID is the number in the address. */
 export function unescoUrl(site: Pick<Site, 'id'>): string {
@@ -57,7 +70,7 @@ export function photoCreditText(photo: { by: string | null; license: string | nu
   return parts.length > 0 ? `Photo: ${parts.join(', ')}` : 'Photo: Wikimedia Commons';
 }
 
-export const IS_APPLE =
+const IS_APPLE =
   typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent);
 
 /** Opens the device's own maps app or site with the site as the destination. */
@@ -73,7 +86,7 @@ export function formatNumber(value: number): string {
   return new Intl.NumberFormat('en-US').format(value);
 }
 
-export function formatYear(year: number | null): string {
+function formatYear(year: number | null): string {
   return year === null ? '—' : String(year);
 }
 
@@ -98,9 +111,7 @@ export function countryLabel(site: Pick<Site, 'countries' | 'country'>): string 
 }
 
 export function siteMeta(site: Site): string {
-  return [countryLabel(site), formatYear(site.year), TYPE_LABEL[site.type]]
-    .filter(Boolean)
-    .join(' · ');
+  return [countryLabel(site), formatYear(site.year), TYPE_LABEL[site.type]].filter(Boolean).join(' · ');
 }
 
 export function normalizeSearch(value: string): string {
@@ -123,9 +134,7 @@ export function tokenMatches(text: string, token: string): boolean {
 
 export function siteSearchText(site: Site): string {
   return normalizeSearch(
-    [site.name, site.countries.join(' '), countryAliases(site.countries), site.id]
-      .filter(Boolean)
-      .join(' '),
+    [site.name, site.countries.join(' '), countryAliases(site.countries), site.id].filter(Boolean).join(' '),
   );
 }
 
@@ -145,7 +154,7 @@ export function markerIconHtml(
   const badge = danger
     ? `<span class="wh-marker__danger" title="In danger"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Zm1 13h-2v-2h2v2Zm0-4h-2V9h2v3Z" fill="currentColor"/></svg></span>`
     : '';
-  return `<div class="${classes}" style="--marker-color:${TYPE_COLOR[type]}"><span class="wh-marker__pin"><span class="wh-marker__icon">${TYPE_ICON[type]}</span></span>${badge}</div>`;
+  return `<div class="${classes}" style="--marker-color:${TYPE_COLOR[type]}"><span class="wh-marker__pin"><span class="wh-marker__icon">${typeIconSvg(type)}</span></span>${badge}</div>`;
 }
 
 export function clusterSize(count: number): number {
@@ -161,7 +170,7 @@ export function typeCounts(types: SiteType[]): Record<SiteType, number> {
 }
 
 /** Conic gradient with one arc per type, sized by share of the cluster. */
-export function clusterRingGradient(counts: Record<SiteType, number>): string {
+function clusterRingGradient(counts: Record<SiteType, number>): string {
   const total = TYPE_ORDER.reduce((sum, type) => sum + counts[type], 0) || 1;
   let cursor = 0;
   const stops: string[] = [];

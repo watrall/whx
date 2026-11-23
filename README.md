@@ -32,6 +32,12 @@ An independent, map-first explorer for UNESCO World Heritage Sites. It puts ever
 - A phone layout with a search pill, a bottom sheet and large touch targets, separate from the desktop layout.
 - Keyboard shortcuts, screen-reader labels, visible focus and reduced-motion support.
 
+## Development
+
+The app serves everything itself. The typeface (Quicksand) and the map pin icons are bundled, so a visit contacts only the map tile servers and the photo hosts. The `_headers` file in `app/public` sets a Content Security Policy that allows exactly those hosts, plus the usual headers against framing and content sniffing. A new image or tile host has to be added to the `img-src` list there before it will load.
+
+The GitHub Actions workflows pin each action to a commit hash.
+
 ## Data
 
 All of the data is public. Unfortunately, there isn't a single, reliable API-based data source for the complete site information. As such, the app combines seven sources, and a few things it works out itself.
@@ -49,6 +55,8 @@ All of the data is public. Unfortunately, there isn't a single, reliable API-bas
 | **Esri** | The Satellite map style (World Imagery tiles), when a free ArcGIS key is set | Esri terms; free account |
 
 The museum glyph in the wordmark is by [juicy_fish](https://www.flaticon.com/free-icon/museum_6981458) on Flaticon, used under the Flaticon free licence with attribution in the About panel.
+
+The map pin icons are from [Font Awesome Free](https://fontawesome.com/) and used under the [CC BY 4.0 licence](https://creativecommons.org/licenses/by/4.0/). Quicksand, the typeface, is served from this site under the SIL Open Font Licence.
 
 The plain-language wording of the ten selection criteria is written in the app, shortened from UNESCO's published criteria.
 

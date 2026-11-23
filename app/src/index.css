@@ -60,7 +60,15 @@ body,
 
 body {
   @apply bg-canvas text-ink antialiased;
-  font-family: Quicksand, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+  font-family:
+    Quicksand,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
     sans-serif;
   font-variant-numeric: tabular-nums;
   overscroll-behavior: none;
@@ -187,10 +195,6 @@ img[data-preview='atlas'] {
   fill: currentColor;
   stroke-width: 2.2;
 }
-.wh-marker__icon i {
-  font-size: 14px;
-  line-height: 1;
-}
 .wh-marker__danger {
   position: absolute;
   top: -3px;
@@ -209,7 +213,9 @@ img[data-preview='atlas'] {
   height: 9px;
 }
 .wh-marker--selected .wh-marker__pin {
-  box-shadow: 0 0 0 2px oklch(var(--paper-raised)), 0 0 0 4px oklch(var(--ink));
+  box-shadow:
+    0 0 0 2px oklch(var(--paper-raised)),
+    0 0 0 4px oklch(var(--ink));
 }
 .wh-marker--selected {
   transform: translateY(-2px) scale(1.08);
@@ -220,7 +226,9 @@ img[data-preview='atlas'] {
   transform: translateY(-2px) scale(1.06);
 }
 .wh-marker--highlighted .wh-marker__pin {
-  box-shadow: 0 0 0 2px oklch(var(--paper-raised)), 0 0 0 4px oklch(var(--ink) / 0.55);
+  box-shadow:
+    0 0 0 2px oklch(var(--paper-raised)),
+    0 0 0 4px oklch(var(--ink) / 0.55);
 }
 
 /* Clusters */
