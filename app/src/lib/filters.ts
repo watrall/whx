@@ -46,5 +46,5 @@ export function matchesExtra(site: Site, filters: ExtraFilters, saved: ReadonlyS
 /** Link that opens the app showing exactly these sites. */
 export function shareListUrl(ids: Iterable<string>, base: string): string {
   const list = [...ids].sort((a, b) => Number(a.replace(/\D/g, '')) - Number(b.replace(/\D/g, '')));
-  return `${base}#list=${list.join(',')}`;
+  return `${base}?list=${list.join(',')}`;
 }

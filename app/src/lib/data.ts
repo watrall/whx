@@ -1,8 +1,8 @@
 import type { CommonsPhoto, Site, SitePhoto, SiteType, UnsplashPhoto } from './types.ts';
 
-const SITES_URL = 'data/unesco.json';
-const PHOTOS_URL = 'data/photos.json';
-const GALLERY_URL = 'data/gallery';
+const SITES_URL = '/data/unesco.json';
+const PHOTOS_URL = '/data/photos.json';
+const GALLERY_URL = '/data/gallery';
 
 export interface LoadResult {
   sites: Site[];

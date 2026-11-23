@@ -1,3 +1,4 @@
+import { slugify } from './slug.ts';
 import type { SiteType, YearRange } from './types.ts';
 
 export interface UrlState {
@@ -19,9 +20,16 @@ const SITE_ID = /^(Q?\d+)$/;
 const CRITERIA_CODES = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x'];
 const TYPES: SiteType[] = ['cultural', 'natural', 'mixed'];
 
-/** Reads app state from a location hash such as `#site=Q123&types=natural&years=1990-2005`. */
-export function parseUrlState(hash: string): UrlState {
-  const params = new URLSearchParams(hash.replace(/^#/, ''));
+const SITE_PATH = /^\/site\/(Q?\d+)(?:-[^/]*)?\/?$/;
+
+interface LocationParts {
+  pathname: string;
+  search: string;
+  hash: string;
+}
+
+export function parseLocation({ pathname, search, hash }: LocationParts): UrlState {
+  const params = new URLSearchParams(search || hash.replace(/^#/, ''));
   const types = (params.get('types') ?? '')
     .split(',')
     .filter((value): value is SiteType => TYPES.includes(value as SiteType));
@@ -34,9 +42,11 @@ export function parseUrlState(hash: string): UrlState {
     if (start <= end) years = [start, end];
   }
 
-  const site = params.get('site');
+  const fromPath = SITE_PATH.exec(pathname)?.[1];
+  const legacy = params.get('site');
+  const site = fromPath ?? (legacy && SITE_ID.test(legacy) ? legacy : null);
   return {
-    site: site && SITE_ID.test(site) ? site : null,
+    site,
     query: params.get('q') ?? '',
     types,
     years,
@@ -50,9 +60,9 @@ export function parseUrlState(hash: string): UrlState {
   };
 }
 
-/** Writes only non-default state, so a pristine view has a clean URL. */
-export function buildUrlHash(state: {
+export interface LinkState {
   site: string | null;
+  siteName: string | null;
   query: string;
   types: Set<SiteType>;
   years: YearRange;
@@ -61,9 +71,10 @@ export function buildUrlHash(state: {
   list: ReadonlySet<string> | null;
   criteria: ReadonlySet<string>;
   country: string | null;
-}): string {
+}
+
+export function buildUrl(state: LinkState): string {
   const params = new URLSearchParams();
-  if (state.site) params.set('site', state.site);
   if (state.query.trim()) params.set('q', state.query.trim());
   if (state.types.size > 0) {
     params.set('types', TYPES.filter((type) => state.types.has(type)).join(','));
@@ -77,6 +88,8 @@ export function buildUrlHash(state: {
     params.set('crit', CRITERIA_CODES.filter((code) => state.criteria.has(code)).join(','));
   }
   if (state.list && state.list.size > 0) params.set('list', [...state.list].join(','));
-  const text = params.toString();
-  return text ? `#${text}` : '';
+  const slug = state.siteName ? slugify(state.siteName) : '';
+  const path = state.site ? `/site/${state.site}${slug ? `-${slug}` : ''}` : '/';
+  const query = params.toString().replace(/%2C/gi, ',');
+  return query ? `${path}?${query}` : path;
 }

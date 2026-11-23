@@ -40,6 +40,10 @@ The app serves everything itself. The typeface (Quicksand) and the map pin icons
 
 The GitHub Actions workflows pin each action to a commit hash.
 
+### Links
+
+The open site lives in the path and the filters live in the query string, for example `/site/87-chartres-cathedral?types=cultural&years=1980-1999`. Only the number after `/site/` matters, so a link with a wrong or missing slug still opens the right site and the address bar corrects itself. Opening or closing a site adds a history entry, so the Back button works. Changing a filter or stepping between sites does not. A shared saved list is `/?list=274,87,148`. Links made before this format, which kept everything after a `#`, still open and are rewritten on load. Cloudflare serves the app for every path through `not_found_handling` in `wrangler.jsonc`, and the data files are fetched from absolute paths for the same reason. That also means the app has to be served from the root of its domain.
+
 ## Data
 
 All of the data is public. Unfortunately, there isn't a single, reliable API-based data source for the complete site information. As such, the app combines seven sources, and a few things it works out itself.

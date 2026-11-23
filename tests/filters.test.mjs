@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { NO_EXTRA, hasExtraFilters, matchesExtra, shareListUrl } from '../app/src/lib/filters.ts';
-import { buildUrlHash, parseUrlState } from '../app/src/lib/urlState.ts';
+import { buildUrl, parseLocation } from '../app/src/lib/urlState.ts';
 
 const site = (id, danger = false) => ({ id, danger });
 
@@ -29,16 +29,22 @@ test('a shared list keeps only listed sites and combines with danger', () => {
   assert.equal(matchesExtra(site('Q3', true), f, new Set()), false);
 });
 
+const at = (target) => {
+  const { pathname, search, hash } = new URL(target, 'https://x.test');
+  return parseLocation({ pathname, search, hash });
+};
+
 test('shareListUrl sorts ids numerically', () => {
   assert.equal(
     shareListUrl(['Q20', 'Q3', 'Q100'], 'https://x.test/app/'),
-    'https://x.test/app/#list=Q3,Q20,Q100',
+    'https://x.test/app/?list=Q3,Q20,Q100',
   );
 });
 
 test('url state round-trips danger and a shared list', () => {
-  const hash = buildUrlHash({
+  const url = buildUrl({
     site: null,
+    siteName: null,
     query: '',
     types: new Set(),
     years: [1978, 2026],
@@ -48,14 +54,14 @@ test('url state round-trips danger and a shared list', () => {
     criteria: new Set(),
     country: null,
   });
-  assert.equal(hash, '#danger=1&list=Q5%2CQ9');
-  const parsed = parseUrlState(hash);
+  assert.equal(url, '/?danger=1&list=Q5,Q9');
+  const parsed = at(url);
   assert.equal(parsed.danger, true);
   assert.deepEqual(parsed.list, ['Q5', 'Q9']);
 });
 
 test('url state ignores malformed list ids', () => {
-  const parsed = parseUrlState('#list=Q1,evil,Q2<script>,Q3');
+  const parsed = at('/?list=Q1,evil,Q2<script>,Q3');
   assert.deepEqual(parsed.list, ['Q1', 'Q3']);
 });
 
@@ -67,8 +73,9 @@ test('criteria filter matches a site meeting any selected criterion', () => {
 });
 
 test('url state round-trips criteria and drops unknown codes', () => {
-  const hash = buildUrlHash({
+  const url = buildUrl({
     site: null,
+    siteName: null,
     query: '',
     types: new Set(),
     years: [1978, 2026],
@@ -78,8 +85,8 @@ test('url state round-trips criteria and drops unknown codes', () => {
     criteria: new Set(['ix', 'vi']),
     country: null,
   });
-  assert.equal(hash, '#crit=vi%2Cix');
-  assert.deepEqual(parseUrlState('#crit=vi,zz,ix').criteria, ['vi', 'ix']);
+  assert.equal(url, '/?crit=vi,ix');
+  assert.deepEqual(at('/?crit=vi,zz,ix').criteria, ['vi', 'ix']);
 });
 
 test("country filter matches any of a site's countries", () => {
@@ -100,8 +107,9 @@ test("country filter matches any of a site's countries", () => {
 });
 
 test('url state round-trips a country', () => {
-  const hash = buildUrlHash({
+  const url = buildUrl({
     site: null,
+    siteName: null,
     query: '',
     types: new Set(),
     years: [1978, 2026],
@@ -111,5 +119,5 @@ test('url state round-trips a country', () => {
     criteria: new Set(),
     country: 'Iran (Islamic Republic of)',
   });
-  assert.equal(parseUrlState(hash).country, 'Iran (Islamic Republic of)');
+  assert.equal(at(url).country, 'Iran (Islamic Republic of)');
 });

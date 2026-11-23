@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 import type { ListScope } from '../components/ListScopeToggle.tsx';
 import type { MapViewHandle } from '../components/MapView.tsx';
@@ -14,7 +14,7 @@ import { sortSites } from './sortSites.ts';
 import type { Origin, SortKey } from './sortSites.ts';
 import { playbackPool } from './timeline.ts';
 import type { Bounds, Site, SiteType, YearRange } from './types.ts';
-import { parseUrlState } from './urlState.ts';
+import { parseLocation } from './urlState.ts';
 import { countryCount, inBounds } from './utils.ts';
 import { readStored, writeStored } from './storage.ts';
 import { useBasemap } from './useBasemap.ts';
@@ -33,6 +33,10 @@ import { useUrlSync } from './useUrlSync.ts';
 const FALLBACK_DOMAIN: YearRange = [1978, 2026];
 const INTRO_KEY = 'wh-intro-seen';
 
+function clampYears(wanted: YearRange | null, domain: YearRange): YearRange {
+  return wanted ? [Math.max(wanted[0], domain[0]), Math.min(wanted[1], domain[1])] : domain;
+}
+
 function detailOffset(isDesktop: boolean): [number, number] {
   return isDesktop ? [...DETAIL_OFFSET.desktop] : [...DETAIL_OFFSET.mobile];
 }
@@ -41,7 +45,7 @@ export function useExplorer(
   mapRef: RefObject<MapViewHandle | null>,
   searchRef: RefObject<HTMLInputElement | null>,
 ) {
-  const [initial] = useState(() => parseUrlState(window.location.hash));
+  const [initial] = useState(() => parseLocation(window.location));
   const pendingSite = useRef(initial.site);
 
   const [query, setQuery] = useState(initial.query);
@@ -80,10 +84,7 @@ export function useExplorer(
     const years = loaded.map((site) => site.year).filter((year): year is number => year !== null);
     const nextDomain: YearRange = years.length ? [Math.min(...years), Math.max(...years)] : FALLBACK_DOMAIN;
     setDomain(nextDomain);
-    const wanted = initial.years;
-    setYearRange(
-      wanted ? [Math.max(wanted[0], nextDomain[0]), Math.min(wanted[1], nextDomain[1])] : nextDomain,
-    );
+    setYearRange(clampYears(initial.years, nextDomain));
     setExtra((prev) => (prev.listIds ? { ...prev, listIds: canonicalIds(prev.listIds, loaded) } : prev));
     migrateSaved(loaded);
     const linked = findSite(pendingSite.current, loaded);
@@ -198,6 +199,27 @@ export function useExplorer(
     criteria: extra.criteria,
     country: extra.country,
   });
+
+  useEffect(() => {
+    const onPopState = () => {
+      const location = parseLocation(window.location);
+      const found = findSite(location.site, sites) ?? null;
+      setQuery(location.query);
+      setTypes(new Set(location.types));
+      setYearRange(clampYears(location.years, domain));
+      setExtra((prev) => ({
+        ...prev,
+        danger: location.danger,
+        listIds: location.list.length > 0 ? canonicalIds(new Set(location.list), sites) : null,
+        criteria: new Set(location.criteria),
+        country: location.country,
+      }));
+      setSelectedSite(found);
+      if (found && found.parts <= 1) mapRef.current?.focusSite(found, { offset: detailOffset(isDesktop) });
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [sites, domain, isDesktop, mapRef]);
 
   const partPoints = useSerialParts(selectedSite, isDesktop, mapRef);
 
@@ -336,7 +358,7 @@ export function useExplorer(
   );
 
   const shareSaved = useCallback(async () => {
-    const url = shareListUrl(saved, `${window.location.origin}${window.location.pathname}`);
+    const url = shareListUrl(saved, `${window.location.origin}/`);
     try {
       await navigator.clipboard.writeText(url);
       setShareCopied(true);

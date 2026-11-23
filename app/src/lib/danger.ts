@@ -1,4 +1,4 @@
-const DANGER_URL = 'data/danger.json';
+const DANGER_URL = '/data/danger.json';
 
 export interface DangerAttribution {
   holder: string;

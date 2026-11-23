@@ -1,5 +1,5 @@
-const TEXT_URL = 'data/unesco-text.json';
-const PARTS_URL = 'data/unesco-parts.json';
+const TEXT_URL = '/data/unesco-text.json';
+const PARTS_URL = '/data/unesco-parts.json';
 
 export interface UnescoAttribution {
   holder: string;
