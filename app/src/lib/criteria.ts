@@ -71,19 +71,3 @@ export const CULTURAL_CODES = ['i', 'ii', 'iii', 'iv', 'v', 'vi'];
 export function criteriaFromCodes(codes: string[]): Criterion[] {
   return ALL_CRITERIA.filter((criterion) => codes.includes(criterion.code));
 }
-
-/** Parses Wikidata's "(ii)|(iv)" format into ordered, de-duplicated criteria. */
-export function parseCriteria(raw: string | null): Criterion[] {
-  if (!raw) return [];
-  const seen = new Set<string>();
-  const result: Criterion[] = [];
-  for (const match of raw.matchAll(/\(?\b([ivx]+)\b\)?/gi)) {
-    const code = match[1].toLowerCase();
-    const entry = CRITERIA[code];
-    if (!entry || seen.has(code)) continue;
-    seen.add(code);
-    result.push({ code, ...entry });
-  }
-  const order = Object.keys(CRITERIA);
-  return result.sort((a, b) => order.indexOf(a.code) - order.indexOf(b.code));
-}
