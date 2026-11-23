@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  articleImageNames,
   cleanText,
+  countLanguages,
   creditFrom,
   fileNameFromImage,
   groupKey,
@@ -118,4 +120,31 @@ test('pickExtras skips animal photos unless they are allowed', () => {
   const files = [photo('Gull.jpg', { categories: 'Birds of Italy' }), photo('Forum.jpg')];
   assert.deepEqual(pickExtras(files, [], 5, { allowAnimals: false }), ['Forum.jpg']);
   assert.deepEqual(pickExtras(files, [], 5).sort(), ['Forum.jpg', 'Gull.jpg']);
+});
+
+test('articleImageNames lists the image files of a Wikipedia media list once each', () => {
+  const mediaList = {
+    items: [
+      { type: 'image', title: 'File:Roman_Forum.jpg' },
+      { type: 'video', title: 'File:Clip.webm' },
+      { type: 'image', title: 'File:Roman_Forum.jpg' },
+      { type: 'image', title: 'File:Colosseum at dusk.jpg' },
+      { type: 'image' },
+    ],
+  };
+  assert.deepEqual(articleImageNames(mediaList), ['Roman Forum.jpg', 'Colosseum at dusk.jpg']);
+  assert.deepEqual(articleImageNames(null), []);
+});
+
+test('countLanguages counts how many articles use each photo', () => {
+  const english = { items: [{ type: 'image', title: 'File:A.jpg' }, { type: 'image', title: 'File:B.jpg' }] };
+  const french = { items: [{ type: 'image', title: 'File:A.jpg' }, { type: 'image', title: 'File:A.jpg' }] };
+  const counts = countLanguages([english, french]);
+  assert.equal(counts.get('A.jpg'), 2);
+  assert.equal(counts.get('B.jpg'), 1);
+});
+
+test('a photo used by more language editions ranks higher, up to a cap', () => {
+  assert.ok(scorePhoto(photo('a.jpg', { languages: 8 })) > scorePhoto(photo('a.jpg', { languages: 2 })));
+  assert.equal(scorePhoto(photo('a.jpg', { languages: 50 })), scorePhoto(photo('a.jpg', { languages: 20 })));
 });

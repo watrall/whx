@@ -2,6 +2,7 @@
 import { mkdir } from 'node:fs/promises';
 import { dhash } from './dhash.mjs';
 import {
+  countLanguages,
   creditFrom,
   fileNameFromImage,
   isDuplicate,
@@ -22,6 +23,8 @@ const OUTPUT = 'data/gallery.json';
 const HASH_CACHE = '.cache/gallery-hashes.json';
 
 const WORKERS = 2;
+const ARTICLE_FILL_BELOW = 4;
+const ARTICLE_PACE_MS = 80;
 const SAVE_EVERY = 40;
 const SEARCH_LIMIT = '50';
 const INFO_BATCH = 50;
@@ -162,6 +165,50 @@ async function infoFor(names) {
   return info;
 }
 
+function mediaListUrl(lang, title) {
+  return `https://${lang}.wikipedia.org/api/rest_v1/page/media-list/${encodeURIComponent(title)}`;
+}
+
+async function articlesFor(numbers) {
+  const byNumber = new Map();
+  if (numbers.length === 0) return byNumber;
+  const ids = numbers.map((number) => `"${number}"`).join(',');
+  const query = `SELECT ?unescoId ?article WHERE { ?item wdt:P757 ?unescoId . FILTER(?unescoId IN (${ids})) ?article schema:about ?item ; schema:isPartOf ?site . FILTER(CONTAINS(STR(?site), ".wikipedia.org")) }`;
+  for (const row of (await queryWikidata(query)).results.bindings) {
+    const number = unescoNumber(row.unescoId.value.trim());
+    const url = new URL(row.article.value);
+    const article = { lang: url.hostname.split('.')[0], title: decodeURIComponent(url.pathname.replace('/wiki/', '')) };
+    byNumber.set(number, [...(byNumber.get(number) ?? []), article]);
+  }
+  return byNumber;
+}
+
+async function articleFiles(articles) {
+  const lists = [];
+  for (const { lang, title } of articles) {
+    const response = await fetchWithRetry(mediaListUrl(lang, title));
+    if (response?.ok) lists.push(await response.json());
+    await sleep(ARTICLE_PACE_MS);
+  }
+  const counts = countLanguages(lists);
+  const info = await infoFor([...counts.keys()]);
+  return [...info.values()].map((file) => ({ ...file, languages: counts.get(file.title) ?? 0 }));
+}
+
+async function fillFromArticles(number, articles, context, gallery) {
+  const { photos, types, hide, hashOf } = context;
+  const primary = photos[number].image ? fileNameFromImage(photos[number].image) : null;
+  const have = gallery.extras[number];
+  const seed = [...(primary ? [primary] : []), ...have];
+  const limit = PHOTOS_PER_SITE - seed.length;
+  const files = await articleFiles(articles);
+  const options = { allowAnimals: types[number] !== 'cultural' };
+  const ranked = pickExtras(files, [...seed, ...(hide[number] ?? [])], limit * RANK_DEPTH, options);
+  const added = await distinct(ranked, seed, limit, hashOf);
+  const credits = Object.fromEntries(files.filter((file) => added.includes(file.title)).map((file) => [file.title, file.credit]));
+  return { extras: [...have, ...added], credits };
+}
+
 function parseArgs(argv) {
   const only = argv.includes('--only') ? argv[argv.indexOf('--only') + 1] : null;
   return { refresh: argv.includes('--refresh'), only: only ? new Set(only.split(',')) : null };
@@ -251,6 +298,20 @@ async function main() {
     }
   };
   await Promise.all(Array.from({ length: WORKERS }, worker));
+
+  const total = (number) => gallery.extras[number].length + (photos[number].image ? 1 : 0);
+  const thin = todo.filter((number) => total(number) < ARTICLE_FILL_BELOW);
+  const articles = await articlesFor(thin);
+  let gained = 0;
+  for (const number of thin) {
+    if (!articles.get(number)?.length) continue;
+    const before = gallery.extras[number].length;
+    const filled = await fillFromArticles(number, articles.get(number), context, gallery);
+    Object.assign(gallery.credits, filled.credits);
+    gallery.extras[number] = filled.extras;
+    if (filled.extras.length > before) gained += 1;
+  }
+  console.log(`${thin.length} sites had fewer than ${ARTICLE_FILL_BELOW} photos; ${gained} gained some from Wikipedia articles`);
 
   const { demoted, primaryNames } = await findDemoted(photos, gallery);
   gallery.demoted = demoted;

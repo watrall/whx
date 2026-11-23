@@ -56,12 +56,33 @@ export function isUsablePhoto({ title, mime, width, height, categories }) {
   return !CATEGORY_REJECT.test(categories ?? '');
 }
 
-export function scorePhoto({ width, height, categories, usage }) {
+const LANGUAGE_WEIGHT = 60;
+const LANGUAGE_CAP = 20;
+
+export function articleImageNames(mediaList) {
+  const names = [];
+  for (const item of mediaList?.items ?? []) {
+    if (item.type !== 'image' || !item.title?.startsWith('File:')) continue;
+    names.push(item.title.slice(5).replace(/_/g, ' '));
+  }
+  return [...new Set(names)];
+}
+
+export function countLanguages(mediaLists) {
+  const counts = new Map();
+  for (const list of mediaLists) {
+    for (const name of articleImageNames(list)) counts.set(name, (counts.get(name) ?? 0) + 1);
+  }
+  return counts;
+}
+
+export function scorePhoto({ width, height, categories, usage, languages }) {
   const cats = categories ?? '';
   let score = 0;
   if (/Featured pictures/i.test(cats)) score += 1000;
   if (/Quality images/i.test(cats)) score += 500;
   if (/Valued images/i.test(cats)) score += 200;
+  score += Math.min(languages ?? 0, LANGUAGE_CAP) * LANGUAGE_WEIGHT;
   score += Math.log2(1 + (usage ?? 0)) * 40;
   score += Math.min((width * height) / 1e6, 24) * 10;
   score -= Math.abs(width / height - 1.5) * 10;
