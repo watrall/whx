@@ -8,7 +8,7 @@ An independent, map-first explorer for UNESCO World Heritage Sites. It puts ever
 - Every site on one map, with pins by type (cultural, natural, mixed) and clusters whose coloured ring shows what mix of types they contain.
 - Search by site name or country, including everyday names: "Turkey" finds "Türkiye".
 - Filters that combine: type, In danger, Saved, selection criterion, and country. The counts on each filter update live to show what turning it on would give.
-- An inscription timeline: drag the handles to a range of years, or press play to watch the List grow year by year, with a ripple on each new site.
+- An inscription timeline: drag the handles to a range of years, or press play to watch the List grow year by year, with each year's sites easing in.
 - Three map styles with previews: Atlas, Streets and Satellite.
 - Near me flies the map to where you are. Surprise me opens a random site, preferring ones with a photo.
 
@@ -29,7 +29,7 @@ An independent, map-first explorer for UNESCO World Heritage Sites. It puts ever
 - The list can follow the map ("In view") or show every match ("All sites"), sorted by name, year, country or, after Near me, distance.
 
 **On any device**
-- A phone layout with a search pill, a bottom sheet and large touch targets, separate from the desktop layout.
+- A phone layout with a search pill, filter chips, a bottom tray that holds the timeline and the list, and large touch targets, separate from the desktop layout.
 - Keyboard shortcuts, screen-reader labels, visible focus and reduced-motion support.
 
 ## Development

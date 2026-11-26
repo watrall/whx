@@ -64,10 +64,6 @@ export default {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
-        shimmer: {
-          '0%': { backgroundPosition: '-200% 0' },
-          '100%': { backgroundPosition: '200% 0' },
-        },
       },
       transitionTimingFunction: {
         DEFAULT: 'cubic-bezier(0.25, 1, 0.5, 1)',
@@ -75,7 +71,6 @@ export default {
       animation: {
         'fade-up': 'fade-up 220ms cubic-bezier(0.25, 1, 0.5, 1) both',
         'fade-in': 'fade-in 180ms cubic-bezier(0.25, 1, 0.5, 1) both',
-        shimmer: 'shimmer 1.4s linear infinite',
       },
     },
   },
