@@ -11,8 +11,10 @@ export type SheetSnap = 'peek' | 'mid' | 'full';
 interface MobileSheetProps {
   snap: SheetSnap;
   onSnapChange: (snap: SheetSnap) => void;
-  header: ReactNode;
-  peek?: ReactNode;
+  /** Always shown under the handle, collapsed or open. */
+  pinned: ReactNode;
+  /** Shown only while the sheet is collapsed. */
+  peek: ReactNode;
   children: ReactNode;
   className?: string;
 }
@@ -31,7 +33,7 @@ const SNAP_ORDER: SheetSnap[] = ['peek', 'mid', 'full'];
 export function MobileSheet({
   snap,
   onSnapChange,
-  header,
+  pinned,
   peek,
   children,
   className = '',
@@ -96,11 +98,10 @@ export function MobileSheet({
     setDragging(false);
     setDragY(null);
     if (!didDragRef.current) return;
-    const candidates: { snap: SheetSnap; distance: number }[] = [
-      { snap: 'peek', distance: Math.abs(current - bases.peek) },
-      { snap: 'mid', distance: Math.abs(current - bases.mid) },
-      { snap: 'full', distance: Math.abs(current - bases.full) },
-    ];
+    const candidates = SNAP_ORDER.map((candidate) => ({
+      snap: candidate,
+      distance: Math.abs(current - bases[candidate]),
+    }));
     candidates.sort((a, b) => a.distance - b.distance);
     onSnapChange(candidates[0].snap);
   };
@@ -143,7 +144,7 @@ export function MobileSheet({
     }
     if (event.key === 'End') {
       event.preventDefault();
-      onSnapChange('full');
+      onSnapChange(SNAP_ORDER[SNAP_ORDER.length - 1]);
       return;
     }
     if (event.key === 'Escape') {
@@ -172,17 +173,17 @@ export function MobileSheet({
         onPointerCancel={onPointerCancel}
         onLostPointerCapture={onPointerCancel}
         onKeyDown={onKeyDown}
-        aria-label="Expand or collapse site list"
+        aria-label="Expand or collapse the tray"
         aria-expanded={snap !== 'peek'}
         aria-controls={sheetId}
         title="Drag or tap to expand"
-        className="focus-ring flex h-9 shrink-0 touch-none items-start justify-center rounded-t-2xl pt-2.5"
+        className="focus-ring flex h-7 shrink-0 touch-none items-start justify-center rounded-t-2xl pt-2.5"
       >
         <span className="sheet-handle" aria-hidden="true" />
       </button>
 
-      {peek && <div className="shrink-0 px-4 pb-2">{peek}</div>}
-      <div className="shrink-0 px-4 pb-2">{header}</div>
+      <div className={`shrink-0 ${snap === 'peek' ? '' : 'border-b border-line'}`}>{pinned}</div>
+      {snap === 'peek' && <div className="shrink-0 pb-2">{peek}</div>}
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-thin pb-[calc(env(safe-area-inset-bottom)+16px)]">
         {children}
       </div>

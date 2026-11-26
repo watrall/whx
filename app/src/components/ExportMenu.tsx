@@ -58,8 +58,8 @@ export function ExportMenu({ count, onExport, touch = false }: ExportMenuProps) 
         aria-haspopup="true"
         aria-label="Export these results"
         title={done ? 'Download started' : 'Export these results'}
-        className={`focus-ring grid place-items-center rounded-md border border-line bg-surface text-muted transition hover:text-ink ${
-          touch ? 'h-11 w-11' : 'h-9 w-9'
+        className={`focus-ring grid place-items-center border border-line bg-surface text-muted transition hover:text-ink ${
+          touch ? 'h-10 w-10 rounded-full' : 'h-9 w-9 rounded-md'
         }`}
       >
         {done ? (

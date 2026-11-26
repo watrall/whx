@@ -2,6 +2,7 @@ import { Layers } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { SiteType } from '../lib/types.ts';
 import { TYPE_COLOR, TYPE_LABEL, TYPE_ORDER, formatNumber } from '../lib/utils.ts';
+import { MOBILE_CHIP } from './FilterChip.tsx';
 import { TypeIcon } from './TypeIcon.tsx';
 
 interface TypeFilterProps {
@@ -90,7 +91,7 @@ export function TypeFilter({
           type="button"
           onClick={onClear}
           aria-pressed={allActive}
-          className={`focus-ring inline-flex h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-medium shadow-card transition ${
+          className={`focus-ring ${MOBILE_CHIP} transition ${
             allActive
               ? 'border-ink bg-ink text-canvas'
               : 'border-line bg-surface text-muted hover:border-ink/30 hover:text-ink'
@@ -108,7 +109,7 @@ export function TypeFilter({
               type="button"
               onClick={() => onToggle(type)}
               aria-pressed={active}
-              className={`focus-ring inline-flex h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-medium shadow-card transition ${
+              className={`focus-ring ${MOBILE_CHIP} transition ${
                 active
                   ? 'border-transparent text-canvas'
                   : 'border-line bg-surface text-muted hover:border-ink/30 hover:text-ink'

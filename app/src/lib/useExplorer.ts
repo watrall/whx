@@ -478,6 +478,7 @@ export function useExplorer(
     listScope,
     setListScope,
     listSites,
+    inViewCount: sortedInView.length,
     sortedCount: sortedFiltered.length,
     exportSites,
     selectedSite,

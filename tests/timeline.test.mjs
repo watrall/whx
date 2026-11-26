@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  decadeTicks,
   playbackHold,
   nearestHandle,
   playbackPool,
@@ -77,4 +78,14 @@ test('the nearest handle wins, and the start wins a tie', () => {
   assert.equal(nearestHandle(95, 100, 118), 'start');
   assert.equal(nearestHandle(109, 100, 118), 'start');
   assert.equal(nearestHandle(110, 100, 118), 'end');
+});
+
+test('decade ticks sit at the centre of each decade year, as a share of the chart width', () => {
+  const ticks = decadeTicks([1978, 2026]);
+  assert.deepEqual(
+    ticks.map((tick) => tick.year),
+    [1980, 1990, 2000, 2010, 2020],
+  );
+  assert.ok(Math.abs(ticks[0].left - (2.5 / 49) * 100) < 1e-9);
+  assert.ok(ticks.every((tick) => tick.left > 0 && tick.left < 100));
 });

@@ -44,7 +44,7 @@ export function Criteria({
 }: {
   e: Explorer;
   layout: 'popover' | 'inline';
-  size?: 'rail' | 'strip';
+  size?: 'rail' | 'strip' | 'chip';
 }) {
   return (
     <CriteriaFilter
@@ -84,7 +84,7 @@ export function MobileTypeFilter({ e }: { e: Explorer }) {
       onToggle={e.toggleType}
       onClear={e.clearTypes}
       variant="mobile"
-      className="scroll-px-4 px-4 py-1.5"
+      className="pointer-events-auto -mx-4 mt-1 scroll-px-4 px-4 py-1.5"
       extras={
         <>
           <DangerChip e={e} variant="mobile" />

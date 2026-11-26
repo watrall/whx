@@ -62,3 +62,13 @@ export function playbackPool<T extends { year: number | null }>(
 export function nearestHandle(x: number, startX: number, endX: number): 'start' | 'end' {
   return Math.abs(x - startX) <= Math.abs(x - endX) ? 'start' : 'end';
 }
+
+/** The decade years inside a domain, each with the share of the chart's width where its bar is centred. */
+export function decadeTicks([first, last]: YearRange): { year: number; left: number }[] {
+  const years = last - first + 1;
+  const ticks: { year: number; left: number }[] = [];
+  for (let year = Math.ceil(first / 10) * 10; year <= last; year += 10) {
+    ticks.push({ year, left: ((year - first + 0.5) / years) * 100 });
+  }
+  return ticks;
+}

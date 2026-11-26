@@ -1,4 +1,5 @@
 import { Shuffle } from 'lucide-react';
+import { TRAY_CHIP } from './FilterChip.tsx';
 
 /** A low-key way into the map for people who do not know what to search for. */
 export function SurpriseButton({ onSurprise }: { onSurprise: () => void }) {
@@ -6,7 +7,7 @@ export function SurpriseButton({ onSurprise }: { onSurprise: () => void }) {
     <button
       type="button"
       onClick={onSurprise}
-      className="focus-ring inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-ink transition hover:bg-canvas active:scale-[0.98]"
+      className={`${TRAY_CHIP} border-line bg-surface text-ink hover:bg-canvas`}
     >
       <Shuffle className="h-4 w-4 text-muted" aria-hidden="true" />
       Surprise me

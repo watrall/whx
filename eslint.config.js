@@ -25,7 +25,7 @@ export default tseslint.config(
     files: [
       'app/src/components/PhotoCarousel.tsx',
       'app/src/components/PhotoLightbox.tsx',
-      'app/src/components/Timeline.tsx',
+      'app/src/components/TimelineChart.tsx',
     ],
     rules: {
       'jsx-a11y/click-events-have-key-events': 'off',

@@ -1,32 +1,40 @@
-import type { RefObject } from 'react';
-import { Info, RotateCcw, X } from 'lucide-react';
+import type { CSSProperties, RefObject } from 'react';
+import { RotateCcw, X } from 'lucide-react';
 import { BASEMAPS } from '../lib/basemaps.ts';
-import { PHONE_VARS } from '../lib/layout.ts';
+import { PHONE, PHONE_VARS } from '../lib/layout.ts';
 import type { Explorer } from '../lib/useExplorer.ts';
-import { formatRange } from '../lib/utils.ts';
 import { Attribution } from './Attribution.tsx';
 import { DataStatus } from './DataStatus.tsx';
 import { DetailCard } from './DetailCard.tsx';
 import { ActiveCountryChip, Criteria, MobileTypeFilter, SharedBanner } from './ExplorerControls.tsx';
 import { ExplorerDialogs } from './ExplorerDialogs.tsx';
 import { ExportMenu } from './ExportMenu.tsx';
+import { TRAY_CHIP } from './FilterChip.tsx';
 import { ListScopeToggle } from './ListScopeToggle.tsx';
 import { LogoMark, MiniWordmark } from './Logo.tsx';
 import { NearMeControl } from './MapActions.tsx';
 import { MapView } from './MapView.tsx';
 import type { MapViewHandle } from './MapView.tsx';
 import { MobileSheet } from './MobileSheet.tsx';
+import { MoreMenu } from './MoreMenu.tsx';
+import { PeekStrip } from './PeekStrip.tsx';
+import { PlaybackBar } from './PlaybackBar.tsx';
 import { PlayHint } from './PlayHint.tsx';
 import { PlaybackReadout } from './PlaybackReadout.tsx';
 import { ShareListButton } from './ShareListButton.tsx';
-import { ListBody, ListSummary } from './SiteListPanel.tsx';
+import { ListBody } from './SiteListPanel.tsx';
 import { SortSelect } from './SortSelect.tsx';
 import { SurpriseButton } from './SurpriseButton.tsx';
-import { Timeline } from './Timeline.tsx';
+import { TimelineRow } from './TimelineRow.tsx';
 
 export function MobileLayout({ e, mapRef }: { e: Explorer; mapRef: RefObject<MapViewHandle | null> }) {
+  const mapBottom = e.playing ? PHONE.transport : PHONE.peek;
+
   return (
-    <main className="relative h-dvh overflow-hidden bg-canvas text-ink" style={PHONE_VARS}>
+    <main
+      className="relative h-dvh overflow-hidden bg-canvas text-ink"
+      style={{ ...PHONE_VARS, '--map-bottom': `${mapBottom}px` } as CSSProperties}
+    >
       <h1 className="sr-only">World Heritage Explorer</h1>
       <MapView
         ref={mapRef}
@@ -38,7 +46,7 @@ export function MobileLayout({ e, mapRef }: { e: Explorer; mapRef: RefObject<Map
         onHover={e.hover}
         onBoundsChange={e.setBounds}
         onMapClick={e.clearSelection}
-        controlsBottomClass="bottom-[calc(var(--sheet-peek)+env(safe-area-inset-bottom)+36px)]"
+        controlsBottomClass="bottom-[calc(var(--map-bottom)+env(safe-area-inset-bottom)+36px)]"
         extraControls={<NearMeControl onNearMe={e.nearMe} notice={e.discoverNotice} />}
         initialFocus={e.initialFocus}
         playback={e.playback}
@@ -73,105 +81,76 @@ export function MobileLayout({ e, mapRef }: { e: Explorer; mapRef: RefObject<Map
             </button>
           )}
         </div>
-        <div className="pointer-events-auto -mx-4">
-          <MobileTypeFilter e={e} />
-        </div>
+        <MobileTypeFilter e={e} />
       </div>
 
-      <MobileSheet
-        snap={e.sheetSnap}
-        onSnapChange={e.setSheetSnap}
-        header={
-          <div className="flex items-center justify-between gap-3">
-            <p className="min-w-0 truncate text-sm font-semibold text-ink">
-              <span className="font-normal text-muted">Inscribed</span> {formatRange(e.yearRange)}
-            </p>
-            <div className="flex items-center gap-1">
-              {e.extra.savedOnly && e.saved.size > 0 && (
-                <ShareListButton variant="sheet" copied={e.shareCopied} onShare={e.shareSaved} />
-              )}
+      {!e.playing && (
+        <MobileSheet
+          snap={e.sheetSnap}
+          onSnapChange={e.setSheetSnap}
+          pinned={
+            <TimelineRow
+              e={e}
+              open={e.sheetSnap !== 'peek'}
+              onToggleTray={() => e.setSheetSnap(e.sheetSnap === 'peek' ? 'mid' : 'peek')}
+            />
+          }
+          peek={<PeekStrip e={e} />}
+        >
+          <div className="flex min-h-0 flex-1 flex-col">
+            {e.extra.country && (
+              <div className="px-4 pt-2">
+                <ActiveCountryChip e={e} />
+              </div>
+            )}
+            {e.extra.listIds && (
+              <div className="px-4 pt-2">
+                <SharedBanner e={e} />
+              </div>
+            )}
+            <h2 className="sr-only">Sites</h2>
+            <div className="flex items-center justify-between gap-1.5 px-4 pt-2">
+              <ListScopeToggle
+                scope={e.listScope}
+                onChange={e.setListScope}
+                counts={{ view: e.inViewCount, all: e.sortedCount }}
+              />
+              <div className="flex items-center gap-1.5">
+                <SortSelect sort={e.sort} onChange={e.setSort} hasOrigin={e.origin !== null} touch />
+                <ExportMenu count={e.sortedCount} onExport={e.exportSites} touch />
+                <MoreMenu onAbout={() => e.setAboutOpen(true)} onGuide={() => e.setGuideOpen(true)} />
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 px-4 pb-2.5 pt-3">
+              <Criteria e={e} layout="popover" size="chip" />
+              <SurpriseButton
+                onSurprise={() => {
+                  e.surprise();
+                  e.setSheetSnap('peek');
+                }}
+              />
               {e.isFiltered && (
                 <button
                   type="button"
                   onClick={e.reset}
-                  className="focus-ring inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-ink transition hover:bg-canvas"
+                  className={`${TRAY_CHIP} border-line bg-surface text-ink hover:bg-canvas`}
                 >
-                  <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                  <RotateCcw className="h-4 w-4 text-muted" aria-hidden="true" />
                   Reset
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => e.setAboutOpen(true)}
-                className="focus-ring inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-muted transition hover:bg-canvas hover:text-ink"
-              >
-                About
-              </button>
-              <button
-                type="button"
-                onClick={() => e.setGuideOpen(true)}
-                aria-label="What is World Heritage?"
-                className="focus-ring grid h-11 w-11 place-items-center rounded-full text-ink transition duration-150 wh-tint"
-              >
-                <Info className="h-[18px] w-[18px]" aria-hidden="true" />
-              </button>
+              {e.extra.savedOnly && e.saved.size > 0 && (
+                <ShareListButton variant="sheet" copied={e.shareCopied} onShare={e.shareSaved} />
+              )}
+            </div>
+            <div className="min-h-0 flex-1 border-t border-line">
+              <ListBody e={e} />
             </div>
           </div>
-        }
-        peek={
-          <Timeline
-            sites={e.timelineSites}
-            domain={e.domain}
-            value={e.yearRange}
-            onChange={e.changeRange}
-            playing={e.playing}
-            onTogglePlay={e.togglePlay}
-            nudgePlay={e.showHint}
-            count={e.filtered.length}
-            compact
-          />
-        }
-      >
-        <div className="flex min-h-0 flex-1 flex-col">
-          {e.extra.country && (
-            <div className="px-4 pt-2">
-              <ActiveCountryChip e={e} />
-            </div>
-          )}
-          {e.extra.listIds && (
-            <div className="px-4 pt-2">
-              <SharedBanner e={e} />
-            </div>
-          )}
-          <div className="px-4 pt-2">
-            <Criteria e={e} layout="inline" />
-          </div>
-          <div className="px-4 pb-1 pt-2">
-            <SurpriseButton
-              onSurprise={() => {
-                e.surprise();
-                e.setSheetSnap('peek');
-              }}
-            />
-          </div>
-          <div className="border-t border-line px-4 py-2">
-            <h2 className="sr-only">Sites</h2>
-            <div className="flex items-center justify-between gap-2">
-              <ListScopeToggle scope={e.listScope} onChange={e.setListScope} touch />
-              <div className="flex items-center gap-2">
-                <SortSelect sort={e.sort} onChange={e.setSort} hasOrigin={e.origin !== null} />
-                <ExportMenu count={e.sortedCount} onExport={e.exportSites} touch />
-              </div>
-            </div>
-            <p className="mt-1.5 text-xs text-muted">
-              <ListSummary e={e} />
-            </p>
-          </div>
-          <div className="min-h-0 flex-1">
-            <ListBody e={e} />
-          </div>
-        </div>
-      </MobileSheet>
+        </MobileSheet>
+      )}
+
+      {e.playing && <PlaybackBar e={e} />}
 
       {e.playing && (
         <PlaybackReadout
@@ -181,9 +160,11 @@ export function MobileLayout({ e, mapRef }: { e: Explorer; mapRef: RefObject<Map
         />
       )}
 
-      {e.showHint && <PlayHint placement="mobile" onDismiss={e.dismissHint} />}
+      {e.showHint && e.sheetSnap === 'peek' && !e.playing && (
+        <PlayHint placement="mobile" onDismiss={e.dismissHint} />
+      )}
 
-      <div className="pointer-events-none fixed left-0 z-[450] rounded-tr-md bg-surface/90 px-2 py-1 bottom-[calc(var(--sheet-peek)+env(safe-area-inset-bottom))]">
+      <div className="pointer-events-none fixed left-0 z-[450] rounded-tr-md bg-surface/90 px-2 py-1 bottom-[calc(var(--map-bottom)+env(safe-area-inset-bottom))]">
         <MiniWordmark />
       </div>
 
@@ -191,7 +172,7 @@ export function MobileLayout({ e, mapRef }: { e: Explorer; mapRef: RefObject<Map
         credits={e.basemap.credits}
         sources={e.basemap.sources}
         compact
-        className="pointer-events-auto fixed right-0 z-[450] rounded-tl-md bg-surface px-2 py-1 bottom-[calc(var(--sheet-peek)+env(safe-area-inset-bottom))]"
+        className="pointer-events-auto fixed right-0 z-[450] rounded-tl-md bg-surface px-2 py-1 bottom-[calc(var(--map-bottom)+env(safe-area-inset-bottom))]"
       />
 
       <DetailCard e={e} variant="mobile" />

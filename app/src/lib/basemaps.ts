@@ -13,7 +13,7 @@ export interface Basemap {
   maxNativeZoom: number;
   /** The credits that must always be on the map. */
   credits: Credit[];
-  /** Data providers that must be named too; phones keep them behind an info button. */
+  /** Data providers to name alongside the credits. */
   sources?: string;
 }
 

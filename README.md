@@ -38,6 +38,10 @@ An independent, map-first explorer for UNESCO World Heritage Sites. It puts ever
 
 The app serves everything itself. The typeface (Quicksand) and the map pin icons are bundled, so a visit contacts only the map tile servers and the photo hosts. The `_headers` file in `app/public` sets a Content Security Policy that allows exactly those hosts, plus the usual headers against framing and content sniffing. A new image or tile host has to be added to the `img-src` list there before it will load.
 
+### Keys
+
+Copy `.env.example` to `.env` in the repo root and fill it in. Atlas, the default map style, needs no key. Streets needs `VITE_CARTO_KEY` and Satellite needs `VITE_ARCGIS_TOKEN`; a style whose key is missing is left out of the style picker. These two are read at build time and end up in the shipped JavaScript, so restrict each key to your domain at the provider. On Cloudflare, set them as build variables under the Worker's Settings, Builds. `UNSPLASH_ACCESS_KEY` is only for the photo script.
+
 The GitHub Actions workflows pin each action to a commit hash.
 
 ### Links

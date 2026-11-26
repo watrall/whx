@@ -16,10 +16,10 @@ export function PlayHint({ onDismiss, placement }: PlayHintProps) {
   return (
     <div
       role="note"
-      className={`animate-fade-up z-[700] w-64 rounded-xl border border-line-strong bg-surface p-3 shadow-float ${
+      className={`animate-fade-up w-64 rounded-xl border border-line-strong bg-surface p-3 shadow-float ${
         desktop
-          ? 'absolute bottom-[124px] right-4'
-          : 'fixed bottom-[calc(var(--sheet-peek)+env(safe-area-inset-bottom)+40px)] left-4'
+          ? 'absolute bottom-[124px] right-4 z-[700]'
+          : 'fixed bottom-[calc(var(--map-bottom)+env(safe-area-inset-bottom)+48px)] left-4 z-[850]'
       }`}
     >
       <div className="flex items-start gap-2">
@@ -38,8 +38,8 @@ export function PlayHint({ onDismiss, placement }: PlayHintProps) {
       {/* Arrow toward the play button. */}
       <span
         aria-hidden="true"
-        className={`absolute h-3 w-3 rotate-45 border-b border-r border-line bg-surface ${
-          desktop ? '-bottom-1.5 right-3' : '-bottom-1.5 left-[26px]'
+        className={`absolute -bottom-1.5 h-3 w-3 rotate-45 border-b border-r border-line bg-surface ${
+          desktop ? 'right-3' : 'left-8'
         }`}
       />
     </div>

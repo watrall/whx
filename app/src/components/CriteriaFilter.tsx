@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { ALL_CRITERIA, CULTURAL_CODES } from '../lib/criteria.ts';
 import { formatNumber } from '../lib/utils.ts';
+import { TRAY_CHIP } from './FilterChip.tsx';
 
 interface CriteriaFilterProps {
   selected: ReadonlySet<string>;
@@ -9,10 +10,10 @@ interface CriteriaFilterProps {
   counts: Record<string, number>;
   onToggle: (code: string) => void;
   onClear: () => void;
-  /** "popover" floats over the list (desktop rail); "inline" pushes content down (sheet). */
+  /** "popover" floats over what is below it; "inline" pushes it down (the desktop Filters menu). */
   layout?: 'popover' | 'inline';
   /** "strip" sizes the button and panel for the floating strip. */
-  size?: 'rail' | 'strip';
+  size?: 'rail' | 'strip' | 'chip';
   className?: string;
 }
 
@@ -91,7 +92,7 @@ export function CriteriaFilter({
       className={
         layout === 'popover'
           ? `absolute top-full z-30 mt-1 max-h-[60vh] overflow-y-auto rounded-xl border border-line bg-surface p-1 shadow-float scroll-thin ${
-              size === 'strip' ? 'left-0 w-[320px]' : 'inset-x-0'
+              size === 'rail' ? 'inset-x-0' : 'left-0 w-[320px]'
             }`
           : 'mt-1 rounded-xl border border-line bg-surface p-1'
       }
@@ -111,22 +112,30 @@ export function CriteriaFilter({
   );
 
   return (
-    <div ref={rootRef} className={`relative ${size === 'strip' ? 'shrink-0' : ''} ${className}`}>
+    <div ref={rootRef} className={`relative ${size === 'rail' ? '' : 'shrink-0'} ${className}`}>
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        className={`focus-ring flex min-h-10 items-center justify-between gap-2 rounded-xl border px-3 text-xs font-medium transition ${
-          size === 'strip' ? 'h-10 shrink-0 shadow-card' : 'w-full'
-        } ${
-          selected.size > 0
-            ? 'border-ink bg-ink text-canvas'
-            : 'border-line bg-surface text-muted hover:border-ink/30 hover:text-ink'
-        }`}
+        className={
+          size === 'chip'
+            ? `${TRAY_CHIP} ${
+                selected.size > 0
+                  ? 'border-ink bg-ink text-canvas'
+                  : 'border-line bg-surface text-ink hover:bg-canvas'
+              }`
+            : `focus-ring flex min-h-10 items-center justify-between gap-2 rounded-xl border px-3 text-xs font-medium transition ${
+                size === 'strip' ? 'h-10 shrink-0 shadow-card' : 'w-full'
+              } ${
+                selected.size > 0
+                  ? 'border-ink bg-ink text-canvas'
+                  : 'border-line bg-surface text-muted hover:border-ink/30 hover:text-ink'
+              }`
+        }
       >
         <span className="flex min-w-0 items-center gap-2">
           <span>Criteria</span>
-          {(selected.size > 0 || size !== 'strip') && (
+          {(selected.size > 0 || size === 'rail') && (
             <span className={`truncate ${selected.size > 0 ? 'text-canvas/80' : 'text-muted'}`}>
               {summary}
             </span>
