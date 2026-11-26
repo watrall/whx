@@ -262,7 +262,7 @@ async function pickForSite(number, context) {
   return { extras, credits };
 }
 
-async function findDemoted(photos, gallery) {
+async function findDemoted(photos, gallery, handPicked) {
   const primaries = Object.entries(photos)
     .map(([number, entry]) => [number, entry.image && fileNameFromImage(entry.image)])
     .filter(([, name]) => name);
@@ -271,6 +271,7 @@ async function findDemoted(photos, gallery) {
   for (const [number, name] of primaries) {
     const file = info.get(name);
     if (file) gallery.credits[name] = file.credit;
+    if (handPicked.has(number)) continue;
     if (file && !isUsablePhoto(file) && (gallery.extras[number] ?? []).length > 0) demoted[number] = name;
   }
   return { demoted, primaryNames: primaries.map(([, name]) => name) };
@@ -293,12 +294,13 @@ async function main() {
   const photos = await readBasePhotos();
   const gallery = await readJson(OUTPUT, { extras: {}, credits: {}, demoted: {} });
   const unesco = await readJson(UNESCO, { sites: {} });
+  const overrides = await readJson(OVERRIDES, {});
   const context = {
     photos,
     categories: await categoriesByNumber(photos),
     names: Object.fromEntries(Object.entries(unesco.sites).map(([number, record]) => [number, record.name])),
     types: Object.fromEntries(Object.entries(unesco.sites).map(([number, record]) => [number, record.type])),
-    hide: (await readJson(OVERRIDES, {})).hide ?? {},
+    hide: overrides.hide ?? {},
     hashOf: createHasher(hashCache),
   };
 
@@ -341,7 +343,11 @@ async function main() {
     `${thin.length} sites had fewer than ${ARTICLE_FILL_BELOW} photos; ${gained} gained some from Wikipedia articles`,
   );
 
-  const { demoted, primaryNames } = await findDemoted(photos, gallery);
+  const { demoted, primaryNames } = await findDemoted(
+    photos,
+    gallery,
+    new Set(Object.keys(overrides.photos ?? {})),
+  );
   gallery.demoted = demoted;
   gallery.credits = pruneCredits(gallery.credits, [...Object.values(gallery.extras).flat(), ...primaryNames]);
   await writeJson(OUTPUT, gallery);
