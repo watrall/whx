@@ -13,7 +13,7 @@ interface MobileSheetProps {
   onSnapChange: (snap: SheetSnap) => void;
   /** Always shown under the handle, collapsed or open. */
   pinned: ReactNode;
-  /** Shown only while the sheet is collapsed. */
+  /** Fills the space under `pinned` while the sheet is collapsed, and fades out as it opens. */
   peek: ReactNode;
   children: ReactNode;
   className?: string;
@@ -30,6 +30,18 @@ function safeBottomInset(): number {
 }
 const SNAP_ORDER: SheetSnap[] = ['peek', 'mid', 'full'];
 
+/** How far, in pixels, the tray has to rise for the collapsed content to give way to the list. */
+const CROSSFADE_PX = 120;
+/** How far each layer drifts, in pixels, while it fades. */
+const DRIFT_PX = 8;
+/** The collapsed content fades this many times faster than the list fades in. */
+const PEEK_FADE_RATE = 2.5;
+const EASE = 'cubic-bezier(0.32,0.72,0,1)';
+
+function clamp01(value: number): number {
+  return Math.min(Math.max(value, 0), 1);
+}
+
 export function MobileSheet({
   snap,
   onSnapChange,
@@ -45,6 +57,8 @@ export function MobileSheet({
   const dragDistanceRef = useRef(0);
   const didDragRef = useRef(false);
   const [dragY, setDragY] = useState<number | null>(null);
+  // 0 with the tray collapsed, 1 once it is open; follows the finger while dragging.
+  const [dragProgress, setDragProgress] = useState(0);
   const [dragging, setDragging] = useState(false);
 
   const snapBases = () => {
@@ -77,6 +91,7 @@ export function MobileSheet({
     didDragRef.current = false;
     setDragging(true);
     setDragY(bases[snap]);
+    setDragProgress(snap === 'peek' ? 0 : 1);
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
@@ -87,6 +102,7 @@ export function MobileSheet({
     dragDistanceRef.current = Math.abs(delta);
     const next = Math.min(Math.max(dragBaseRef.current + delta, 0), bases.peek);
     setDragY(next);
+    setDragProgress(clamp01((bases.peek - next) / CROSSFADE_PX));
     if (dragDistanceRef.current > 4) didDragRef.current = true;
   };
 
@@ -153,6 +169,10 @@ export function MobileSheet({
     }
   };
 
+  const progress = dragging ? dragProgress : snap === 'peek' ? 0 : 1;
+  const listActive = progress >= 0.5;
+  const fade = dragging ? 'none' : `opacity 300ms ${EASE}, transform 300ms ${EASE}`;
+
   return (
     <div
       ref={sheetRef}
@@ -182,10 +202,35 @@ export function MobileSheet({
         <span className="sheet-handle" aria-hidden="true" />
       </button>
 
-      <div className={`shrink-0 ${snap === 'peek' ? '' : 'border-b border-line'}`}>{pinned}</div>
-      {snap === 'peek' && <div className="shrink-0 pb-2">{peek}</div>}
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain scroll-thin pb-[calc(env(safe-area-inset-bottom)+16px)]">
-        {children}
+      <div className="shrink-0">{pinned}</div>
+      <div className="relative min-h-0 flex-1">
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-0 h-px bg-line"
+          style={{ opacity: progress, transition: fade }}
+        />
+        <div
+          inert={listActive}
+          className="absolute inset-x-0 top-0"
+          style={{
+            opacity: clamp01(1 - progress * PEEK_FADE_RATE),
+            transform: `translateY(${progress * DRIFT_PX}px)`,
+            transition: fade,
+          }}
+        >
+          {peek}
+        </div>
+        <div
+          inert={!listActive}
+          className="absolute inset-0 flex flex-col overflow-y-auto overscroll-contain scroll-thin pb-[calc(env(safe-area-inset-bottom)+16px)]"
+          style={{
+            opacity: progress,
+            transform: `translateY(${(1 - progress) * DRIFT_PX}px)`,
+            transition: fade,
+          }}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );
