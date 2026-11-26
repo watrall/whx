@@ -252,6 +252,14 @@ img[data-preview='atlas'] {
   box-shadow: 0 2px 6px oklch(var(--ink) / 0.25);
   transition: transform 120ms var(--ease-out);
 }
+.wh-cluster--sm {
+  border-width: 1.5px;
+}
+.wh-cluster--sm .wh-cluster__ring {
+  inset: -4px;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
+}
 .wh-cluster:hover {
   transform: scale(1.06);
 }

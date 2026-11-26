@@ -84,6 +84,7 @@ export function MobileTypeFilter({ e }: { e: Explorer }) {
       onToggle={e.toggleType}
       onClear={e.clearTypes}
       variant="mobile"
+      className="scroll-px-4 px-4 py-1.5"
       extras={
         <>
           <DangerChip e={e} variant="mobile" />

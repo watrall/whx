@@ -319,7 +319,7 @@ export function Timeline({
       role="group"
       aria-label="Timeline of inscription years"
     >
-      <div className={`flex h-full items-center gap-2 ${compact ? 'px-3' : 'px-4'}`}>
+      <div className={`flex h-full items-center ${compact ? 'gap-3 px-3' : 'gap-2 px-4'}`}>
         {compact && (
           <button
             type="button"

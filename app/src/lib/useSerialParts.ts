@@ -1,11 +1,20 @@
 import { useEffect, useState } from 'react';
 import type { RefObject } from 'react';
 import type { MapViewHandle } from '../components/MapView.tsx';
+import { PHONE } from './layout.ts';
 import type { Site } from './types.ts';
 import { loadParts } from './unesco.ts';
 import type { PartPoint } from './unesco.ts';
 
-export const DETAIL_OFFSET = { desktop: [210, 0], mobile: [0, 120] } as const;
+const DESKTOP_DETAIL_OFFSET = [210, 0] as const;
+
+/** How far to shift the map centre so a selected site sits in the middle of the map the card leaves visible. */
+export function detailOffset(isDesktop: boolean): [number, number] {
+  if (isDesktop) return [...DESKTOP_DETAIL_OFFSET];
+  const height = window.innerHeight;
+  const cardTop = height * (1 - PHONE.cardMaxVh / 100);
+  return [0, Math.round(height / 2 - (PHONE.topInset + cardTop) / 2)];
+}
 
 export function useSerialParts(
   site: Site | null,
@@ -26,12 +35,14 @@ export function useSerialParts(
           points,
           isDesktop
             ? { right: 460, bottom: 48 }
-            : { right: 24, bottom: Math.round(window.innerHeight * 0.62) },
+            : {
+                top: PHONE.topInset + 16,
+                right: 24,
+                bottom: Math.round((window.innerHeight * PHONE.cardMaxVh) / 100),
+              },
         );
       } else {
-        mapRef.current?.focusSite(site, {
-          offset: isDesktop ? [...DETAIL_OFFSET.desktop] : [...DETAIL_OFFSET.mobile],
-        });
+        mapRef.current?.focusSite(site, { offset: detailOffset(isDesktop) });
       }
     });
     return () => {

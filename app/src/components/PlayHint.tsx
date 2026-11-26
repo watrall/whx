@@ -19,7 +19,7 @@ export function PlayHint({ onDismiss, placement }: PlayHintProps) {
       className={`animate-fade-up z-[700] w-64 rounded-xl border border-line-strong bg-surface p-3 shadow-float ${
         desktop
           ? 'absolute bottom-[124px] right-4'
-          : 'fixed bottom-[calc(152px+env(safe-area-inset-bottom)+40px)] left-4'
+          : 'fixed bottom-[calc(var(--sheet-peek)+env(safe-area-inset-bottom)+40px)] left-4'
       }`}
     >
       <div className="flex items-start gap-2">

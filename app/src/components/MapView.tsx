@@ -5,20 +5,15 @@ import 'leaflet.markercluster';
 import { BasemapPicker } from './BasemapPicker.tsx';
 import { MapTooltip } from './MapTooltip.tsx';
 import type { Basemap, BasemapId } from '../lib/basemaps.ts';
+import { DESKTOP_QUERY } from '../lib/layout.ts';
 import type { Bounds, Site, SiteType } from '../lib/types.ts';
 import { PlaybackLayer } from '../lib/playbackLayer.ts';
 import type { PlaybackEntry } from '../lib/timeline.ts';
-import {
-  clusterIconHtml,
-  clusterSize,
-  escapeHtml,
-  markerIconHtml,
-  siteMeta,
-  typeCounts,
-} from '../lib/utils.ts';
+import { clusterIcon, escapeHtml, markerIconHtml, siteMeta, typeCounts } from '../lib/utils.ts';
 
 export interface PartsPadding {
-  /** Pixels on the right and bottom to keep clear, for the detail card. */
+  /** Pixels to keep clear: the top for search and filters, the right and bottom for the detail card. */
+  top?: number;
   right: number;
   bottom: number;
 }
@@ -203,7 +198,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     }).setView([20, 0], 2);
 
     const cluster = L.markerClusterGroup({
-      maxClusterRadius: 48,
+      maxClusterRadius: window.matchMedia(DESKTOP_QUERY).matches ? 48 : 40,
       showCoverageOnHover: false,
       spiderfyOnMaxZoom: true,
       chunkedLoading: true,
@@ -211,9 +206,9 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
         const count = group.getChildCount();
         const markers = group.getAllChildMarkers();
         const types = markers.map((marker) => markerSites.current.get(marker)?.type ?? 'cultural');
-        const size = clusterSize(count);
+        const { html, size } = clusterIcon(count, typeCounts(types));
         return L.divIcon({
-          html: clusterIconHtml(count, typeCounts(types)),
+          html,
           className: 'wh-cluster-wrapper',
           iconSize: [size, size],
           iconAnchor: [size / 2, size / 2],
@@ -477,7 +472,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
         const map = mapRef.current;
         if (!map || points.length === 0) return;
         map.fitBounds(L.latLngBounds(points), {
-          paddingTopLeft: [40, 80],
+          paddingTopLeft: [40, padding.top ?? 80],
           paddingBottomRight: [padding.right, padding.bottom],
           maxZoom: 9,
         });

@@ -1,4 +1,5 @@
 import { countryAliases } from './countryAliases.ts';
+import { DESKTOP_QUERY } from './layout.ts';
 import type { Bounds, Site, SiteType } from './types.ts';
 
 export const TYPE_ORDER: SiteType[] = ['cultural', 'natural', 'mixed'];
@@ -157,11 +158,10 @@ export function markerIconHtml(
   return `<div class="${classes}" style="--marker-color:${TYPE_COLOR[type]}"><span class="wh-marker__pin"><span class="wh-marker__icon">${typeIconSvg(type)}</span></span>${badge}</div>`;
 }
 
-export function clusterSize(count: number): number {
-  if (count >= 100) return 58;
-  if (count >= 10) return 46;
-  return 38;
-}
+const CLUSTER_SIZES = {
+  desktop: { large: 58, medium: 46, small: 38 },
+  phone: { large: 36, medium: 30, small: 24 },
+} as const;
 
 export function typeCounts(types: SiteType[]): Record<SiteType, number> {
   const counts: Record<SiteType, number> = { cultural: 0, natural: 0, mixed: 0 };
@@ -183,9 +183,14 @@ function clusterRingGradient(counts: Record<SiteType, number>): string {
   return `conic-gradient(${stops.join(', ')})`;
 }
 
-export function clusterIconHtml(count: number, counts: Record<SiteType, number>): string {
-  const size = clusterSize(count);
-  return `<div class="wh-cluster" style="width:${size}px;height:${size}px;font-size:${count >= 100 ? 14 : 12}px"><span class="wh-cluster__ring" style="background:${clusterRingGradient(counts)}"></span>${count}</div>`;
+/** A cluster marker's HTML and pixel size. Phones get smaller ones so they do not crowd the map. */
+export function clusterIcon(count: number, counts: Record<SiteType, number>): { html: string; size: number } {
+  const phone = typeof window !== 'undefined' && !window.matchMedia(DESKTOP_QUERY).matches;
+  const sizes = CLUSTER_SIZES[phone ? 'phone' : 'desktop'];
+  const size = count >= 100 ? sizes.large : count >= 10 ? sizes.medium : sizes.small;
+  const fontSize = (count >= 100 ? 14 : 12) - (phone ? 2 : 0);
+  const html = `<div class="wh-cluster${phone ? ' wh-cluster--sm' : ''}" style="width:${size}px;height:${size}px;font-size:${fontSize}px"><span class="wh-cluster__ring" style="background:${clusterRingGradient(counts)}"></span>${count}</div>`;
+  return { html, size };
 }
 
 export function escapeHtml(value: string): string {

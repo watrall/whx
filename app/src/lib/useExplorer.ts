@@ -24,7 +24,8 @@ import { usePlayHint } from './usePlayHint.ts';
 import { usePlayback } from './usePlayback.ts';
 import { useRecentSearches } from './useRecentSearches.ts';
 import { useSavedSites } from './useSavedSites.ts';
-import { DETAIL_OFFSET, useSerialParts } from './useSerialParts.ts';
+import { DESKTOP_QUERY } from './layout.ts';
+import { detailOffset, useSerialParts } from './useSerialParts.ts';
 import { useShortcuts } from './useShortcuts.ts';
 import { useSiteFilters } from './useSiteFilters.ts';
 import { useSites } from './useSites.ts';
@@ -35,10 +36,6 @@ const INTRO_KEY = 'wh-intro-seen';
 
 function clampYears(wanted: YearRange | null, domain: YearRange): YearRange {
   return wanted ? [Math.max(wanted[0], domain[0]), Math.min(wanted[1], domain[1])] : domain;
-}
-
-function detailOffset(isDesktop: boolean): [number, number] {
-  return isDesktop ? [...DETAIL_OFFSET.desktop] : [...DETAIL_OFFSET.mobile];
 }
 
 export function useExplorer(
@@ -74,7 +71,7 @@ export function useExplorer(
   const [bounds, setBounds] = useState<Bounds | null>(null);
   const [initialFocus, setInitialFocus] = useState<{ site: Site; offset: [number, number] } | null>(null);
 
-  const isDesktop = useMediaQuery('(min-width: 1024px)');
+  const isDesktop = useMediaQuery(DESKTOP_QUERY);
   const debouncedQuery = useDebouncedValue(query, 350);
   const { basemap, choose: chooseBasemap, fallBack: fallBackBasemap } = useBasemap(BASEMAPS);
   const { recent, addRecent, clearRecent } = useRecentSearches();
@@ -294,16 +291,23 @@ export function useExplorer(
     mapRef.current?.fitAll();
   }, [domain, stopPlayback, mapRef]);
 
-  const select = useCallback(
+  const selectOnMap = useCallback(
     (site: Site) => {
-      addRecent(query);
       setSelectedSite(site);
-      setSearchOpen(false);
-      setHighlightedId(null);
       if (!isDesktop) setSheetSnap('peek');
       if (site.parts <= 1) mapRef.current?.focusSite(site, { offset: detailOffset(isDesktop) });
     },
-    [addRecent, query, isDesktop, mapRef],
+    [isDesktop, mapRef],
+  );
+
+  const select = useCallback(
+    (site: Site) => {
+      addRecent(query);
+      setSearchOpen(false);
+      setHighlightedId(null);
+      selectOnMap(site);
+    },
+    [addRecent, query, selectOnMap],
   );
 
   const step = useCallback(
@@ -478,7 +482,7 @@ export function useExplorer(
     exportSites,
     selectedSite,
     select,
-    selectOnMap: setSelectedSite,
+    selectOnMap,
     clearSelection,
     step,
     hover,

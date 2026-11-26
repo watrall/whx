@@ -30,7 +30,7 @@ export function FilterChip({
 }: FilterChipProps) {
   const base =
     variant === 'mobile'
-      ? 'inline-flex h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-medium'
+      ? 'inline-flex h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-medium shadow-card'
       : variant === 'strip'
         ? 'inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border px-3 text-xs font-medium shadow-card'
         : 'flex min-h-10 w-full items-center justify-between gap-2 rounded-xl border px-3 text-xs font-medium';

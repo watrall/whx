@@ -4,6 +4,7 @@ import type {
   KeyboardEvent as ReactKeyboardEvent,
   ReactNode,
 } from 'react';
+import { PHONE } from '../lib/layout.ts';
 
 export type SheetSnap = 'peek' | 'mid' | 'full';
 
@@ -15,9 +16,6 @@ interface MobileSheetProps {
   children: ReactNode;
   className?: string;
 }
-
-// Handle (36) + chips (44) + timeline (56) + gaps (16). The safe-area inset is added at runtime.
-const PEEK_CONTENT = 152;
 
 function safeBottomInset(): number {
   const probe = document.createElement('div');
@@ -50,7 +48,7 @@ export function MobileSheet({
   const snapBases = () => {
     const height = sheetRef.current?.getBoundingClientRect().height ?? window.innerHeight * 0.92;
     return {
-      peek: Math.max(0, height - (PEEK_CONTENT + safeBottomInset())),
+      peek: Math.max(0, height - (PHONE.peek + safeBottomInset())),
       mid: Math.max(0, height - window.innerHeight * 0.64),
       full: 0,
     };
@@ -58,7 +56,8 @@ export function MobileSheet({
 
   const snapTransform = () => {
     if (dragY !== null) return `translateY(${dragY}px)`;
-    if (snap === 'peek') return 'translateY(calc(92dvh - 152px - env(safe-area-inset-bottom, 0px)))';
+    if (snap === 'peek')
+      return 'translateY(calc(92dvh - var(--sheet-peek) - env(safe-area-inset-bottom, 0px)))';
     if (snap === 'mid') return 'translateY(28dvh)';
     return 'translateY(0px)';
   };

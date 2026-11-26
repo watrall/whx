@@ -3,7 +3,7 @@ import 'leaflet.markercluster';
 import type { Site } from './types.ts';
 import { STAGGER_LIMIT, staggerBatches, staggerWindow } from './timeline.ts';
 import type { PlaybackEntry } from './timeline.ts';
-import { clusterIconHtml, clusterSize, markerIconHtml, typeCounts } from './utils.ts';
+import { clusterIcon, markerIconHtml, typeCounts } from './utils.ts';
 
 const CLUSTER_RADIUS = 48;
 
@@ -179,9 +179,9 @@ export class PlaybackLayer {
   private showCluster(parent: L.MarkerCluster, visible: Site[]): void {
     const existing = this.shown.get(parent);
     if (existing?.count === visible.length) return;
-    const size = clusterSize(visible.length);
+    const { html, size } = clusterIcon(visible.length, typeCounts(visible.map((site) => site.type)));
     const icon = L.divIcon({
-      html: clusterIconHtml(visible.length, typeCounts(visible.map((site) => site.type))),
+      html,
       className: 'wh-cluster-wrapper wh-playing',
       iconSize: [size, size],
       iconAnchor: [size / 2, size / 2],
