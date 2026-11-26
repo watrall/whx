@@ -17,7 +17,7 @@ export function DetailCard({ e, variant }: { e: Explorer; variant: 'desktop' | '
       onToggleSaved={() => e.toggleSaved(site.id)}
       onFilterCountry={e.filterCountry}
       newFromYear={e.domain[1] - 1}
-      onClose={e.clearSelection}
+      onClose={e.closeDetail}
     />
   );
 }

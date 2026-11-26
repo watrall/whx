@@ -222,6 +222,11 @@ export function useExplorer(
 
   const clearSelection = useCallback(() => setSelectedSite(null), []);
 
+  const closeDetail = useCallback(() => {
+    setSelectedSite(null);
+    mapRef.current?.fitAll();
+  }, [mapRef]);
+
   const changeQuery = useCallback((value: string) => {
     setQuery(value);
     setSelectedSite(null);
@@ -485,6 +490,7 @@ export function useExplorer(
     select,
     selectOnMap,
     clearSelection,
+    closeDetail,
     step,
     hover,
     highlightedId,
