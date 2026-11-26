@@ -79,6 +79,14 @@ interface MapViewProps {
 const TOOLTIP_SIDE = 130;
 const TOOLTIP_TOP = 152;
 
+/** The bounds of the markers in a cluster group, or null when it holds none. */
+function clusterBounds(cluster: L.MarkerClusterGroup): L.LatLngBounds | null {
+  // An emptied group still reports the last marker it held as its bounds.
+  if (cluster.getLayers().length === 0) return null;
+  const bounds = cluster.getBounds();
+  return bounds.isValid() ? bounds : null;
+}
+
 /** The latitude where Web Mercator tiles end. */
 const MERCATOR_LIMIT = 85.0511;
 
@@ -332,8 +340,8 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     if (added.length > 0) cluster.addLayers(added);
 
     if (!hasFitRef.current && sites.length > 0) {
-      const bounds = cluster.getBounds();
-      if (bounds.isValid()) {
+      const bounds = clusterBounds(cluster);
+      if (bounds) {
         const focus = initialFocusRef.current;
         if (focus) {
           const zoom = 9;
@@ -356,8 +364,8 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     const map = mapRef.current;
     const cluster = clusterRef.current;
     if (!map || !cluster) return;
-    const bounds = cluster.getBounds();
-    if (bounds.isValid()) {
+    const bounds = clusterBounds(cluster);
+    if (bounds) {
       map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
       lastFitKeyRef.current = fitKey;
     }
@@ -490,8 +498,8 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
         const map = mapRef.current;
         const cluster = clusterRef.current;
         if (!map || !cluster) return;
-        const bounds = cluster.getBounds();
-        if (bounds.isValid()) map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
+        const bounds = clusterBounds(cluster);
+        if (bounds) map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
       },
     }),
     [],
@@ -552,8 +560,8 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
             const map = mapRef.current;
             const cluster = clusterRef.current;
             if (!map || !cluster) return;
-            const bounds = cluster.getBounds();
-            if (bounds.isValid()) map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
+            const bounds = clusterBounds(cluster);
+            if (bounds) map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
           }}
           aria-label="Fit all sites"
           className={`group relative focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL[controlSize].button}`}
