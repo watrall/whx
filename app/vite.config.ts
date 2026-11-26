@@ -25,6 +25,7 @@ function galleries() {
 
 export default defineConfig({
   root: __dirname,
+  envDir: repoRoot,
   plugins: [
     react(),
     {
