@@ -12,7 +12,15 @@ const SEED = Math.floor(Math.random() * 2 ** 32);
 /** The collapsed tray's strip of site photos, a different set each visit, there to invite browsing. */
 export function PeekStrip({ e }: { e: Explorer }) {
   const sites = useMemo(() => pickPreviews(e.listSites, SEED, STRIP_LENGTH), [e.listSites]);
-  if (sites.length === 0) return null;
+  if (sites.length === 0) {
+    return (
+      <p className="flex h-14 items-center px-4 text-sm text-muted">
+        {e.listSites.length === 0
+          ? 'No sites in view. Zoom out or change a filter.'
+          : 'No photos for the sites in view. Tap Browse for the list.'}
+      </p>
+    );
+  }
   return (
     <ul className="no-scrollbar flex h-14 scroll-px-4 gap-2 overflow-x-auto px-4">
       {sites.map((site) => (
