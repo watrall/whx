@@ -54,3 +54,12 @@ test('every style has a preview picture drawn from its own tiles', async () => {
     assert.ok(!/[{}]/.test(url), `${basemap.id} still has a placeholder`);
   }
 });
+
+test('satellite shows Powered by Esri and keeps the data providers in sources', () => {
+  const satellite = createBasemaps({ arcgisToken: 't' }).find((basemap) => basemap.id === 'satellite');
+  assert.deepEqual(
+    satellite.credits.map((credit) => credit.text),
+    ['Powered by Esri'],
+  );
+  assert.match(satellite.sources, /Earthstar Geographics/);
+});

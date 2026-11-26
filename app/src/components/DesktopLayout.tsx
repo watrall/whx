@@ -115,6 +115,7 @@ export function DesktopLayout({ e, mapRef, searchRef }: DesktopLayoutProps) {
           />
           <Attribution
             credits={e.basemap.credits}
+            sources={e.basemap.sources}
             className="absolute bottom-0 right-0 z-[500] rounded-tl-md bg-surface/90 px-2 py-1"
           />
           {e.playing && (

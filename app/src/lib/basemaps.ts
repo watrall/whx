@@ -11,7 +11,10 @@ export interface Basemap {
   url: string;
   /** Deepest zoom the provider has real tiles for; the map enlarges them beyond it. */
   maxNativeZoom: number;
+  /** The credits that must always be on the map. */
   credits: Credit[];
+  /** Data providers that must be named too; phones keep them behind an info button. */
+  sources?: string;
 }
 
 interface Keys {
@@ -20,7 +23,7 @@ interface Keys {
 }
 
 const OPENSTREETMAP: Credit = {
-  text: 'OpenStreetMap contributors',
+  text: '© OpenStreetMap',
   href: 'https://www.openstreetmap.org/copyright',
 };
 
@@ -44,7 +47,7 @@ export function createBasemaps({ cartoKey, arcgisToken }: Keys): Basemap[] {
       label: 'Streets',
       url: `https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${encodeURIComponent(cartoKey)}`,
       maxNativeZoom: 18,
-      credits: [OPENSTREETMAP, { text: 'CARTO', href: 'https://carto.com/attributions' }],
+      credits: [OPENSTREETMAP, { text: '© CARTO', href: 'https://carto.com/attributions' }],
     });
   }
   if (arcgisToken) {
@@ -54,10 +57,8 @@ export function createBasemaps({ cartoKey, arcgisToken }: Keys): Basemap[] {
       url: `https://ibasemaps-api.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}?token=${encodeURIComponent(arcgisToken)}`,
       // Imagery is sharper than this in cities but thin elsewhere; stopping here avoids blank tiles.
       maxNativeZoom: 17,
-      credits: [
-        { text: 'Esri', href: 'https://www.esri.com' },
-        { text: 'Maxar, Earthstar Geographics, and the GIS User Community' },
-      ],
+      credits: [{ text: 'Powered by Esri', href: 'https://www.esri.com' }],
+      sources: 'Maxar, Earthstar Geographics, and the GIS User Community',
     });
   }
   return basemaps;

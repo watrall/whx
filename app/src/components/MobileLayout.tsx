@@ -189,7 +189,9 @@ export function MobileLayout({ e, mapRef }: { e: Explorer; mapRef: RefObject<Map
 
       <Attribution
         credits={e.basemap.credits}
-        className="pointer-events-auto fixed right-0 z-[450] rounded-tl-md bg-surface/90 px-2 py-1 bottom-[calc(var(--sheet-peek)+env(safe-area-inset-bottom))]"
+        sources={e.basemap.sources}
+        compact
+        className="pointer-events-auto fixed right-0 z-[450] rounded-tl-md bg-surface px-2 py-1 bottom-[calc(var(--sheet-peek)+env(safe-area-inset-bottom))]"
       />
 
       <DetailCard e={e} variant="mobile" />
