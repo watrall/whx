@@ -18,14 +18,14 @@ export function TimelineRow({ e, open, onToggleTray }: TimelineRowProps) {
   const Chevron = open ? ChevronDown : ChevronUp;
   return (
     <div role="group" aria-label="Timeline of inscription years" className="px-4 pb-1">
-      <div className="flex h-11 items-center gap-3">
+      <div className="flex h-11 items-center gap-2.5">
         <button
           type="button"
           onClick={e.togglePlay}
           aria-label="Play timeline"
-          className={`focus-ring grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink text-canvas active:scale-95 ${e.showHint ? 'wh-nudge' : ''}`}
+          className={`focus-ring relative grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink text-canvas before:absolute before:-inset-1.5 active:scale-95 ${e.showHint ? 'wh-nudge' : ''}`}
         >
-          <Play className="h-4 w-4 fill-current" aria-hidden="true" />
+          <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
         </button>
         <p className="min-w-0 flex-1 truncate text-sm tabular-nums text-muted">
           <span className="font-semibold text-ink">{formatRange(e.yearRange)}</span> ·{' '}
