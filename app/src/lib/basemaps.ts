@@ -58,7 +58,8 @@ export function createBasemaps({ cartoKey, arcgisToken }: Keys): Basemap[] {
       // Imagery is sharper than this in cities but thin elsewhere; stopping here avoids blank tiles.
       maxNativeZoom: 17,
       credits: [{ text: 'Powered by Esri', href: 'https://www.esri.com' }],
-      sources: 'Maxar, Earthstar Geographics, and the GIS User Community',
+      // From the copyrightText of Esri's World_Imagery service, minus Esri itself. Esri changes it, so recheck now and then.
+      sources: 'Vantor, Earthstar Geographics, and the GIS User Community',
     });
   }
   return basemaps;
