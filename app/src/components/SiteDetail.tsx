@@ -216,6 +216,21 @@ export function SiteDetail({
                 In danger
               </span>
             )}
+            {onToggleSaved && (
+              <button
+                type="button"
+                onClick={onToggleSaved}
+                aria-pressed={saved}
+                aria-label={saved ? 'Remove from saved sites' : 'Save this site'}
+                title={saved ? 'Remove from saved sites' : 'Save this site'}
+                className="focus-ring -my-2 -mr-2 ml-auto grid h-11 w-11 place-items-center rounded-full text-muted transition hover:text-ink active:scale-95"
+              >
+                <Bookmark
+                  className={`h-5 w-5 ${saved ? 'fill-danger text-danger' : ''}`}
+                  aria-hidden="true"
+                />
+              </button>
+            )}
           </div>
 
           <h2 className="mt-3 text-balance break-words text-xl font-medium leading-tight text-ink">
@@ -271,7 +286,7 @@ export function SiteDetail({
                 <ExternalLink className="h-4 w-4" aria-hidden="true" />
               </a>
             )}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <a
                 href={directionsUrl(site)}
                 target="_blank"
@@ -281,20 +296,6 @@ export function SiteDetail({
                 <Navigation className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                 Directions
               </a>
-              {onToggleSaved && (
-                <button
-                  type="button"
-                  onClick={onToggleSaved}
-                  aria-pressed={saved}
-                  className={`${secondary} ${action} ${saved ? 'border-ink bg-ink/5' : ''}`}
-                >
-                  <Bookmark
-                    className={`h-3.5 w-3.5 shrink-0 ${saved ? 'fill-current' : ''}`}
-                    aria-hidden="true"
-                  />
-                  {saved ? 'Saved' : 'Save'}
-                </button>
-              )}
               <button type="button" onClick={copyLink} className={`${secondary} ${action}`}>
                 {copied ? (
                   <Check className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
