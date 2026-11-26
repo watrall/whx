@@ -184,7 +184,7 @@ export function MobileSheet({
 
       <div className={`shrink-0 ${snap === 'peek' ? '' : 'border-b border-line'}`}>{pinned}</div>
       {snap === 'peek' && <div className="shrink-0 pb-2">{peek}</div>}
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-thin pb-[calc(env(safe-area-inset-bottom)+16px)]">
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain scroll-thin pb-[calc(env(safe-area-inset-bottom)+16px)]">
         {children}
       </div>
     </div>
