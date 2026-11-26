@@ -79,6 +79,9 @@ interface MapViewProps {
 const TOOLTIP_SIDE = 130;
 const TOOLTIP_TOP = 152;
 
+/** The latitude where Web Mercator tiles end. */
+const MERCATOR_LIMIT = 85.0511;
+
 /**
  * Opens the tooltip on the side with room. Pins near the top get it below, pins near the
  * left or right edge get it beside them, so it never lands off screen or under the strip.
@@ -193,6 +196,12 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       attributionControl: false,
       worldCopyJump: true,
       minZoom: 2,
+      // Longitude wraps, but the map ends at the poles: never let the view pan into the grey beyond the tiles.
+      maxBounds: [
+        [-MERCATOR_LIMIT, -Infinity],
+        [MERCATOR_LIMIT, Infinity],
+      ],
+      maxBoundsViscosity: 1,
       maxZoom: 18,
       preferCanvas: true,
     }).setView([20, 0], 2);
