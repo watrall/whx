@@ -1,12 +1,18 @@
+import { useMemo } from 'react';
+import { pickPreviews } from '../lib/previewPicks.ts';
 import type { Explorer } from '../lib/useExplorer.ts';
 import { SiteImage } from './SiteImage.tsx';
 
 /** How many sites the collapsed tray previews; the strip scrolls past the screen edge. */
 const STRIP_LENGTH = 12;
 
-/** The collapsed tray's strip of site photos, there to invite browsing. */
+/** One seed per page load, so the strip is the same however often the tray remounts, and new on each visit. */
+const SEED = Math.floor(Math.random() * 2 ** 32);
+
+/** The collapsed tray's strip of site photos, a different set each visit, there to invite browsing. */
 export function PeekStrip({ e }: { e: Explorer }) {
-  const sites = e.listSites.slice(0, STRIP_LENGTH);
+  const sites = useMemo(() => pickPreviews(e.listSites, SEED, STRIP_LENGTH), [e.listSites]);
+  if (sites.length === 0) return null;
   return (
     <ul className="no-scrollbar flex h-14 scroll-px-4 gap-2 overflow-x-auto px-4">
       {sites.map((site) => (
