@@ -1,5 +1,5 @@
 {
-  "note": "Hand-picked Commons files, applied whenever the photo data is rebuilt. \"photos\": UNESCO number -> file that replaces Wikidata's photo. \"hide\": UNESCO number -> files never to use in the gallery.",
+  "note": "Hand-picked Commons files, applied whenever the photo data is rebuilt. \"photos\": UNESCO number -> file that replaces Wikidata's photo and always leads the gallery, even if it is small. \"hide\": UNESCO number -> files never to use in the gallery.",
   "photos": {
     "740": "Gough island top view.png",
     "1325": "Phoenix Islands Protected Area-114879.jpg"

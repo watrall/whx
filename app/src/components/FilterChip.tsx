@@ -43,9 +43,11 @@ export function FilterChip({
   className = '',
 }: FilterChipProps) {
   const ref = useRef<HTMLButtonElement>(null);
+  const seenPulse = useRef(pulse);
   useEffect(() => {
     const chip = ref.current;
-    if (pulse === 0 || !chip) return;
+    if (pulse === seenPulse.current || !chip) return;
+    seenPulse.current = pulse;
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     chip.scrollIntoView({ behavior: still ? 'auto' : 'smooth', inline: 'nearest', block: 'nearest' });
     if (!still) {

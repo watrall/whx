@@ -75,15 +75,15 @@ export function useExplorer(
   const debouncedQuery = useDebouncedValue(query, 350);
   const { basemap, choose: chooseBasemap, fallBack: fallBackBasemap } = useBasemap(BASEMAPS);
   const { recent, addRecent, clearRecent } = useRecentSearches();
-  const { saved, toggle: toggleSavedSite, addMany: saveMany, migrate: migrateSaved } = useSavedSites();
+  const { saved, toggle: toggleSavedRaw, addMany: saveMany, migrate: migrateSaved } = useSavedSites();
 
   const [savePulse, setSavePulse] = useState(0);
   const toggleSaved = useCallback(
     (id: string) => {
       if (!saved.has(id)) setSavePulse((count) => count + 1);
-      toggleSavedSite(id);
+      toggleSavedRaw(id);
     },
-    [saved, toggleSavedSite],
+    [saved, toggleSavedRaw],
   );
 
   const { sites, loading, error, reload } = useSites((loaded) => {
