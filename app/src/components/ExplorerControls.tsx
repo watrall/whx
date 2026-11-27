@@ -32,6 +32,7 @@ function SavedChip({ e, variant }: { e: Explorer; variant: Variant }) {
       count={e.saved.size}
       active={e.extra.savedOnly}
       onClick={e.toggleSavedOnly}
+      pulse={e.savePulse}
       variant={variant}
     />
   );

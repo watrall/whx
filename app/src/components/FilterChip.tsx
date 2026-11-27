@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { formatNumber } from '../lib/utils.ts';
 
@@ -10,6 +11,8 @@ interface FilterChipProps {
   variant?: 'desktop' | 'mobile' | 'strip';
   /** "danger" fills with red when active and tints the icon red when off. */
   tone?: 'ink' | 'danger';
+  /** When this number changes, the chip scrolls into view and pulses once. */
+  pulse?: number;
   className?: string;
 }
 
@@ -36,8 +39,22 @@ export function FilterChip({
   onClick,
   variant = 'desktop',
   tone: toneName = 'ink',
+  pulse = 0,
   className = '',
 }: FilterChipProps) {
+  const ref = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const chip = ref.current;
+    if (pulse === 0 || !chip) return;
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    chip.scrollIntoView({ behavior: still ? 'auto' : 'smooth', inline: 'nearest', block: 'nearest' });
+    if (!still) {
+      chip.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }], {
+        duration: 450,
+        easing: 'cubic-bezier(0.25,1,0.5,1)',
+      });
+    }
+  }, [pulse]);
   const base =
     variant === 'mobile'
       ? MOBILE_CHIP
@@ -52,6 +69,7 @@ export function FilterChip({
     : 'border-line bg-surface text-muted hover:border-ink/30 hover:text-ink';
   return (
     <button
+      ref={ref}
       type="button"
       onClick={onClick}
       aria-pressed={active}

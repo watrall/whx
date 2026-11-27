@@ -75,7 +75,16 @@ export function useExplorer(
   const debouncedQuery = useDebouncedValue(query, 350);
   const { basemap, choose: chooseBasemap, fallBack: fallBackBasemap } = useBasemap(BASEMAPS);
   const { recent, addRecent, clearRecent } = useRecentSearches();
-  const { saved, toggle: toggleSaved, addMany: saveMany, migrate: migrateSaved } = useSavedSites();
+  const { saved, toggle: toggleSavedSite, addMany: saveMany, migrate: migrateSaved } = useSavedSites();
+
+  const [savePulse, setSavePulse] = useState(0);
+  const toggleSaved = useCallback(
+    (id: string) => {
+      if (!saved.has(id)) setSavePulse((count) => count + 1);
+      toggleSavedSite(id);
+    },
+    [saved, toggleSavedSite],
+  );
 
   const { sites, loading, error, reload } = useSites((loaded) => {
     const years = loaded.map((site) => site.year).filter((year): year is number => year !== null);
@@ -458,6 +467,7 @@ export function useExplorer(
     saveAllShared,
     saved,
     toggleSaved,
+    savePulse,
     shareSaved,
     shareCopied,
     filtered,
