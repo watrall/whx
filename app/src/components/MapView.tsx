@@ -327,6 +327,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       );
       marker.on('click', (event) => {
         L.DomEvent.stopPropagation(event);
+        marker.closeTooltip();
         onSelectRef.current(site);
       });
       marker.on('mouseover', () => onHoverRef.current?.(site));
