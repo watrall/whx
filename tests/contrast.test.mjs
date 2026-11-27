@@ -39,33 +39,33 @@ function contrast(a, b) {
 
 const TYPES = ['cultural', 'natural', 'mixed'];
 
-test('danger red works as an icon on paper and as a fill under paper text', () => {
-  assert.ok(contrast(token('danger'), token('paper')) >= 4.5, 'danger on paper');
-  assert.ok(contrast(token('paper'), token('danger')) >= 4.5, 'paper text on danger');
+test('danger red works as an icon on canvas and as a fill under canvas text', () => {
+  assert.ok(contrast(token('danger'), token('canvas')) >= 4.5, 'danger on canvas');
+  assert.ok(contrast(token('canvas'), token('danger')) >= 4.5, 'canvas text on danger');
 });
 
 test('danger note text is legible on its tint', () => {
   assert.ok(contrast(token('danger-ink'), token('danger-tint')) >= 4.5, 'danger-ink on danger-tint');
   assert.ok(contrast(token('ink'), token('danger-tint')) >= 7, 'ink on danger-tint');
-  assert.ok(contrast(token('ink-muted'), token('danger-tint')) >= 4.5, 'muted on danger-tint');
+  assert.ok(contrast(token('muted'), token('danger-tint')) >= 4.5, 'muted on danger-tint');
 });
 
 test('danger red differs from the Cultural terracotta in luminance', () => {
   assert.ok(contrast(token('danger'), token('type-cultural')) >= 1.25);
 });
 
-test('body and muted text meet WCAG AA on paper surfaces', () => {
-  for (const surface of ['paper', 'paper-raised']) {
+test('body and muted text meet WCAG AA on canvas surfaces', () => {
+  for (const surface of ['canvas', 'surface']) {
     assert.ok(contrast(token('ink'), token(surface)) >= 7, `ink on ${surface}`);
-    assert.ok(contrast(token('ink-muted'), token(surface)) >= 4.5, `ink-muted on ${surface}`);
+    assert.ok(contrast(token('muted'), token(surface)) >= 4.5, `muted on ${surface}`);
   }
 });
 
 for (const type of TYPES) {
-  test(`${type}: solid works as text on paper and as a fill under paper text`, () => {
+  test(`${type}: solid works as text on canvas and as a fill under canvas text`, () => {
     const solid = token(`type-${type}`);
-    assert.ok(contrast(solid, token('paper')) >= 4.5, 'solid on paper');
-    assert.ok(contrast(token('paper'), solid) >= 4.5, 'paper text on solid');
+    assert.ok(contrast(solid, token('canvas')) >= 4.5, 'solid on canvas');
+    assert.ok(contrast(token('canvas'), solid) >= 4.5, 'canvas text on solid');
   });
 
   test(`${type}: ink text is legible on its tint`, () => {
@@ -85,7 +85,7 @@ test('type colours differ in luminance as well as hue', () => {
   }
 });
 
-test('cluster discs hold paper text and stay lighter than ink', () => {
-  assert.ok(contrast(token('paper-raised'), token('cluster')) >= 4.5, 'paper text on cluster');
+test('cluster discs hold canvas text and stay lighter than ink', () => {
+  assert.ok(contrast(token('surface'), token('cluster')) >= 4.5, 'canvas text on cluster');
   assert.ok(token('cluster')[0] > token('ink')[0] + 0.15, 'cluster is clearly lighter than ink');
 });

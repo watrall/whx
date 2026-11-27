@@ -82,7 +82,7 @@ export function PhotoLightbox({ site, photos, index, onIndexChange, onClose }: P
       aria-modal="true"
       aria-label={`Photos of ${site.name}`}
       tabIndex={-1}
-      className="animate-fade-in fixed inset-0 z-[1300] grid touch-pan-y place-items-center bg-ink/60 outline-none backdrop-blur-sm"
+      className="animate-fade-in fixed inset-0 z-lightbox grid touch-pan-y place-items-center bg-ink/60 outline-none backdrop-blur-sm"
       onClick={() => {
         if (!swipe.wasDragged()) onClose();
       }}

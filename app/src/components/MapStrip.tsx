@@ -43,7 +43,7 @@ export function MapStrip({
   return (
     <div
       ref={rootRef}
-      className="pointer-events-none absolute inset-x-4 top-4 z-[550] flex flex-wrap items-start gap-2"
+      className="pointer-events-none absolute inset-x-4 top-4 z-map-strip flex flex-wrap items-start gap-2"
     >
       <div className="pointer-events-auto relative min-w-[200px] max-w-[340px] flex-1 basis-[280px]">
         <Search

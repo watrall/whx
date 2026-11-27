@@ -20,7 +20,7 @@ export function MapTooltip({
   return (
     <span
       role="tooltip"
-      className={`pointer-events-none absolute z-[700] whitespace-nowrap rounded-md bg-ink px-2 py-1 text-xs font-medium text-canvas opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 ${PLACEMENT[placement]}`}
+      className={`pointer-events-none absolute z-tooltip whitespace-nowrap rounded-md bg-ink px-2 py-1 text-xs font-medium text-canvas opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 ${PLACEMENT[placement]}`}
     >
       {children}
     </span>

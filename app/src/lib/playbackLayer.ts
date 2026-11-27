@@ -1,5 +1,6 @@
 import L from 'leaflet';
 import 'leaflet.markercluster';
+import { hashString } from './hash.ts';
 import type { Site } from './types.ts';
 import { STAGGER_LIMIT, staggerBatches, staggerWindow } from './timeline.ts';
 import type { PlaybackEntry } from './timeline.ts';
@@ -8,14 +9,6 @@ import { clusterIcon, markerIconHtml, typeCounts } from './utils.ts';
 const CLUSTER_RADIUS = 48;
 
 const HIDDEN_ICON = L.divIcon({ className: 'wh-ref-hidden', html: '', iconSize: [0, 0] });
-
-function hash(id: string): number {
-  let value = 0;
-  for (let index = 0; index < id.length; index += 1) {
-    value = (value * 31 + id.charCodeAt(index)) | 0;
-  }
-  return value;
-}
 
 type Parent = L.Marker | L.MarkerCluster;
 
@@ -90,7 +83,7 @@ export class PlaybackLayer {
     }
     for (const id of [...this.revealed]) if (!wanted.has(id)) this.revealed.delete(id);
 
-    fresh.sort((a, b) => hash(a.id) - hash(b.id));
+    fresh.sort((a, b) => hashString(a.id) - hashString(b.id));
     if (fresh.length > STAGGER_LIMIT) {
       for (const site of fresh) this.revealed.add(site.id);
       this.render();

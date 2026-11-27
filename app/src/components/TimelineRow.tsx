@@ -5,36 +5,36 @@ import { formatRange, pluralize } from '../lib/utils.ts';
 import { TimelineChart } from './TimelineChart.tsx';
 
 interface TimelineRowProps {
-  e: Explorer;
+  explorer: Explorer;
   /** Whether the tray is open: the button at the end then closes it. */
   open: boolean;
   onToggleTray: () => void;
 }
 
 /** The phone timeline, always in view at the top of the tray: play and the range, then a full-width chart with its years. */
-export function TimelineRow({ e, open, onToggleTray }: TimelineRowProps) {
-  const [first, last] = e.domain;
-  const narrowed = e.yearRange[0] !== first || e.yearRange[1] !== last;
+export function TimelineRow({ explorer, open, onToggleTray }: TimelineRowProps) {
+  const [first, last] = explorer.domain;
+  const narrowed = explorer.yearRange[0] !== first || explorer.yearRange[1] !== last;
   const Chevron = open ? ChevronDown : ChevronUp;
   return (
     <div role="group" aria-label="Timeline of inscription years" className="px-4 pb-1">
       <div className="flex h-11 items-center gap-2.5">
         <button
           type="button"
-          onClick={e.togglePlay}
+          onClick={explorer.togglePlay}
           aria-label="Play timeline"
-          className={`focus-ring relative grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink text-canvas before:absolute before:-inset-1.5 active:scale-95 ${e.showHint ? 'wh-nudge' : ''}`}
+          className={`focus-ring relative grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink text-canvas before:absolute before:-inset-1.5 active:scale-95 ${explorer.showHint ? 'wh-nudge' : ''}`}
         >
           <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
         </button>
         <p className="min-w-0 flex-1 truncate text-sm tabular-nums text-muted">
-          <span className="font-semibold text-ink">{formatRange(e.yearRange)}</span> ·{' '}
-          {pluralize(e.filtered.length, 'site')}
+          <span className="font-semibold text-ink">{formatRange(explorer.yearRange)}</span> ·{' '}
+          {pluralize(explorer.filtered.length, 'site')}
         </p>
         {narrowed && (
           <button
             type="button"
-            onClick={() => e.changeRange([first, last])}
+            onClick={() => explorer.changeRange([first, last])}
             aria-label="Reset years"
             className="focus-ring relative grid h-6 w-6 shrink-0 place-items-center rounded-full bg-sunken text-ink before:absolute before:-inset-2.5"
           >
@@ -52,16 +52,16 @@ export function TimelineRow({ e, open, onToggleTray }: TimelineRowProps) {
         </button>
       </div>
       <TimelineChart
-        sites={e.timelineSites}
-        domain={e.domain}
-        value={e.yearRange}
-        onChange={e.changeRange}
+        sites={explorer.timelineSites}
+        domain={explorer.domain}
+        value={explorer.yearRange}
+        onChange={explorer.changeRange}
         hover={false}
         touch
         className="mx-2 mt-1 h-14"
       />
       <div aria-hidden="true" className="relative mx-2 mt-1 h-4 text-xs tabular-nums text-muted">
-        {decadeTicks(e.domain).map((tick) => (
+        {decadeTicks(explorer.domain).map((tick) => (
           <span key={tick.year} className="absolute -translate-x-1/2" style={{ left: `${tick.left}%` }}>
             {tick.year}
           </span>

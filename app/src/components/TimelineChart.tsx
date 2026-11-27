@@ -142,7 +142,7 @@ export function TimelineChart({
         y1={0}
         x2={x}
         y2={48}
-        style={{ stroke: 'oklch(var(--rule))' }}
+        style={{ stroke: 'oklch(var(--line))' }}
         strokeWidth={1}
         vectorEffect="non-scaling-stroke"
       />,
@@ -328,7 +328,7 @@ export function TimelineChart({
           y1="48"
           x2="1000"
           y2="48"
-          style={{ stroke: 'oklch(var(--rule))' }}
+          style={{ stroke: 'oklch(var(--line))' }}
           strokeWidth="1"
           vectorEffect="non-scaling-stroke"
         />
@@ -357,7 +357,7 @@ export function TimelineChart({
       {handleEnd}
       {hoverYear !== null && hover && (
         <div
-          className="pointer-events-none absolute bottom-full z-[1000] mb-2 -translate-x-1/2 rounded-lg bg-ink px-2.5 py-1.5 text-canvas shadow-float"
+          className="pointer-events-none absolute bottom-full z-scrub mb-2 -translate-x-1/2 rounded-lg bg-ink px-2.5 py-1.5 text-canvas shadow-float"
           style={{ left: `${hoverX}%` }}
           aria-hidden="true"
         >

@@ -9,8 +9,8 @@ export default function App() {
   const searchRef = useRef<HTMLInputElement>(null);
   const explorer = useExplorer(mapRef, searchRef);
   return explorer.isDesktop ? (
-    <DesktopLayout e={explorer} mapRef={mapRef} searchRef={searchRef} />
+    <DesktopLayout explorer={explorer} mapRef={mapRef} searchRef={searchRef} />
   ) : (
-    <MobileLayout e={explorer} mapRef={mapRef} />
+    <MobileLayout explorer={explorer} mapRef={mapRef} />
   );
 }

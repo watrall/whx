@@ -53,7 +53,7 @@ export function FilterChip({
       if (still) return;
       chip.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }], {
         duration: 450,
-        easing: 'cubic-bezier(0.25,1,0.5,1)',
+        easing: getComputedStyle(chip).getPropertyValue('--ease-out'),
       });
     };
 

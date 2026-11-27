@@ -33,6 +33,9 @@ import { useUrlSync } from './useUrlSync.ts';
 
 const FALLBACK_DOMAIN: YearRange = [1978, 2026];
 const INTRO_KEY = 'wh-intro-seen';
+/** How long a map notice stays up, and how long "Finding you…" waits before giving up. */
+const NOTICE_MS = 6000;
+const PENDING_NOTICE_MS = 15000;
 
 function clampYears(wanted: YearRange | null, domain: YearRange): YearRange {
   return wanted ? [Math.max(wanted[0], domain[0]), Math.min(wanted[1], domain[1])] : domain;
@@ -62,6 +65,15 @@ export function useExplorer(
   const [listScope, setListScope] = useState<ListScope>('view');
   const [origin, setOrigin] = useState<Origin | null>(null);
   const [discoverNotice, setDiscoverNotice] = useState<string | null>(null);
+  const noticeTimer = useRef<number | undefined>(undefined);
+  const showNotice = useCallback((message: string | null, clearAfterMs = 0) => {
+    window.clearTimeout(noticeTimer.current);
+    setDiscoverNotice(message);
+    if (message && clearAfterMs > 0) {
+      noticeTimer.current = window.setTimeout(() => setDiscoverNotice(null), clearAfterMs);
+    }
+  }, []);
+  useEffect(() => () => window.clearTimeout(noticeTimer.current), []);
   const [shareCopied, setShareCopied] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -341,23 +353,24 @@ export function useExplorer(
 
   const nearMe = useCallback(() => {
     if (!('geolocation' in navigator)) {
-      setDiscoverNotice('Location is not available in this browser.');
+      showNotice('Location is not available in this browser.', NOTICE_MS);
       return;
     }
-    setDiscoverNotice('Finding you…');
+    // A dismissed permission prompt can leave the request pending, so this notice clears itself too.
+    showNotice('Finding you…', PENDING_NOTICE_MS);
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setDiscoverNotice(null);
+        showNotice(null);
         setSelectedSite(null);
         const here = { lat: position.coords.latitude, lon: position.coords.longitude };
         setOrigin(here);
         setSort('distance');
         mapRef.current?.flyToPoint(here.lat, here.lon, 6);
       },
-      () => setDiscoverNotice('Could not get your location. Check browser permissions.'),
+      () => showNotice('Could not get your location. Check browser permissions.', NOTICE_MS),
       { timeout: 8000, maximumAge: 300000 },
     );
-  }, [mapRef]);
+  }, [mapRef, showNotice]);
 
   const exportSites = useCallback(
     (format: 'csv' | 'geojson') => {
@@ -390,10 +403,9 @@ export function useExplorer(
     (id: BasemapId) => {
       if (id === BASEMAPS[0].id) return;
       fallBackBasemap();
-      setDiscoverNotice('That map style is not available right now. Showing Atlas.');
-      window.setTimeout(() => setDiscoverNotice(null), 6000);
+      showNotice('That map style is not available right now. Showing Atlas.', NOTICE_MS);
     },
-    [fallBackBasemap],
+    [fallBackBasemap, showNotice],
   );
 
   const criteriaCounts = useMemo(() => {

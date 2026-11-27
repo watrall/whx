@@ -18,8 +18,8 @@ export function PlayHint({ onDismiss, placement }: PlayHintProps) {
       role="note"
       className={`animate-fade-up w-64 rounded-xl border border-line-strong bg-surface p-3 shadow-float ${
         desktop
-          ? 'absolute bottom-[124px] right-4 z-[700]'
-          : 'fixed bottom-[calc(var(--map-bottom)+env(safe-area-inset-bottom)+48px)] left-4 z-[850]'
+          ? 'absolute bottom-[124px] right-4 z-tooltip'
+          : 'fixed bottom-[calc(var(--map-bottom)+env(safe-area-inset-bottom)+48px)] left-4 z-transport'
       }`}
     >
       <div className="flex items-start gap-2">

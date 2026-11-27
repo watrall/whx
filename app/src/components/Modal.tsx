@@ -55,7 +55,7 @@ export function Modal({
   return (
     <div
       role="presentation"
-      className="animate-fade-in fixed inset-0 z-[1200] grid place-items-center bg-ink/20 p-4 backdrop-blur-sm"
+      className="animate-fade-in fixed inset-0 z-modal grid place-items-center bg-ink/20 p-4 backdrop-blur-sm"
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}

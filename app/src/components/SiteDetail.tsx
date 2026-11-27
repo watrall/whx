@@ -146,8 +146,8 @@ export function SiteDetail({
       aria-label={site.name}
       className={`animate-fade-up flex flex-col overflow-hidden border border-line bg-surface shadow-float ${
         mobile
-          ? 'fixed inset-x-4 bottom-[calc(16px+env(safe-area-inset-bottom))] z-[1100] max-h-[var(--card-max)] rounded-2xl'
-          : 'absolute right-6 top-[4.5rem] z-[600] max-h-[calc(100%-6rem)] w-[400px] rounded-2xl'
+          ? 'fixed inset-x-4 bottom-[calc(16px+env(safe-area-inset-bottom))] z-card-mobile max-h-[var(--card-max)] rounded-2xl'
+          : 'absolute right-6 top-[4.5rem] z-card max-h-[calc(100%-6rem)] w-[400px] rounded-2xl'
       }`}
       style={
         mobile

@@ -72,7 +72,7 @@ The plain-language wording of the ten selection criteria is written in the app, 
 
 ### How the sources are combined
 
-1. **UNESCO's export is the list.** Every site comes from it, all 1,273 of them, so the app's counts match UNESCO's own: for example 13 sites in Peru, 62 in Italy, and 54 in danger.
+1. **UNESCO's export is the list.** Every site comes from it, so the app's counts match UNESCO's own.
 2. **Each site gets one pin.** Most sites have a single coordinate. A serial site has one for every place in it, and its pin is the place nearest the middle of them all. Opening a serial site draws every place and frames them together. Three sites have no coordinates in UNESCO's file: two take Wikidata's, and the First World War memorial sites use an approximate point in the middle of the Western Front.
 3. **Type comes from UNESCO's category**, and the selection criteria are shown in plain language.
 4. **Photographs start from Wikidata.** Each Wikidata item is matched to a UNESCO site by its UNESCO number. Where Wikidata also holds items for the individual parts of a serial site, the photo of the property itself is preferred. Each card header then shows up to five photos; see Photo galleries below. About 4% of sites have no photograph in Wikidata, and most of those get one from the galleries.

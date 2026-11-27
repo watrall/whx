@@ -10,12 +10,12 @@ const STRIP_LENGTH = 12;
 const SEED = Math.floor(Math.random() * 2 ** 32);
 
 /** The collapsed tray's strip of site photos, a different set each visit, there to invite browsing. */
-export function PeekStrip({ e }: { e: Explorer }) {
-  const sites = useMemo(() => pickPreviews(e.listSites, SEED, STRIP_LENGTH), [e.listSites]);
+export function PeekStrip({ explorer }: { explorer: Explorer }) {
+  const sites = useMemo(() => pickPreviews(explorer.listSites, SEED, STRIP_LENGTH), [explorer.listSites]);
   if (sites.length === 0) {
     return (
       <p className="flex h-14 items-center px-4 text-sm text-muted">
-        {e.listSites.length === 0
+        {explorer.listSites.length === 0
           ? 'No sites in view. Zoom out or change a filter.'
           : 'No photos for the sites in view. Tap Browse for the list.'}
       </p>
@@ -27,7 +27,7 @@ export function PeekStrip({ e }: { e: Explorer }) {
         <li key={site.id} className="shrink-0">
           <button
             type="button"
-            onClick={() => e.select(site)}
+            onClick={() => explorer.select(site)}
             className="focus-ring relative block h-14 w-[88px] overflow-hidden rounded-lg border border-line bg-canvas transition active:scale-[0.97]"
           >
             <SiteImage site={site} width={176} className="h-full w-full" />

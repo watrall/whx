@@ -87,6 +87,12 @@ function clusterBounds(cluster: L.MarkerClusterGroup): L.LatLngBounds | null {
   return bounds.isValid() ? bounds : null;
 }
 
+/** How `fitBounds` frames a set of sites: a margin round them, and never closer than a region. */
+const FIT_OPTIONS: L.FitBoundsOptions = { padding: [36, 36], maxZoom: 6 };
+
+/** Above Leaflet's pins and clusters (600), so a serial site's parts are never hidden under them. */
+const PARTS_PANE_Z_INDEX = '650';
+
 /** The latitude where Web Mercator tiles end. */
 const MERCATOR_LIMIT = 85.0511;
 
@@ -233,8 +239,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
       },
     });
     cluster.addTo(map);
-    // A pane above the pins and clusters, so a serial site's parts are never hidden under them.
-    map.createPane('parts').style.zIndex = '650';
+    map.createPane('parts').style.zIndex = PARTS_PANE_Z_INDEX;
     partsLayerRef.current = L.layerGroup().addTo(map);
 
     const emitBounds = () => {
@@ -352,7 +357,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
           map.setView(map.unproject(point, zoom), zoom, { animate: false });
           initialFocusRef.current = null;
         } else {
-          map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
+          map.fitBounds(bounds, FIT_OPTIONS);
         }
         hasFitRef.current = true;
         lastFitKeyRef.current = fitKey;
@@ -367,7 +372,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
     if (!map || !cluster) return;
     const bounds = clusterBounds(cluster);
     if (bounds) {
-      map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
+      map.fitBounds(bounds, FIT_OPTIONS);
       lastFitKeyRef.current = fitKey;
     }
   }, [fitKey]);
@@ -484,7 +489,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
         const map = mapRef.current;
         if (!map || target.length === 0) return;
         const bounds = L.latLngBounds(target.map((site) => [site.lat, site.lon] as [number, number]));
-        map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
+        map.fitBounds(bounds, FIT_OPTIONS);
       },
       fitParts: (points, padding) => {
         const map = mapRef.current;
@@ -500,7 +505,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
         const cluster = clusterRef.current;
         if (!map || !cluster) return;
         const bounds = clusterBounds(cluster);
-        if (bounds) map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
+        if (bounds) map.fitBounds(bounds, FIT_OPTIONS);
       },
     }),
     [],
@@ -517,7 +522,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
         aria-label="Map of World Heritage sites"
       />
       <div
-        className={`absolute z-[500] flex flex-col ${MAP_CONTROL[controlSize].stack} ${controlsSideClass} ${controlsBottomClass}`}
+        className={`absolute z-map-control flex flex-col ${MAP_CONTROL[controlSize].stack} ${controlsSideClass} ${controlsBottomClass}`}
       >
         <button
           type="button"
@@ -562,7 +567,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(function MapView(
             const cluster = clusterRef.current;
             if (!map || !cluster) return;
             const bounds = clusterBounds(cluster);
-            if (bounds) map.fitBounds(bounds, { padding: [36, 36], maxZoom: 6 });
+            if (bounds) map.fitBounds(bounds, FIT_OPTIONS);
           }}
           aria-label="Fit all sites"
           className={`group relative focus-ring grid place-items-center border border-line bg-surface text-ink shadow-card transition hover:bg-canvas active:scale-95 ${MAP_CONTROL[controlSize].button}`}

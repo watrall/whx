@@ -5,26 +5,27 @@
 :root {
   color-scheme: light;
 
-  /* Neutrals: warm paper. Channels are "L C H" so Tailwind can add alpha. */
-  --paper: 0.975 0.008 85;
-  --paper-raised: 0.99 0.005 85;
-  --paper-sunken: 0.945 0.008 85;
-  --rule: 0.9 0.01 80;
-  --rule-strong: 0.83 0.012 80;
+  /* Neutrals: warm off-white. Channels are "L C H" so Tailwind can add alpha. */
+  --canvas: 0.975 0.008 85;
+  --surface: 0.99 0.005 85;
+  --sunken: 0.945 0.008 85;
+  --line: 0.9 0.01 80;
+  --line-strong: 0.83 0.012 80;
   --ink: 0.22 0.015 60;
-  --ink-muted: 0.48 0.015 70;
+  --muted: 0.48 0.015 70;
 
   /* Alert red for World Heritage in Danger. Hue 27 and lightness 0.50 keep it apart from
      the terracotta Cultural colour (hue 42, lightness 0.56); the triangle icon is the
-     non-colour signal. Paper text on it is 6.2:1. */
+     non-colour signal. Canvas text on it is 6.2:1. */
   --danger: 0.5 0.2 27;
   /* Cluster discs: lighter than ink, still dark enough to stand out on the map. */
   --cluster: 0.46 0.035 58;
   --danger-tint: 0.96 0.025 27;
   --danger-ink: 0.4 0.15 27;
 
-  /* Motion: exponential ease-out (quart) for everything that moves. */
+  /* Motion: exponential ease-out (quart) for everything that moves; the tray uses its own settle curve. */
   --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
 
   /* Site types. Hues sit 100-135 degrees apart; lightness steps differ so the
      three also separate by luminance for red-green colour blindness. Icons
@@ -81,14 +82,14 @@ input {
 /* Scrollbars: quiet, only where content scrolls. */
 .scroll-thin {
   scrollbar-width: thin;
-  scrollbar-color: oklch(var(--rule-strong)) transparent;
+  scrollbar-color: oklch(var(--line-strong)) transparent;
 }
 .scroll-thin::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 .scroll-thin::-webkit-scrollbar-thumb {
-  background: oklch(var(--rule-strong));
+  background: oklch(var(--line-strong));
   border-radius: 999px;
 }
 .scroll-thin::-webkit-scrollbar-track {
@@ -117,12 +118,12 @@ img[data-preview='atlas'] {
   filter: grayscale(0.8) contrast(0.88) brightness(1.06) sepia(0.06);
 }
 .leaflet-control-attribution {
-  background: oklch(var(--paper-raised) / 0.85) !important;
+  background: oklch(var(--surface) / 0.85) !important;
   backdrop-filter: blur(6px);
   border-radius: 8px 0 0 0;
   padding: 2px 8px !important;
   font-size: 0.75rem !important;
-  color: oklch(var(--ink-muted)) !important;
+  color: oklch(var(--muted)) !important;
 }
 .leaflet-control-attribution a {
   color: oklch(var(--ink)) !important;
@@ -171,7 +172,7 @@ img[data-preview='atlas'] {
   height: 30px;
   border-radius: 50% 50% 50% 8px;
   background: var(--marker-color);
-  border: 2px solid oklch(var(--paper-raised));
+  border: 2px solid oklch(var(--surface));
   transform: rotate(-45deg);
   display: flex;
   align-items: center;
@@ -179,7 +180,7 @@ img[data-preview='atlas'] {
 }
 .wh-marker__icon {
   transform: rotate(45deg);
-  color: oklch(var(--paper-raised));
+  color: oklch(var(--surface));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -200,8 +201,8 @@ img[data-preview='atlas'] {
   height: 16px;
   border-radius: 999px;
   background: oklch(var(--danger));
-  color: oklch(var(--paper-raised));
-  border: 1.5px solid oklch(var(--paper-raised));
+  color: oklch(var(--surface));
+  border: 1.5px solid oklch(var(--surface));
 }
 .wh-marker__danger svg {
   width: 9px;
@@ -209,7 +210,7 @@ img[data-preview='atlas'] {
 }
 .wh-marker--selected .wh-marker__pin {
   box-shadow:
-    0 0 0 2px oklch(var(--paper-raised)),
+    0 0 0 2px oklch(var(--surface)),
     0 0 0 4px oklch(var(--ink));
 }
 .wh-marker--selected {
@@ -222,7 +223,7 @@ img[data-preview='atlas'] {
 }
 .wh-marker--highlighted .wh-marker__pin {
   box-shadow:
-    0 0 0 2px oklch(var(--paper-raised)),
+    0 0 0 2px oklch(var(--surface)),
     0 0 0 4px oklch(var(--ink) / 0.55);
 }
 
@@ -239,11 +240,11 @@ img[data-preview='atlas'] {
   border-radius: 999px;
   /* A mid-dark warm disc: it has to read against the pale map without the weight of black. */
   background: oklch(var(--cluster));
-  color: oklch(var(--paper-raised));
+  color: oklch(var(--surface));
   font-weight: 600;
   font-size: 12px;
   letter-spacing: -0.01em;
-  border: 2px solid oklch(var(--paper-raised));
+  border: 2px solid oklch(var(--surface));
   box-shadow: 0 2px 6px oklch(var(--ink) / 0.25);
   transition: transform 120ms var(--ease-out);
 }
@@ -278,7 +279,7 @@ img[data-preview='atlas'] {
   width: 12px;
   height: 12px;
   border-radius: 999px;
-  border: 2px solid oklch(var(--paper-raised));
+  border: 2px solid oklch(var(--surface));
   box-shadow: 0 1px 3px oklch(var(--ink) / 0.35);
 }
 .wh-part--cultural {
@@ -419,7 +420,7 @@ img[data-preview='atlas'] {
   border: none !important;
   border-radius: 10px !important;
   background: oklch(var(--ink)) !important;
-  color: oklch(var(--paper)) !important;
+  color: oklch(var(--canvas)) !important;
   box-shadow: 0 6px 20px oklch(var(--ink) / 0.22) !important;
   padding: 6px 9px !important;
   font-size: 0.75rem;
@@ -446,13 +447,13 @@ img[data-preview='atlas'] {
   justify-content: center;
   min-width: 1.5rem;
   padding: 0.125rem 0.375rem;
-  border: 1px solid oklch(var(--rule));
+  border: 1px solid oklch(var(--line));
   border-bottom-width: 2px;
   border-radius: 0.375rem;
-  background: oklch(var(--paper-raised));
+  background: oklch(var(--surface));
   font-size: 0.75rem;
   font-weight: 600;
-  color: oklch(var(--ink-muted));
+  color: oklch(var(--muted));
 }
 
 /* Reduced motion */
@@ -474,7 +475,7 @@ img[data-preview='atlas'] {
 .focus-ring:focus-visible {
   outline: 2px solid oklch(var(--ink));
   outline-offset: 2px;
-  box-shadow: 0 0 0 2px oklch(var(--paper-raised));
+  box-shadow: 0 0 0 2px oklch(var(--surface));
 }
 
 /* Mobile sheet handle */
@@ -482,7 +483,7 @@ img[data-preview='atlas'] {
   width: 44px;
   height: 5px;
   border-radius: 999px;
-  background: oklch(var(--rule-strong));
+  background: oklch(var(--line-strong));
 }
 
 /* Inline SVG icons (mixed type uses the same pin glyph as the map) */

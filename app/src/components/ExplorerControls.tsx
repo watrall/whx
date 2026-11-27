@@ -10,145 +10,149 @@ import { TypeFilter } from './TypeFilter.tsx';
 
 type Variant = 'desktop' | 'mobile' | 'strip';
 
-function DangerChip({ e, variant }: { e: Explorer; variant: Variant }) {
+function DangerChip({ explorer, variant }: { explorer: Explorer; variant: Variant }) {
   return (
     <FilterChip
       label="In danger"
       icon={<TriangleAlert className={variant === 'mobile' ? 'h-4 w-4' : 'h-3.5 w-3.5'} aria-hidden="true" />}
-      count={e.dangerCount}
-      active={e.extra.danger}
-      onClick={e.toggleDanger}
+      count={explorer.dangerCount}
+      active={explorer.extra.danger}
+      onClick={explorer.toggleDanger}
       variant={variant}
       tone="danger"
     />
   );
 }
 
-function SavedChip({ e, variant }: { e: Explorer; variant: Variant }) {
+function SavedChip({ explorer, variant }: { explorer: Explorer; variant: Variant }) {
   return (
     <FilterChip
       label="Saved"
       icon={<Bookmark className={variant === 'mobile' ? 'h-4 w-4' : 'h-3.5 w-3.5'} aria-hidden="true" />}
-      count={e.saved.size}
-      active={e.extra.savedOnly}
-      onClick={e.toggleSavedOnly}
-      pulse={e.savePulse}
+      count={explorer.saved.size}
+      active={explorer.extra.savedOnly}
+      onClick={explorer.toggleSavedOnly}
+      pulse={explorer.savePulse}
       variant={variant}
     />
   );
 }
 
 export function Criteria({
-  e,
+  explorer,
   layout,
   size = 'rail',
 }: {
-  e: Explorer;
+  explorer: Explorer;
   layout: 'popover' | 'inline';
   size?: 'rail' | 'strip' | 'chip';
 }) {
   return (
     <CriteriaFilter
-      selected={e.extra.criteria}
-      counts={e.criteriaCounts}
-      onToggle={e.toggleCriterion}
-      onClear={e.clearCriteria}
+      selected={explorer.extra.criteria}
+      counts={explorer.criteriaCounts}
+      onToggle={explorer.toggleCriterion}
+      onClear={explorer.clearCriteria}
       layout={layout}
       size={size}
     />
   );
 }
 
-export function ActiveCountryChip({ e }: { e: Explorer }) {
-  if (!e.extra.country) return null;
-  return <CountryChip country={e.extra.country} onClear={() => e.filterCountry(null)} />;
+export function ActiveCountryChip({ explorer }: { explorer: Explorer }) {
+  if (!explorer.extra.country) return null;
+  return <CountryChip country={explorer.extra.country} onClear={() => explorer.filterCountry(null)} />;
 }
 
-export function SharedBanner({ e }: { e: Explorer }) {
-  if (!e.extra.listIds) return null;
+export function SharedBanner({ explorer }: { explorer: Explorer }) {
+  if (!explorer.extra.listIds) return null;
   return (
     <SharedListBanner
-      count={e.extra.listIds.size}
-      unsaved={e.sharedUnsaved}
-      onSaveAll={e.saveAllShared}
-      onShowAll={e.showAllShared}
+      count={explorer.extra.listIds.size}
+      unsaved={explorer.sharedUnsaved}
+      onSaveAll={explorer.saveAllShared}
+      onShowAll={explorer.showAllShared}
     />
   );
 }
 
-export function MobileTypeFilter({ e }: { e: Explorer }) {
+export function MobileTypeFilter({ explorer }: { explorer: Explorer }) {
   return (
     <TypeFilter
-      types={e.types}
-      counts={e.typeCounts}
-      total={e.typeTotal}
-      onToggle={e.toggleType}
-      onClear={e.clearTypes}
+      types={explorer.types}
+      counts={explorer.typeCounts}
+      total={explorer.typeTotal}
+      onToggle={explorer.toggleType}
+      onClear={explorer.clearTypes}
       variant="mobile"
       className="pointer-events-auto -mx-4 mt-1 scroll-px-4 px-4 py-1.5"
       extras={
         <>
-          <DangerChip e={e} variant="mobile" />
-          <SavedChip e={e} variant="mobile" />
+          <DangerChip explorer={explorer} variant="mobile" />
+          <SavedChip explorer={explorer} variant="mobile" />
         </>
       }
     />
   );
 }
 
-export function StripTypes({ e, compact }: { e: Explorer; compact: boolean }) {
+export function StripTypes({ explorer, compact }: { explorer: Explorer; compact: boolean }) {
   return (
     <TypeFilter
-      types={e.types}
-      counts={e.typeCounts}
-      total={e.typeTotal}
-      onToggle={e.toggleType}
-      onClear={e.clearTypes}
+      types={explorer.types}
+      counts={explorer.typeCounts}
+      total={explorer.typeTotal}
+      onToggle={explorer.toggleType}
+      onClear={explorer.clearTypes}
       variant="strip"
       compact={compact}
     />
   );
 }
 
-export function StripFilters({ e, wide }: { e: Explorer; wide: boolean }) {
+export function StripFilters({ explorer, wide }: { explorer: Explorer; wide: boolean }) {
   if (wide) {
     return (
       <>
-        <DangerChip e={e} variant="strip" />
-        <SavedChip e={e} variant="strip" />
-        <Criteria e={e} layout="popover" size="strip" />
+        <DangerChip explorer={explorer} variant="strip" />
+        <SavedChip explorer={explorer} variant="strip" />
+        <Criteria explorer={explorer} layout="popover" size="strip" />
       </>
     );
   }
   return (
     <>
-      <DangerChip e={e} variant="strip" />
-      <FiltersMenu activeCount={(e.extra.savedOnly ? 1 : 0) + e.extra.criteria.size}>
-        <SavedChip e={e} variant="desktop" />
-        <Criteria e={e} layout="inline" />
+      <DangerChip explorer={explorer} variant="strip" />
+      <FiltersMenu activeCount={(explorer.extra.savedOnly ? 1 : 0) + explorer.extra.criteria.size}>
+        <SavedChip explorer={explorer} variant="desktop" />
+        <Criteria explorer={explorer} layout="inline" />
       </FiltersMenu>
     </>
   );
 }
 
-export function hasStripExtras(e: Explorer): boolean {
-  return Boolean(e.extra.country || e.extra.listIds || (e.extra.savedOnly && e.saved.size > 0));
+export function hasStripExtras(explorer: Explorer): boolean {
+  return Boolean(
+    explorer.extra.country || explorer.extra.listIds || (explorer.extra.savedOnly && explorer.saved.size > 0),
+  );
 }
 
-export function StripExtras({ e }: { e: Explorer }) {
-  const sharing = e.extra.savedOnly && e.saved.size > 0;
+export function StripExtras({ explorer }: { explorer: Explorer }) {
+  const sharing = explorer.extra.savedOnly && explorer.saved.size > 0;
   return (
     <>
-      <ActiveCountryChip e={e} />
-      {e.extra.listIds && (
+      <ActiveCountryChip explorer={explorer} />
+      {explorer.extra.listIds && (
         <SharedListChip
-          count={e.extra.listIds.size}
-          unsaved={e.sharedUnsaved}
-          onSaveAll={e.saveAllShared}
-          onShowAll={e.showAllShared}
+          count={explorer.extra.listIds.size}
+          unsaved={explorer.sharedUnsaved}
+          onSaveAll={explorer.saveAllShared}
+          onShowAll={explorer.showAllShared}
         />
       )}
-      {sharing && <ShareListButton variant="strip" copied={e.shareCopied} onShare={e.shareSaved} />}
+      {sharing && (
+        <ShareListButton variant="strip" copied={explorer.shareCopied} onShare={explorer.shareSaved} />
+      )}
     </>
   );
 }

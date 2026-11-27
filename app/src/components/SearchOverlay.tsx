@@ -98,7 +98,7 @@ export function SearchOverlay({
   return (
     <div
       role="presentation"
-      className="animate-fade-in fixed inset-0 z-[1150] bg-ink/25 backdrop-blur-sm"
+      className="animate-fade-in fixed inset-0 z-search bg-ink/25 backdrop-blur-sm"
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}

@@ -36,7 +36,6 @@ const CROSSFADE_PX = 120;
 const DRIFT_PX = 8;
 /** The collapsed content fades this many times faster than the list fades in. */
 const PEEK_FADE_RATE = 2.5;
-const EASE = 'cubic-bezier(0.32,0.72,0,1)';
 
 function clamp01(value: number): number {
   return Math.min(Math.max(value, 0), 1);
@@ -171,7 +170,7 @@ export function MobileSheet({
 
   const progress = dragging ? dragProgress : snap === 'peek' ? 0 : 1;
   const listActive = progress >= 0.5;
-  const fade = dragging ? 'none' : `opacity 300ms ${EASE}, transform 300ms ${EASE}`;
+  const fade = dragging ? 'none' : 'opacity 300ms var(--ease-sheet), transform 300ms var(--ease-sheet)';
 
   return (
     <div
@@ -179,8 +178,8 @@ export function MobileSheet({
       id={sheetId}
       role="region"
       aria-label="Site browser"
-      className={`fixed inset-x-0 bottom-0 z-[800] flex h-[92dvh] flex-col rounded-t-2xl border-t border-line bg-surface shadow-float ${
-        dragging ? '' : 'transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]'
+      className={`fixed inset-x-0 bottom-0 z-sheet flex h-[92dvh] flex-col rounded-t-2xl border-t border-line bg-surface shadow-float ${
+        dragging ? '' : 'transition-transform duration-300 ease-sheet'
       } ${className}`}
       style={{ transform: snapTransform() }}
     >

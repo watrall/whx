@@ -3,36 +3,36 @@ import { AboutModal } from './AboutModal.tsx';
 import { SearchOverlay } from './SearchOverlay.tsx';
 import { WorldHeritageDialog } from './WorldHeritageDialog.tsx';
 
-export function ExplorerDialogs({ e }: { e: Explorer }) {
+export function ExplorerDialogs({ explorer }: { explorer: Explorer }) {
   return (
     <>
       <SearchOverlay
-        open={e.searchOpen}
-        onClose={() => e.setSearchOpen(false)}
-        query={e.query}
-        onQueryChange={e.changeQuery}
-        sites={e.filtered}
-        selectedId={e.selectedSite?.id ?? null}
-        onSelect={e.select}
-        recent={e.recent}
-        onClearRecent={e.clearRecent}
-        mobile={!e.isDesktop}
+        open={explorer.searchOpen}
+        onClose={() => explorer.setSearchOpen(false)}
+        query={explorer.query}
+        onQueryChange={explorer.changeQuery}
+        sites={explorer.filtered}
+        selectedId={explorer.selectedSite?.id ?? null}
+        onSelect={explorer.select}
+        recent={explorer.recent}
+        onClearRecent={explorer.clearRecent}
+        mobile={!explorer.isDesktop}
       />
-      <AboutModal open={e.aboutOpen} onClose={() => e.setAboutOpen(false)} />
+      <AboutModal open={explorer.aboutOpen} onClose={() => explorer.setAboutOpen(false)} />
       <WorldHeritageDialog
-        open={e.introVisible || e.guideOpen}
-        view={e.guideOpen ? 'guide' : 'intro'}
-        canGoBack={e.introVisible}
-        onReadMore={() => e.setGuideOpen(true)}
-        onBack={() => e.setGuideOpen(false)}
+        open={explorer.introVisible || explorer.guideOpen}
+        view={explorer.guideOpen ? 'guide' : 'intro'}
+        canGoBack={explorer.introVisible}
+        onReadMore={() => explorer.setGuideOpen(true)}
+        onBack={() => explorer.setGuideOpen(false)}
         onClose={(remember) => {
-          e.setGuideOpen(false);
-          e.closeIntro(remember);
+          explorer.setGuideOpen(false);
+          explorer.closeIntro(remember);
         }}
         onAbout={(remember) => {
-          e.setGuideOpen(false);
-          e.closeIntro(remember);
-          e.setAboutOpen(true);
+          explorer.setGuideOpen(false);
+          explorer.closeIntro(remember);
+          explorer.setAboutOpen(true);
         }}
       />
     </>
