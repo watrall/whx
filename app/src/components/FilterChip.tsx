@@ -49,13 +49,35 @@ export function FilterChip({
     if (pulse === seenPulse.current || !chip) return;
     seenPulse.current = pulse;
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    chip.scrollIntoView({ behavior: still ? 'auto' : 'smooth', inline: 'nearest', block: 'nearest' });
-    if (!still) {
+    const bounce = () => {
+      if (still) return;
       chip.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }], {
         duration: 450,
         easing: 'cubic-bezier(0.25,1,0.5,1)',
       });
+    };
+
+    const scroller = chip.parentElement;
+    const row = scroller?.getBoundingClientRect();
+    const box = chip.getBoundingClientRect();
+    if (!scroller || !row || (box.left >= row.left && box.right <= row.right)) {
+      bounce();
+      return;
     }
+
+    // Wait for the row to finish scrolling so the pulse is seen; the timer covers browsers without scrollend.
+    const done = () => {
+      window.clearTimeout(timer);
+      scroller.removeEventListener('scrollend', done);
+      bounce();
+    };
+    const timer = window.setTimeout(done, 600);
+    scroller.addEventListener('scrollend', done, { once: true });
+    chip.scrollIntoView({ behavior: still ? 'auto' : 'smooth', inline: 'nearest', block: 'nearest' });
+    return () => {
+      window.clearTimeout(timer);
+      scroller.removeEventListener('scrollend', done);
+    };
   }, [pulse]);
   const base =
     variant === 'mobile'
